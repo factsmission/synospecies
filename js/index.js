@@ -40,15 +40,18 @@ function getNewTaxon(genus, species) {
 function showReport(genus, species) {
     function appendDeprecations(genus, species) {
         let currentAcceptedName = "";
-        getNewTaxon(genus, species).then(nameChange => {
+        let expandedTaxa = {};
+        getNewTaxon(genus, species).then(deprecations => {
             var template = $('#newTaxonTpl').html();
-            nameChange.forEach(taxon => {
+            deprecations.forEach(taxon => {
                 var html = Mustache.to_html(template, taxon);
                 $('#report').append(html);
             });
-            nameChange.forEach(taxon => {
-                appendDeprecations(taxon.newGenus, taxon.newSpecies)
-            });
+            if (!expandedTaxa[deprecation.newGenus+deprecation.newSpecies]) {
+                deprecations.forEach(deprecation => {
+                    appendDeprecations(deprecation.newGenus, deprecation.newSpecies)
+                });
+            }
         });
     }
     $('#report').html("");
