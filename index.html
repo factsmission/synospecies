@@ -9,37 +9,22 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script id="newTaxonTpl" type="text/template">
+            <h1>New Name: {{newGenus}} {{newSpecies}}</h1>
+            <p>According to: <a href="{{treatment}}">{{treatment}}</a>
+                    <i>{{oldGenus}} {{oldSpecies}}</i> is deprecated by 
+                    <i>{{newGenus}} {{newSpecies}}</i></p>
+        </script>
     </head>
     <body>
-        <div>TODO write content</div>
-        <script>
-            function getNewTaxon(genus, species) {
-                let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
-                        "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
-                        "SELECT * WHERE { " +
-                        "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?newTaxon ." +
-                        "    ?treatment treat:deprecates ?oldTaxon ." +
-                        "    ?oldTaxon dwc:genus \""+genus+"\"."+
-                        "    ?oldTaxon dwc:species \""+species+"\"."+
-                        "} ";
-                let encodedQuery = encodeURIComponent(query);
-                fetch("https://test.lindas-data.ch/sparql?query=" + encodedQuery, {
-                    headers: {
-                        accept: "application/sparql-results+json"
-                    }
-                }).then(response =>
-                {
-                    if (!response.ok) {
-                        throw response.status;
-                    } else {
-                        return response.json();
-                    }
-                }).then(json => {
-                    //json.results.bindings[0].oldTaxon.value
-                    alert(json);
-                });
-            }
-            getNewTaxon("Polistes", "helveticus");
-        </script>
+        <form>
+            Genus: <input id="genus" type="text" value="Polistes" /><br/>
+            Species: <input id="species" type="text" value="helveticus"><br/>
+            <button id="lookup">Look up</button>
+        </form>
+        <div id="report"> </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="js/index.js"></script>
     </body>
 </html>
