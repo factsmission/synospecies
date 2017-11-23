@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <div>TODO write content</div>
+        <script>
+            function getNewTaxon(genus, species) {
+                let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
+                        "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
+                        "SELECT * WHERE { " +
+                        "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?newTaxon ." +
+                        "    ?treatment treat:deprecates ?oldTaxon ." +
+                        "    ?oldTaxon dwc:genus \""+genus+"\"."+
+                        "    ?oldTaxon dwc:species \""+species+"\"."+
+                        "} ";
+                let encodedQuery = encodeURIComponent(query);
+                fetch("https://test.lindas-data.ch/sparql?query=" + encodedQuery, {
+                    headers: {
+                        accept: "application/sparql-results+json"
+                    }
+                }).then(response =>
+                {
+                    if (!response.ok) {
+                        throw response.status;
+                    } else {
+                        return response.json();
+                    }
+                }).then(json => {
+                    //json.results.bindings[0].oldTaxon.value
+                    alert(json);
+                });
+            }
+            getNewTaxon("Polistes", "helveticus");
+        </script>
+    </body>
+</html>
