@@ -38,16 +38,25 @@ function getNewTaxon(genus, species) {
 }
 
 function showReport(genus, species) {
-    getNewTaxon(genus, species).then(taxa => {
-        var template = $('#newTaxonTpl').html();
-        taxa.forEach(taxon => {
-            var html = Mustache.to_html(template, taxon);
-            $('#report').append(html);
+    function appendDeprecations(genus, species) {
+        let currentAcceptedName = "";
+        getNewTaxon(genus, species).then(nameChange => {
+            var template = $('#newTaxonTpl').html();
+            nameChange.forEach(taxon => {
+                var html = Mustache.to_html(template, taxon);
+                $('#report').append(html);
+            });
+            nameChange.forEach(taxon => {
+                appendDeprecations(taxon.newGenus, taxon.newSpecies)
+            });
         });
-    });
+    }
+    $('#report').html("");
+    appendDeprecations(genus, species);
 }
 
 $("#lookup").on("click", e => {
     showReport($("#genus").val(), $("#species").val());
+    return false;
 });
 
