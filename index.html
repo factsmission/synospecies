@@ -10,10 +10,10 @@ and open the template in the editor.
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script id="newTaxonTpl" type="text/template">
-            <h1>New Name: {{newGenus}} {{newSpecies}}</h1>
+            <h1>New Name: {{newTaxon.genus}} {{newTaxon.species}}</h1>
             <p>According to: <a href="{{treatment}}">{{treatment}}</a>
-                    <i>{{oldGenus}} {{oldSpecies}}</i> is deprecated by 
-                    <i>{{newGenus}} {{newSpecies}}</i></p>
+                    <i>{{oldTaxon.genus}} {{oldTaxon.species}}</i> is deprecated by 
+                    <i>{{newTaxon.genus}} {{newTaxon.species}}</i></p>
         </script>
     </head>
     <body>

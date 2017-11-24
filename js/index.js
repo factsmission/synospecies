@@ -27,10 +27,12 @@ function getNewTaxon(genus, species) {
         //json.results.bindings[0].oldTaxon.value
         return json.results.bindings.map(binding => {
             let result = {};
-            result.newGenus = binding.newGenus.value;
-            result.newSpecies = binding.newSpecies.value;
-            result.oldSpecies = species;
-            result.oldGenus = genus;
+            result.newTaxon = {};
+            result.newTaxon.genus = binding.newGenus.value;
+            result.newTaxon.species = binding.newSpecies.value;
+            result.oldTaxon = {};
+            result.oldTaxon.species = species;
+            result.oldTaxon.genus = genus;
             result.treatment = binding.treatment.value;
             return result;
         });
@@ -38,20 +40,21 @@ function getNewTaxon(genus, species) {
 }
 
 function showReport(genus, species) {
+    let expandedTaxa = {};
     function appendDeprecations(genus, species) {
-        let currentAcceptedName = "";
-        let expandedTaxa = {};
+        let currentAcceptedName = "";    
         getNewTaxon(genus, species).then(deprecations => {
             var template = $('#newTaxonTpl').html();
-            deprecations.forEach(taxon => {
-                var html = Mustache.to_html(template, taxon);
+            deprecations.forEach(deprecation => {
+                var html = Mustache.to_html(template, deprecation);
                 $('#report').append(html);
             });
-            if (!expandedTaxa[deprecation.newGenus+deprecation.newSpecies]) {
-                deprecations.forEach(deprecation => {
-                    appendDeprecations(deprecation.newGenus, deprecation.newSpecies)
-                });
-            }
+            deprecations.forEach(deprecation => {
+                if (!expandedTaxa[deprecation.newTaxon.genus+deprecation.newTaxon.species]) {
+                    expandedTaxa[deprecation.newTaxon.genus+deprecation.newTaxon.species] = true;
+                    appendDeprecations(deprecation.newTaxon.genus, deprecation.newTaxon.species);
+                }
+            });
         });
     }
     $('#report').html("");
