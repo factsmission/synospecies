@@ -2,24 +2,36 @@
 <html>
     <head>
         <title>SynoSpecies</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script id="newTaxonTpl" type="text/template">
-            <h1>New Name: {{newTaxon.genus}} {{newTaxon.species}}</h1>
+            <h3>New Name: {{newTaxon.genus}} {{newTaxon.species}}</h3>
             <p>According to: <a href="{{treatment}}">{{treatment}}</a>
-                    <i>{{oldTaxon.genus}} {{oldTaxon.species}}</i> is deprecated by 
-                    <i>{{newTaxon.genus}} {{newTaxon.species}}</i></p>
+            <i>{{oldTaxon.genus}} {{oldTaxon.species}}</i> is deprecated by 
+            <i>{{newTaxon.genus}} {{newTaxon.species}}</i></p>
         </script>
     </head>
     <body>
-        <form>
-            Genus: <input id="genus" type="text" value="Munida" /><br/>
-            Species: <input id="species" type="text" value="caribaea"><br/>
-            <button id="lookup">Look up</button>
-        </form>
-        <div id="report"> </div>
+        <div class="container my-3">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label class="mx-sm-2" for="genus" >Genus</label>
+                    <input type="text" class="form-control" id="genus" value="Munida" placeholder="Munida">
+                </div>
+                <div class="form-group mx-sm-3">
+                    <label class="mx-sm-2" for="species">Species</label>
+                    <input type="text" class="form-control" id="species" value="caribaea" placeholder="caribaea">
+                </div>
+                <button class="btn btn-primary" id="lookup">Look up</button>
+            </form>
+        </div>
+        <div class="container" id="report"> </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
         <script src="js/index.js"></script>
-    </body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+</body>
 </html>
