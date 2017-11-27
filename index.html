@@ -16,14 +16,9 @@
     <body>
         <div class="container my-3">
             <form class="form-inline">
-                <div class="form-group">
-                    <label class="mx-sm-2" for="genus" >Genus</label>
-                    <input type="text" class="form-control" id="genus" value="" placeholder="Munida">
-                </div>
-                <div class="form-group mx-sm-3">
-                    <label class="mx-sm-2" for="species">Species</label>
-                    <input type="text" class="form-control" id="species" value="caribaea" placeholder="caribaea">
-                </div>
+                <input type="text" class="mx-3 form-control-plaintext" readonly id="name" value="SynoSpecies">
+                <label for="combinedfield">Input genus & species here:</label>
+                <input type="text" class="form-control mx-3" id="combinedfield" value="" placeholder="Munida caribaea">
                 <button class="btn btn-primary" id="lookup">Look up</button>
             </form>
         </div>

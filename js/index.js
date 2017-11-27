@@ -63,18 +63,40 @@ function showReport(genus, species) {
     appendDeprecations(genus, species);
 }
 
+let input = document.getElementById("combinedfield");
+let previousValue = input.value;
+
 $("#lookup").on("click", e => {
-    showReport($("#genus").val(), $("#species").val());
+    showReport(input.value.toString().substring(0,input.value.toString().indexOf(" ")), input.value.toString().substr(input.value.toString().indexOf(" ") + 1));
     return false;
 });
 
-let input = document.getElementById("genus");
-let previousValue = input.value;
 input.onkeyup = (e) => {
     if (input.value.length >= 2) {
-        if ((e.key !== "Enter") && (input.value !== previousValue)) {
-            previousValue = input.value;
-            getGenusSuggestions(input.value).then(values => awesomplete.list = values);
+        if (input.value.toString().indexOf(" ") === -1) {
+            if ((e.key !== "Enter") && (input.value !== previousValue)) {
+                previousValue = input.value;
+            getGenusSuggestions(input.value).then(gs => {
+                getCombinedSuggestions(input.value).then(cs => {
+                    let sugg = [];
+                    sugg = gs;
+                    sugg = sugg.concat(cs);
+                    awesomplete.maxItems = 15;
+                    awesomplete.list = sugg; 
+                });
+            });
+            }
+        } else {
+            if ((e.key !== "Enter") && (input.value !== previousValue)) {
+                previousValue = input.value;
+                let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
+                let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
+                getSpeciesSuggestions(speciesIn).then(values => {
+                    let sugg = values.map(i => genusIn+" "+i);
+                    awesomplete.maxItems = 15;
+                    awesomplete.list = sugg;
+                });
+            }
         }
     }
     return true;
@@ -94,8 +116,40 @@ function getGenusSuggestions(prefix) {
                 "?sub dwc:genus ?genus .\n"+
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?genus, \"^"+prefix+"\",\"i\")\n"+
-            "} ORDER BY UCASE(?genus) LIMIT 15";
+            "} ORDER BY UCASE(?genus) LIMIT 10";
+    console.log(query);
     return executeSparql(query).then(json => {
         return json.results.bindings.map(binding => binding.genus.value);
+    });
+}
+
+function getSpeciesSuggestions(prefix) {
+    let query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
+                "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n"+
+                "PREFIX dwcfp: <http://filteredpush.org/ontologies/oa/dwcFP#>\n"+
+                "SELECT DISTINCT ?species WHERE {\n"+
+                "?sub dwc:species ?species .\n"+
+                "?sub rdf:type dwcfp:TaxonName.\n"+
+                "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
+            "} ORDER BY UCASE(?species) LIMIT 10";
+    console.log(query);
+    return executeSparql(query).then(json => {
+        return json.results.bindings.map(binding => binding.species.value);
+    });
+}
+
+function getCombinedSuggestions(prefix) {
+    let query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
+                "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n"+
+                "PREFIX dwcfp: <http://filteredpush.org/ontologies/oa/dwcFP#>\n"+
+                "SELECT DISTINCT ?genus ?species WHERE {\n"+
+                "?sub dwc:genus ?genus .\n"+
+                "?sub dwc:species ?species .\n"+
+                "?sub rdf:type dwcfp:TaxonName.\n"+
+                "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
+            "} ORDER BY UCASE(?species) LIMIT 10";
+    console.log(query);
+    return executeSparql(query).then(json => {
+        return json.results.bindings.map(binding => binding.genus.value+" "+binding.species.value);
     });
 }
