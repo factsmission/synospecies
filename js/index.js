@@ -75,24 +75,20 @@ $("#lookup").on("click", e => {
 });
 
 input.onkeyup = (e) => {
-    if (input.value.length >= 2) {
+    if ((input.value.length >= 2) && (e.key !== "Enter") && (input.value !== previousValue)) {
         if (input.value.toString().indexOf(" ") === -1) {
-            if ((e.key !== "Enter") && (input.value !== previousValue)) {
-                previousValue = input.value;
-                Promise.all([getGenusSuggestions(input.value),getCombinedSuggestions(input.value)]).then(v => {
-                    gs = gs.map(i => i+" ");
-                    awesomplete.list = gs.concat(cs);
-                });
-            }
+            previousValue = input.value;
+            Promise.all([getGenusSuggestions(input.value),getCombinedSuggestions(input.value)]).then(v => {
+                gs = gs.map(i => i+" ");
+                awesomplete.list = gs.concat(cs);
+            });
         } else {
-            if ((e.key !== "Enter") && (input.value !== previousValue)) {
-                previousValue = input.value;
-                let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
-                let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
-                getSpeciesSuggestions(speciesIn).then(values => {
-                    awesomplete.list = ss.map(i => genusIn+" "+i);
-                });
-            }
+            previousValue = input.value;
+            let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
+            let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
+            getSpeciesSuggestions(speciesIn).then(values => {
+                awesomplete.list = ss.map(i => genusIn+" "+i);
+            });
         }
     }
     return true;
@@ -108,20 +104,17 @@ awesomplete.filter = (t, i) => {
 
 let origItem = awesomplete.item;
 awesomplete.item = (t, i) => {
-	var html = i.trim() === "" ? t : i.replace(RegExp($.regExpEscape(input.trim()), "gi"), "<mark>$&</mark>");
-	return $.create("li", {
-		innerHTML: html,
-		"aria-selected": "false"
-	});
-};
-
-/*{
-    let word = t.substr(t.indexOf(" ") + 1);
-    if (word.toLowerCase().indexOf(i.toLowerCase()) === 0) {
-        return true;
+    let foundPos = t.toLowerCase().indexOf(i.toLowerCase());
+    let spacePos = t.substr(0, t.length-1).indexOf(" ");
+    let html;
+    if (spacePos === -1) {
+        html = "<mark>"+t.substring(0, i.length)+"</mark>"+t.substring(i.length);
+    } else {
+        html = t.substring(0, spacePos + 1)+"<mark>"+t.substring(spacePos + 1, t.toString().indexOf(" ") + 1 + i.length) +
+                "</mark>"+t.substring(t.toString().indexOf(" ") + 1 + i.length) 
     }
-    return t.toLowerCase().indexOf(i.toLowerCase()) === 0;
-};*/
+    return $("<li aria-selected='false'>"+html+"</li>")[0];
+};
 
 
 /**
