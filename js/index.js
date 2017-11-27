@@ -81,7 +81,6 @@ input.onkeyup = (e) => {
                 previousValue = input.value;
                 Promise.all([getGenusSuggestions(input.value),getCombinedSuggestions(input.value)]).then(v => {
                     gs = gs.map(i => i+" ");
-                    awesomplete.maxItems = 15;
                     awesomplete.list = gs.concat(cs);
                 });
             }
@@ -91,7 +90,6 @@ input.onkeyup = (e) => {
                 let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
                 let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
                 getSpeciesSuggestions(speciesIn).then(values => {
-                    awesomplete.maxItems = 15;
                     awesomplete.list = ss.map(i => genusIn+" "+i);
                 });
             }
@@ -100,6 +98,17 @@ input.onkeyup = (e) => {
     return true;
 };
 let awesomplete = new Awesomplete(input);
+awesomplete.maxItems = 15;
+awesomplete.sort = false;
+//
+awesomplete.filter = function(t, i) {
+    let word = t.substr(t.indexOf(" ") + 1);
+    if (word.toLowerCase().indexOf(i.toLowerCase()) === 0) {
+        return true;
+    }
+    return t.toLowerCase().indexOf(i.toLowerCase()) === 0;
+};
+
 
 /**
  * 
