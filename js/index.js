@@ -101,13 +101,27 @@ let awesomplete = new Awesomplete(input);
 awesomplete.maxItems = 15;
 awesomplete.sort = false;
 //
-awesomplete.filter = function(t, i) {
+awesomplete.filter = (t, i) => {
+    let foundPos = t.toLowerCase().indexOf(i.toLowerCase());
+    return (foundPos === 0) || (foundPos === (t.indexOf(" ") + 1));
+};  
+
+let origItem = awesomplete.item;
+awesomplete.item = (t, i) => {
+	var html = i.trim() === "" ? t : i.replace(RegExp($.regExpEscape(input.trim()), "gi"), "<mark>$&</mark>");
+	return $.create("li", {
+		innerHTML: html,
+		"aria-selected": "false"
+	});
+};
+
+/*{
     let word = t.substr(t.indexOf(" ") + 1);
     if (word.toLowerCase().indexOf(i.toLowerCase()) === 0) {
         return true;
     }
     return t.toLowerCase().indexOf(i.toLowerCase()) === 0;
-};
+};*/
 
 
 /**
