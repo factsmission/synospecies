@@ -65,6 +65,9 @@ function showReport(genus, species) {
 
 let input = document.getElementById("combinedfield");
 let previousValue = input.value;
+let gs = [];
+let cs = [];
+let ss = [];
 
 $("#lookup").on("click", e => {
     showReport(input.value.toString().substring(0,input.value.toString().indexOf(" ")), input.value.toString().substr(input.value.toString().indexOf(" ") + 1));
@@ -76,15 +79,11 @@ input.onkeyup = (e) => {
         if (input.value.toString().indexOf(" ") === -1) {
             if ((e.key !== "Enter") && (input.value !== previousValue)) {
                 previousValue = input.value;
-            getGenusSuggestions(input.value).then(gs => {
-                getCombinedSuggestions(input.value).then(cs => {
-                    let sugg = [];
-                    sugg = gs;
-                    sugg = sugg.concat(cs);
+                Promise.all([getGenusSuggestions(input.value),getCombinedSuggestions(input.value)]).then(v => {
+                    gs = gs.map(i => i+" ");
                     awesomplete.maxItems = 15;
-                    awesomplete.list = sugg; 
+                    awesomplete.list = gs.concat(cs);
                 });
-            });
             }
         } else {
             if ((e.key !== "Enter") && (input.value !== previousValue)) {
@@ -92,9 +91,8 @@ input.onkeyup = (e) => {
                 let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
                 let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
                 getSpeciesSuggestions(speciesIn).then(values => {
-                    let sugg = values.map(i => genusIn+" "+i);
                     awesomplete.maxItems = 15;
-                    awesomplete.list = sugg;
+                    awesomplete.list = ss.map(i => genusIn+" "+i);
                 });
             }
         }
@@ -119,7 +117,8 @@ function getGenusSuggestions(prefix) {
             "} ORDER BY UCASE(?genus) LIMIT 10";
     console.log(query);
     return executeSparql(query).then(json => {
-        return json.results.bindings.map(binding => binding.genus.value);
+        gs = json.results.bindings.map(binding => binding.genus.value);
+        return true;
     });
 }
 
@@ -134,7 +133,8 @@ function getSpeciesSuggestions(prefix) {
             "} ORDER BY UCASE(?species) LIMIT 10";
     console.log(query);
     return executeSparql(query).then(json => {
-        return json.results.bindings.map(binding => binding.species.value);
+        ss = json.results.bindings.map(binding => binding.species.value);
+        return true;
     });
 }
 
@@ -150,6 +150,7 @@ function getCombinedSuggestions(prefix) {
             "} ORDER BY UCASE(?species) LIMIT 10";
     console.log(query);
     return executeSparql(query).then(json => {
-        return json.results.bindings.map(binding => binding.genus.value+" "+binding.species.value);
+        cs = json.results.bindings.map(binding => binding.genus.value+" "+binding.species.value);
+        return true;
     });
 }
