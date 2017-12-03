@@ -1,5 +1,6 @@
 /* global Mustache */
 function executeSparql(query) {
+    console.log(query);
     let encodedQuery = encodeURIComponent(query);
     return fetch("https://test.lindas-data.ch/sparql?query=" + encodedQuery, {
         headers: {
@@ -131,7 +132,6 @@ function getGenusSuggestions(prefix) {
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?genus, \"^"+prefix+"\",\"i\")\n"+
             "} ORDER BY UCASE(?genus) LIMIT 10";
-    console.log(query);
     return executeSparql(query).then(json => {
         gs = json.results.bindings.map(binding => binding.genus.value);
         return true;
@@ -147,7 +147,6 @@ function getSpeciesSuggestions(prefix) {
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
             "} ORDER BY UCASE(?species) LIMIT 10";
-    console.log(query);
     return executeSparql(query).then(json => {
         ss = json.results.bindings.map(binding => binding.species.value);
         return true;
@@ -164,7 +163,6 @@ function getCombinedSuggestions(prefix) {
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
             "} ORDER BY UCASE(?species) LIMIT 10";
-    console.log(query);
     return executeSparql(query).then(json => {
         cs = json.results.bindings.map(binding => binding.genus.value+" "+binding.species.value);
         return true;
