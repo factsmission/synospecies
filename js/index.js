@@ -104,15 +104,20 @@ awesomplete.filter = (t, i) => {
 };  
 
 let origItem = awesomplete.item;
-awesomplete.item = (t, i) => {
-    let foundPos = t.toLowerCase().indexOf(i.toLowerCase());
-    let spacePos = t.substr(0, t.length-1).indexOf(" ");
+awesomplete.item = (suggestion, i) => {
+    let foundPos = suggestion.toLowerCase().indexOf(i.toLowerCase());
+    let suggestionSpacePos = suggestion.substr(0, suggestion.length-1).indexOf(" ");
     let html;
-    if (spacePos === -1) {
-        html = "<mark>"+t.substring(0, i.length)+"</mark>"+t.substring(i.length);
-    } else {
-        html = t.substring(0, spacePos + 1)+"<mark>"+t.substring(spacePos + 1, t.toString().indexOf(" ") + 1 + i.length) +
-                "</mark>"+t.substring(t.toString().indexOf(" ") + 1 + i.length) 
+    if (suggestionSpacePos === -1) {
+        html = "<mark>"+suggestion.substring(0, i.length)+"</mark>"+suggestion.substring(i.length);
+    } else if (i.indexOf(" ") === -1) {
+        html = suggestion.substring(0, suggestionSpacePos + 1)+"<mark>" +
+                suggestion.substring(suggestionSpacePos + 1, suggestionSpacePos + 1 + i.length) +
+                "</mark>" + suggestion.substring(suggestionSpacePos + 1 + i.length);
+    } else if (i.indexOf(" ") !== -1) {
+        html = "<mark>" +
+                suggestion.substring(0, i.length) +
+                "</mark>" + suggestion.substring(i.length);
     }
     return $("<li aria-selected='false'>"+html+"</li>")[0];
 };
@@ -143,10 +148,11 @@ function getSpeciesSuggestions(prefix, genus) {
                 "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n"+
                 "PREFIX dwcfp: <http://filteredpush.org/ontologies/oa/dwcFP#>\n"+
                 "SELECT DISTINCT ?species WHERE {\n"+
-                "?sub dwc:genus \""+ genus +"\" .\n"+
+                "?sub dwc:genus ?genus .\n"+
                 "?sub dwc:species ?species .\n"+
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
+                "FILTER REGEX(?genus, \"^"+genus+"\",\"i\")\n" +
             "} ORDER BY UCASE(?species) LIMIT 10";
     return executeSparql(query).then(json => {
         ss = json.results.bindings.map(binding => binding.species.value);
