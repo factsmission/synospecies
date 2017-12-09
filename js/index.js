@@ -87,7 +87,7 @@ input.onkeyup = (e) => {
             previousValue = input.value;
             let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
             let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
-            getSpeciesSuggestions(speciesIn).then(values => {
+            getSpeciesSuggestions(speciesIn, genusIn).then(values => {
                 awesomplete.list = ss.map(i => genusIn+" "+i);
             });
         }
@@ -138,11 +138,12 @@ function getGenusSuggestions(prefix) {
     });
 }
 
-function getSpeciesSuggestions(prefix) {
+function getSpeciesSuggestions(prefix, genus) {
     let query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
                 "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n"+
                 "PREFIX dwcfp: <http://filteredpush.org/ontologies/oa/dwcFP#>\n"+
                 "SELECT DISTINCT ?species WHERE {\n"+
+                "?sub dwc:genus \""+ genus +"\" .\n"+
                 "?sub dwc:species ?species .\n"+
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
