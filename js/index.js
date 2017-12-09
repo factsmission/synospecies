@@ -87,9 +87,15 @@ input.onkeyup = (e) => {
             previousValue = input.value;
             let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
             let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
-            getSpeciesSuggestions(speciesIn, genusIn).then(values => {
-                awesomplete.list = ss.map(i => genusIn+" "+i);
-            });
+            if (speciesIn.length > 0) {
+                getSpeciesSuggestions(speciesIn, genusIn).then(values => {
+                    awesomplete.list = ss.map(i => genusIn + " " + i);
+                });
+            } else {
+                getSpeciesSuggestions("", genusIn).then(values => {
+                    awesomplete.list = ss.map(i => genusIn + " " + i);
+                });
+            }
         }
     }
     return true;
