@@ -21,8 +21,8 @@ function getNewTaxon(genus, species) {
     let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
             "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
             "SELECT * WHERE { " +
-            " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
-            "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?newTaxon ." +
+            " GRAPH <https://linked.opendata.swiss/graph/plazi> {" +
+            "    ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?newTaxon ." +
             "    ?treatment treat:deprecates ?oldTaxon ." +
             "    ?oldTaxon dwc:genus \"" + genus + "\"." +
             "    ?oldTaxon dwc:species \"" + species + "\"." +
@@ -91,15 +91,9 @@ input.onkeyup = (e) => {
             previousValue = input.value;
             let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
             let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
-            if (speciesIn.length > 0) {
-                getSpeciesSuggestions(speciesIn, genusIn).then(values => {
-                    awesomplete.list = ss.map(i => genusIn + " " + i);
-                });
-            } else {
-                getSpeciesSuggestions("", genusIn).then(values => {
-                    awesomplete.list = ss.map(i => genusIn + " " + i);
-                });
-            }
+            getSpeciesSuggestions(speciesIn).then(values => {
+                awesomplete.list = ss.map(i => genusIn+" "+i);
+            });
         }
     }
     return true;
@@ -114,20 +108,15 @@ awesomplete.filter = (t, i) => {
 };  
 
 let origItem = awesomplete.item;
-awesomplete.item = (suggestion, i) => {
-    let foundPos = suggestion.toLowerCase().indexOf(i.toLowerCase());
-    let suggestionSpacePos = suggestion.substr(0, suggestion.length-1).indexOf(" ");
+awesomplete.item = (t, i) => {
+    let foundPos = t.toLowerCase().indexOf(i.toLowerCase());
+    let spacePos = t.substr(0, t.length-1).indexOf(" ");
     let html;
-    if (suggestionSpacePos === -1) {
-        html = "<mark>"+suggestion.substring(0, i.length)+"</mark>"+suggestion.substring(i.length);
-    } else if (i.indexOf(" ") === -1) {
-        html = suggestion.substring(0, suggestionSpacePos + 1)+"<mark>" +
-                suggestion.substring(suggestionSpacePos + 1, suggestionSpacePos + 1 + i.length) +
-                "</mark>" + suggestion.substring(suggestionSpacePos + 1 + i.length);
-    } else if (i.indexOf(" ") !== -1) {
-        html = "<mark>" +
-                suggestion.substring(0, i.length) +
-                "</mark>" + suggestion.substring(i.length);
+    if (spacePos === -1) {
+        html = "<mark>"+t.substring(0, i.length)+"</mark>"+t.substring(i.length);
+    } else {
+        html = t.substring(0, spacePos + 1)+"<mark>"+t.substring(spacePos + 1, t.toString().indexOf(" ") + 1 + i.length) +
+                "</mark>"+t.substring(t.toString().indexOf(" ") + 1 + i.length) 
     }
     return $("<li aria-selected='false'>"+html+"</li>")[0];
 };
@@ -155,17 +144,15 @@ function getGenusSuggestions(prefix) {
     });
 }
 
-function getSpeciesSuggestions(prefix, genus) {
+function getSpeciesSuggestions(prefix) {
     let query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"+
                 "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n"+
                 "PREFIX dwcfp: <http://filteredpush.org/ontologies/oa/dwcFP#>\n"+
                 "SELECT DISTINCT ?species WHERE {\n"+
                 " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
-                "?sub dwc:genus ?genus .\n"+
                 "?sub dwc:species ?species .\n"+
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
-                "FILTER REGEX(?genus, \"^"+genus+"\",\"i\")\n" +
                 " }\n" +
             "} ORDER BY UCASE(?species) LIMIT 10";
     return executeSparql(query).then(json => {
