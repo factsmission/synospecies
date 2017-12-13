@@ -2,8 +2,8 @@
 function executeSparql(query) {
     console.log(query);
     let encodedQuery = encodeURIComponent(query);
-    let sparqlEndpoint = "https://test.lindas-data.ch/sparql";
-    //let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
+    //let sparqlEndpoint = "https://test.lindas-data.ch/sparql";
+    let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
     return fetch(sparqlEndpoint+"?query=" + encodedQuery, {
         headers: {
             accept: "application/sparql-results+json"
