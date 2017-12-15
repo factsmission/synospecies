@@ -1,9 +1,9 @@
-/* global Mustache */
-function executeSparql(query) {
+/* global Mustache, $rdf */
+let sparqlEndpoint = "https://lindas-data.ch/sparql";
+//let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
+function getSparqlResultSet(query) {
     console.log(query);
     let encodedQuery = encodeURIComponent(query);
-    let sparqlEndpoint = "https://lindas-data.ch/sparql";
-    //let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
     return fetch(sparqlEndpoint+"?query=" + encodedQuery, {
         headers: {
             accept: "application/sparql-results+json"
@@ -17,6 +17,42 @@ function executeSparql(query) {
         }
     });
 }
+
+/** a side-effects free rdf-fetch function
+ */
+function rdfFetch(uri, init = {}) {
+    return fetch(uri, init).then(response => {
+        if (response.ok) {
+            let graph = $rdf.graph();
+            let mediaType = response.headers.get("Content-type");
+            return response.text().then(text => {
+                $rdf.parse(text, graph, uri, mediaType);
+                response.graph = graph;
+                return response;
+            });
+        } else {
+            return response;
+        }
+    });
+};
+
+function getSparqlRDF(query) {
+    console.log(query);
+    let encodedQuery = encodeURIComponent(query);
+    return rdfFetch(sparqlEndpoint+"?query=" + encodedQuery, {
+        headers: {
+            accept: "text/turtle"
+        }
+    }).then(response =>
+    {
+        if (!response.ok) {
+            throw response.status;
+        } else {
+            return response.graph;
+        }
+    });
+}
+
 function getNewTaxon(genus, species) {
     let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
             "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
@@ -30,7 +66,7 @@ function getNewTaxon(genus, species) {
             "    ?newTaxon dwc:species ?newSpecies." +
             " }\n" +
             "} ";
-    return executeSparql(query).then(json => {
+    return getSparqlResultSet(query).then(json => {
         //json.results.bindings[0].oldTaxon.value
         return json.results.bindings.map(binding => {
             let result = {};
@@ -45,8 +81,58 @@ function getNewTaxon(genus, species) {
         });
     });
 }
+function specificInfos(genus, species) {
+    let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
+"PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
+"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+"SELECT DISTINCT * WHERE {   " +
+"  OPTIONAL {?taxon      (^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept)) ?newTaxon . }" +
+"  ?taxon dwc:genus \"Munida\" .    " +
+"  ?taxon dwc:species \"irrasa\".    " +
+"  OPTIONAL { " +
+"    ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?taxon. " +
+"    ?treatment <http://purl.org/spar/cito/cites> ?cites." +
+"    ?cites rdf:type <http://purl.org/spar/fabio/Figure>. " +
+"    ?cites ?p ?o." +
+"  }" +
+"  OPTIONAL {?taxon  (dwc:authority|dwc:scientificNameAuthorship) ?authority .}" +
+"  " +
+"  } LIMIT 150";
+		
+};
 
-function showReport(genus, species) {
+
+function getTaxonName(genus, species) {
+    let query = "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
+        "DESCRIBE ?taxonName WHERE {" +
+        "?taxonName dwc:genus \""+genus+"\" ."+    
+        "?taxonName dwc:species \""+species+"\" ."+
+        "?taxonName a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonName>"+
+        "}";
+    return getSparqlRDF(query).then(graph => {
+        let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonName"),graph);
+        return tnClass.in($rdf.sym("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+    });
+};
+
+/**
+ * 
+ * @returns {undefined} a Promise to an array of taxon concepts URIs
+ */
+function getTaxonConcepts(taxonName) {
+    let query = "SELECT * WHERE {" +
+        "  ?taxonConcept <http://plazi.org/vocab/treatment#hasTaxonName> <"+taxonName+"> ." +
+        "}";
+    return getSparqlResultSet(query).then(json => {
+        //json.results.bindings[0].oldTaxon.value
+        return json.results.bindings.map(binding => {
+            return binding.taxonConcept.value;
+        });
+    });
+
+};
+
+function nameReport(genus, species) {
     let expandedTaxa = {};
     function appendDeprecations(genus, species) {
         let currentAcceptedName = "";
@@ -54,7 +140,7 @@ function showReport(genus, species) {
             var template = $('#newTaxonTpl').html();
             deprecations.forEach(deprecation => {
                 var html = Mustache.to_html(template, deprecation);
-                $('#report').append(html);
+                $('#name-report').append(html);
             });
             deprecations.forEach(deprecation => {
                 if (!expandedTaxa[deprecation.newTaxon.genus + deprecation.newTaxon.species]) {
@@ -66,6 +152,13 @@ function showReport(genus, species) {
     }
     $('#report').html("");
     appendDeprecations(genus, species);
+};
+
+function report(genus, species) {
+    getTaxonName(genus, species).then(
+            tn =>  $('#taxon-name').append(tn.value)
+    );
+    nameReport(genus, species);
 }
 
 let input = document.getElementById("combinedfield");
@@ -75,7 +168,7 @@ let cs = [];
 let ss = [];
 
 $("#lookup").on("click", e => {
-    showReport(input.value.toString().substring(0,input.value.toString().indexOf(" ")), input.value.toString().substr(input.value.toString().indexOf(" ") + 1));
+    report(input.value.toString().substring(0,input.value.toString().indexOf(" ")), input.value.toString().substr(input.value.toString().indexOf(" ") + 1));
     return false;
 });
 
@@ -149,7 +242,7 @@ function getGenusSuggestions(prefix) {
                 "FILTER REGEX(?genus, \"^"+prefix+"\",\"i\")\n"+
                 " }\n" +
             "} ORDER BY UCASE(?genus) LIMIT 10";
-    return executeSparql(query).then(json => {
+    return getSparqlResultSet(query).then(json => {
         gs = json.results.bindings.map(binding => binding.genus.value);
         return true;
     });
@@ -168,7 +261,7 @@ function getSpeciesSuggestions(prefix, genus) {
                 "FILTER REGEX(?genus, \"^"+genus+"\",\"i\")\n" +
                 " }\n" +
             "} ORDER BY UCASE(?species) LIMIT 10";
-    return executeSparql(query).then(json => {
+    return getSparqlResultSet(query).then(json => {
         ss = json.results.bindings.map(binding => binding.species.value);
         return true;
     });
@@ -186,7 +279,7 @@ function getCombinedSuggestions(prefix) {
                 "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
                 " }\n" +
             "} ORDER BY UCASE(?species) LIMIT 10";
-    return executeSparql(query).then(json => {
+    return getSparqlResultSet(query).then(json => {
         cs = json.results.bindings.map(binding => binding.genus.value+" "+binding.species.value);
         return true;
     });
