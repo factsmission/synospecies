@@ -103,14 +103,14 @@ function specificInfos(genus, species) {
 
 
 function getTaxonName(genus, species) {
-    let query = "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
-        "DESCRIBE ?taxonName WHERE {" +
-        "?taxonName dwc:genus \""+genus+"\" ."+    
-        "?taxonName dwc:species \""+species+"\" ."+
-        "?taxonName a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonName>"+
+    let query = "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
+        "DESCRIBE ?taxonName WHERE {\n" +
+        "?taxonName dwc:genus \""+genus+"\" .\n"+    
+        "?taxonName dwc:species \""+species+"\" .\n"+
+        "?taxonName a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept>\n"+
         "}";
     return getSparqlRDF(query).then(graph => {
-        let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonName"),graph);
+        let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"),graph);
         return tnClass.in($rdf.sym("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
     });
 };
@@ -131,6 +131,10 @@ function getTaxonConcepts(taxonName) {
     });
 
 };
+
+function dwc(localName) {
+    return $rdf.sym("http://rs.tdwg.org/dwc/terms/"+localName);
+}
 
 function nameReport(genus, species) {
     let expandedTaxa = {};
@@ -156,7 +160,11 @@ function nameReport(genus, species) {
 
 function report(genus, species) {
     getTaxonName(genus, species).then(
-       tns => tns.each(tn =>  "<li>"+tn.value+"</li>")
+       tns => tns.each(tn =>  "<li>URI:"+tn.value+"<br/>\n"+
+            "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
+            " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
+            " - Family: "+tn.out(dwc("family")).value+" - Genus: "+tn.out(dwc("genus")).value+
+            " - Species: "+tn.out(dwc("species")).value+"</li>")
     ).then(listItems => $('#taxon-name').append("<ul>"+listItems.join("\n")+"</ul>"));
     nameReport(genus, species);
 }
