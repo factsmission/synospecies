@@ -156,8 +156,8 @@ function nameReport(genus, species) {
 
 function report(genus, species) {
     getTaxonName(genus, species).then(
-            tn =>  $('#taxon-name').append(tn.value)
-    );
+       tns => tns.each(tn =>  "<li>"+tn.value+"</li>")
+    ).then(listItems => $('#taxon-name').append("<ul>"+listItems.join("\n")+"</ul>"));
     nameReport(genus, species);
 }
 
