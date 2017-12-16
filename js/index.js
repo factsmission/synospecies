@@ -160,7 +160,11 @@ function nameReport(genus, species) {
 
 function report(genus, species) {
     getTaxonName(genus, species).then(
-       tns => tns.each(tn =>  "<li>URI:"+tn.value+"<br/>\n"+
+       tns => tns.each(tn => tn)).then(tns => tns.sort((tn1, tn2) => {
+           let y1 = tn1.value.substring(tn1.value.length -4);
+           let y2 = tn2.value.substring(tn2.value.length -4);
+           return y1 - y2;
+       }).map(tn => "<li>URI:"+tn.value+"<br/>\n"+
             "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
             " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
             " - Family: "+tn.out(dwc("family")).value+" - Genus: "+tn.out(dwc("genus")).value+
