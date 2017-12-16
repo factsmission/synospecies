@@ -1,4 +1,4 @@
-/* global Mustache, $rdf */
+/* global Mustache, $rdf, fetch */
 let sparqlEndpoint = "https://lindas-data.ch/sparql";
 //let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
 function getSparqlResultSet(query) {
@@ -165,7 +165,7 @@ function report(genus, species) {
             " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
             " - Family: "+tn.out(dwc("family")).value+" - Genus: "+tn.out(dwc("genus")).value+
             " - Species: "+tn.out(dwc("species")).value+"</li>")
-    ).then(listItems => $('#taxon-name').append("<ul>"+listItems.join("\n")+"</ul>"));
+    ).then(listItems => $('#taxon-name').html("<ul>"+listItems.join("\n")+"</ul>"));
     nameReport(genus, species);
 }
 
