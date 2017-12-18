@@ -56,10 +56,30 @@ function getSparqlRDF(query) {
 function getNewTaxa(oldTaxon) {
     let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
             "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
-            "DESCRIBE ?newTaxon WHERE { \n" +
+            "CONSTRUCT {\n"+
+            "  ?tc dwc:rank ?rank .\n" +
+            "  ?tc dwc:phylum ?phylum .\n" +
+            "  ?tc dwc:kingdom ?kingdom .\n" +
+            "  ?tc dwc:class ?class .\n" +
+            "  ?tc dwc:family ?family .\n" +
+            "  ?tc dwc:order ?oder .\n" +
+            "  ?tc dwc:genus ?genus .\n" +
+            "  ?tc dwc:species ?species .\n" +
+            "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n"+
+            "  ?treatment treat:preferedName ?tc.\n" +
+            "} WHERE { \n" +
             " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
-            "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?newTaxon .\n" +
-            "    ?treatment treat:deprecates <"+oldTaxon+">.\n" +
+            "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .\n" +
+            "  ?treatment treat:deprecates <"+oldTaxon+">.\n" +
+            "  ?tc dwc:rank ?rank .\n" +
+            "  ?tc dwc:phylum ?phylum .\n" +
+            "  ?tc dwc:kingdom ?kingdom .\n" +
+            "  ?tc dwc:class ?class .\n" +
+            "  ?tc dwc:family ?family .\n" +
+            "  ?tc dwc:order ?oder .\n" +
+            "  ?tc dwc:genus ?genus .\n" +
+            "  ?tc dwc:species ?species .\n" +
+            "  ?treatment ?treatmentTaxonRelation ?tc .\n" +
             " }\n" +
             "} ";
     return getSparqlRDF(query).then(graph => {
@@ -136,6 +156,10 @@ function dwc(localName) {
     return $rdf.sym("http://rs.tdwg.org/dwc/terms/"+localName);
 }
 
+function treat(localName) {
+    return $rdf.sym("http://plazi.org/vocab/treatment#"+localName);
+}
+
 function nameReport(genus, species) {
     let expandedTaxa = {};
     function appendDeprecations(genus, species) {
@@ -176,7 +200,15 @@ function report(genus, species) {
                 
                 //for unlear reasons some taxa have more than one family
                 let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
-                let result = $("<li>").append("<strong>"+getFormattedName(tn.value)+"</strong><br/>\n"+
+                let preferedNameByGN = tn.in(treat("preferedName"));
+                function linkToTreatment() {
+                        return preferedNameByGN.each(f => f.value)
+                                .then(fs => fs.map(treatmentUri => " <a href=\""+treatmentUri+"\">ref</a>").join(", "));
+                    }
+                let preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatment() : 
+                        "";
+                let result = $("<li>").append("<strong>"+getFormattedName(tn.value)+"</strong>"+
+                 preferedNameBy+"<br/>\n"+
                  "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
                  " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
                  " - Family: "+family+" - Genus: "+tn.out(dwc("genus")).value+
