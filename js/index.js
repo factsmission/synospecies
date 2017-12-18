@@ -53,6 +53,22 @@ function getSparqlRDF(query) {
     });
 }
 
+function getNewTaxa(oldTaxon) {
+    let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
+            "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
+            "DESCRIBE ?newTaxon WHERE { \n" +
+            " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
+            "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?newTaxon .\n" +
+            "    ?treatment treat:deprecates <"+oldTaxon+">.\n" +
+            " }\n" +
+            "} ";
+    return getSparqlRDF(query).then(graph => {
+        let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"),graph);
+        return tnClass.in($rdf.sym("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+    });
+}
+
+
 function getNewTaxon(genus, species) {
     let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
             "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
@@ -104,10 +120,10 @@ function specificInfos(genus, species) {
 
 function getTaxonConcepts(genus, species) {
     let query = "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
-        "DESCRIBE ?taxonName WHERE {\n" +
-        "?taxonName dwc:genus \""+genus+"\" .\n"+    
-        "?taxonName dwc:species \""+species+"\" .\n"+
-        "?taxonName a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept>\n"+
+        "DESCRIBE ?taxonConcept WHERE {\n" +
+        "?taxonConcept dwc:genus \""+genus+"\" .\n"+    
+        "?taxonConcept dwc:species \""+species+"\" .\n"+
+        "?taxonConcept a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept>\n"+
         "}";
     return getSparqlRDF(query).then(graph => {
         let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"),graph);
@@ -149,18 +165,30 @@ function report(genus, species) {
         return nameSection.substring(0, lastSeparator).replace(new RegExp("_","g")," ")+
                 ", "+nameSection.substring(lastSeparator+1);
     }
-    getTaxonConcepts(genus, species).then(
-       tns => tns.each(tn => tn)).then(tns => tns.sort((tn1, tn2) => {
-           let y1 = tn1.value.substring(tn1.value.length -4);
-           let y2 = tn2.value.substring(tn2.value.length -4);
-           return y1 - y2;
-       }).map(tn => "<li><strong>"+getFormattedName(tn.value)+"</strong><br/>\n"+
-            "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
-            " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
-            " - Family: "+tn.out(dwc("family")).value+" - Genus: "+tn.out(dwc("genus")).value+
-            " - Species: "+tn.out(dwc("species")).value+"</li>")
-    ).then(listItems => $('#taxon-name').html("<ul>"+listItems.join("\n")+"</ul>"));
-    nameReport(genus, species);
+    $('#taxon-name').html("");
+    let names = {};
+    let displayTaxa = tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
+                let y1 = tn1.value.substring(tn1.value.length -4);
+                let y2 = tn2.value.substring(tn2.value.length -4);
+                return y1 - y2;
+            }).map(async tn => {
+                names[tn.value] = true;
+                //for unlear reasons some taxa have more than one family
+                let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
+                return "<li><strong>"+getFormattedName(tn.value)+"</strong><br/>\n"+
+                 "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
+                 " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
+                 " - Family: "+family+" - Genus: "+tn.out(dwc("genus")).value+
+                 " - Species: "+tn.out(dwc("species")).value+"</li>";
+             }))
+         ).then(listItems => $('#taxon-name').append("Taxa: <ul>"+listItems.join("\n")+"</ul>"));
+    getTaxonConcepts(genus, species).then(displayTaxa).then(ignored =>
+        Object.keys(names).forEach(uri => {
+            console.log("getting neW taxa for "+uri);
+            getNewTaxa(uri).then(displayTaxa);
+        })
+    );
+    //nameReport(genus, species);
 }
 
 let input = document.getElementById("combinedfield");
