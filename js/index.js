@@ -102,7 +102,7 @@ function specificInfos(genus, species) {
 };
 
 
-function getTaxonName(genus, species) {
+function getTaxonConcepts(genus, species) {
     let query = "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
         "DESCRIBE ?taxonName WHERE {\n" +
         "?taxonName dwc:genus \""+genus+"\" .\n"+    
@@ -115,22 +115,6 @@ function getTaxonName(genus, species) {
     });
 };
 
-/**
- * 
- * @returns {undefined} a Promise to an array of taxon concepts URIs
- */
-function getTaxonConcepts(taxonName) {
-    let query = "SELECT * WHERE {" +
-        "  ?taxonConcept <http://plazi.org/vocab/treatment#hasTaxonName> <"+taxonName+"> ." +
-        "}";
-    return getSparqlResultSet(query).then(json => {
-        //json.results.bindings[0].oldTaxon.value
-        return json.results.bindings.map(binding => {
-            return binding.taxonConcept.value;
-        });
-    });
-
-};
 
 function dwc(localName) {
     return $rdf.sym("http://rs.tdwg.org/dwc/terms/"+localName);
@@ -159,12 +143,18 @@ function nameReport(genus, species) {
 };
 
 function report(genus, species) {
-    getTaxonName(genus, species).then(
+    function getFormattedName(uri) {
+        let nameSection = uri.substring(uri.lastIndexOf("/")+1);
+        let lastSeparator = nameSection.lastIndexOf("_");
+        return nameSection.substring(0, lastSeparator).replace(new RegExp("_","g")," ")+
+                ", "+nameSection.substring(lastSeparator+1);
+    }
+    getTaxonConcepts(genus, species).then(
        tns => tns.each(tn => tn)).then(tns => tns.sort((tn1, tn2) => {
            let y1 = tn1.value.substring(tn1.value.length -4);
            let y2 = tn2.value.substring(tn2.value.length -4);
            return y1 - y2;
-       }).map(tn => "<li>URI:"+tn.value+"<br/>\n"+
+       }).map(tn => "<li><strong>"+getFormattedName(tn.value)+"</strong><br/>\n"+
             "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
             " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
             " - Family: "+tn.out(dwc("family")).value+" - Genus: "+tn.out(dwc("genus")).value+
