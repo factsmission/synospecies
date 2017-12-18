@@ -167,7 +167,7 @@ function report(genus, species) {
     }
     $('#taxon-name').html("");
     let names = {};
-    function getTaxonRenderer(target) {
+    function getTaxonRenderer(title, target) {
         return tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
                 let y1 = tn1.value.substring(tn1.value.length -4);
                 let y2 = tn2.value.substring(tn2.value.length -4);
@@ -176,24 +176,28 @@ function report(genus, species) {
                 
                 //for unlear reasons some taxa have more than one family
                 let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
-                let deprecationsArea = $("<div class=\"deprecations\">looking fro deprecations....</div>");
                 let result = $("<li>").append("<strong>"+getFormattedName(tn.value)+"</strong><br/>\n"+
                  "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
                  " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
                  " - Family: "+family+" - Genus: "+tn.out(dwc("genus")).value+
                  " - Species: "+tn.out(dwc("species")).value);
                  if (!names[tn.value]) {
+                     let deprecationsArea = $("<div class=\"deprecations\">looking for deprecations....</div>");
                      result = result.append(deprecationsArea)
                      names[tn.value] = true;
-                     getNewTaxa(tn.value).then(getTaxonRenderer(deprecationsArea));
+                     getNewTaxa(tn.value).then(getTaxonRenderer("Deprecated by",deprecationsArea));
                  }        
                  return result;
              }))
          ).then(listItems => {
-             target.html($("<ul>").append(listItems))
+            if (listItems.length > 0) {
+                target.html(title).append($("<ul>").append(listItems));
+            } else {
+                target.html("");
+            }
          });
     };
-    getTaxonConcepts(genus, species).then(getTaxonRenderer($('#taxon-name')));
+    getTaxonConcepts(genus, species).then(getTaxonRenderer(genus +" "+species, $('#taxon-name')));
     //nameReport(genus, species);
 }
 
