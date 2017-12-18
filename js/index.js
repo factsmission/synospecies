@@ -167,27 +167,33 @@ function report(genus, species) {
     }
     $('#taxon-name').html("");
     let names = {};
-    let displayTaxa = tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
+    function getTaxonRenderer(target) {
+        return tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
                 let y1 = tn1.value.substring(tn1.value.length -4);
                 let y2 = tn2.value.substring(tn2.value.length -4);
                 return y1 - y2;
             }).map(async tn => {
-                names[tn.value] = true;
+                
                 //for unlear reasons some taxa have more than one family
                 let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
-                return "<li><strong>"+getFormattedName(tn.value)+"</strong><br/>\n"+
+                let deprecationsArea = $("<div class=\"deprecations\">looking fro deprecations....</div>");
+                let result = $("<li>").append("<strong>"+getFormattedName(tn.value)+"</strong><br/>\n"+
                  "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
                  " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
                  " - Family: "+family+" - Genus: "+tn.out(dwc("genus")).value+
-                 " - Species: "+tn.out(dwc("species")).value+"</li>";
+                 " - Species: "+tn.out(dwc("species")).value);
+                 if (!names[tn.value]) {
+                     result = result.append(deprecationsArea)
+                     names[tn.value] = true;
+                     getNewTaxa(tn.value).then(getTaxonRenderer(deprecationsArea));
+                 }        
+                 return result;
              }))
-         ).then(listItems => $('#taxon-name').append("Taxa: <ul>"+listItems.join("\n")+"</ul>"));
-    getTaxonConcepts(genus, species).then(displayTaxa).then(ignored =>
-        Object.keys(names).forEach(uri => {
-            console.log("getting neW taxa for "+uri);
-            getNewTaxa(uri).then(displayTaxa);
-        })
-    );
+         ).then(listItems => {
+             target.html($("<ul>").append(listItems))
+         });
+    };
+    getTaxonConcepts(genus, species).then(getTaxonRenderer($('#taxon-name')));
     //nameReport(genus, species);
 }
 
