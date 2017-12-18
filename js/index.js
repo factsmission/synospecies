@@ -318,8 +318,20 @@ $("#lookup").on("click", e => {
     return false;
 });
 
+var awesomplete = new Awesomplete(input);
+awesomplete.maxItems = 15;
+awesomplete.sort = false;
+
 input.onkeyup = (e) => {
     if ((input.value.length >= 2) && (e.key !== "Enter") && (input.value !== previousValue)) {
+        suggest();
+    }
+    return true;
+};
+
+awesomplete.addEventListener("awesomplete-selectcomplete", suggest());
+
+function suggest() {
         if (input.value.toString().indexOf(" ") === -1) {
             previousValue = input.value;
             Promise.all([getGenusSuggestions(input.value),getCombinedSuggestions(input.value)]).then(v => {
@@ -340,12 +352,8 @@ input.onkeyup = (e) => {
                 });
             }
         }
-    }
-    return true;
 };
-let awesomplete = new Awesomplete(input);
-awesomplete.maxItems = 15;
-awesomplete.sort = false;
+
 //
 awesomplete.filter = (t, i) => {
     let foundPos = t.toLowerCase().indexOf(i.toLowerCase());
