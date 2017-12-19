@@ -303,7 +303,13 @@ function report(genus, species) {
             }
          });
     };
-    getTaxonConcepts(genus, species).then(getTaxonRenderer(genus +" "+species, $('#taxon-name')));
+    getTaxonConcepts(genus, species).then(taxonConcepts => {
+        if (taxonConcepts.nodes.length === 0) {
+            $('#taxon-name').html("No treatment for "+genus +" "+species+" found on plazi.")
+        } else {
+            getTaxonRenderer(genus +" "+species, $('#taxon-name'))(taxonConcepts);
+        }
+    });
     //nameReport(genus, species);
 }
 
