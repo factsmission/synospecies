@@ -1,4 +1,4 @@
-/* global Mustache, $rdf, fetch */
+/* global Mustache, $rdf, fetch, Promise */
 let sparqlEndpoint = "https://lindas-data.ch/sparql";
 //let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
 function getSparqlResultSet(query) {
@@ -56,6 +56,7 @@ function getSparqlRDF(query) {
 function getNewTaxa(oldTaxon) {
     let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
             "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
+            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n"+
             "CONSTRUCT {\n"+
             "  ?tc dwc:rank ?rank .\n" +
             "  ?tc dwc:phylum ?phylum .\n" +
@@ -67,6 +68,7 @@ function getNewTaxa(oldTaxon) {
             "  ?tc dwc:species ?species .\n" +
             "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n"+
             "  ?treatment treat:preferedName ?tc.\n" +
+            "  ?treatment dc:creator ?treatmentCreator .\n" +
             "} WHERE { \n" +
             " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
             "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .\n" +
@@ -80,6 +82,7 @@ function getNewTaxa(oldTaxon) {
             "  ?tc dwc:genus ?genus .\n" +
             "  ?tc dwc:species ?species .\n" +
             "  ?treatment ?treatmentTaxonRelation ?tc .\n" +
+            "  ?treatment dc:creator ?treatmentCreator .\n" +
             " }\n" +
             "} ";
     return getSparqlRDF(query).then(graph => {
@@ -141,6 +144,7 @@ function specificInfos(genus, species) {
 function getTaxonConcepts(genus, species) {
     let query = "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
             "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
+            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
             "CONSTRUCT {\n"+
             "  ?tc dwc:rank ?rank .\n" +
             "  ?tc dwc:phylum ?phylum .\n" +
@@ -152,6 +156,7 @@ function getTaxonConcepts(genus, species) {
             "  ?tc dwc:species \""+species+"\" .\n"+
             "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n"+
             "  ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n"+
+            "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator ." +
             "  ?definingTreatment treat:definesTaxonConcept ?tc .\n"+
             "} WHERE { \n" +
             "  ?tc dwc:rank ?rank .\n" +
@@ -163,7 +168,8 @@ function getTaxonConcepts(genus, species) {
             "  ?tc dwc:genus \""+genus+"\" .\n"+    
             "  ?tc dwc:species \""+species+"\" .\n"+
             "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> . \n"+
-            "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . }\n"+
+            "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . \n"+
+            "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}\n"+
             "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . }\n"+
         "}";
     return getSparqlRDF(query).then(graph => {
@@ -179,6 +185,10 @@ function dwc(localName) {
 
 function treat(localName) {
     return $rdf.sym("http://plazi.org/vocab/treatment#"+localName);
+}
+
+function dc(localName) {
+    return $rdf.sym("http://purl.org/dc/elements/1.1/"+localName);
 }
 
 function nameReport(genus, species) {
@@ -219,21 +229,30 @@ function report(genus, species) {
                 return y1 - y2;
             }).map(async tn => {
                 
-                //for unlear reasons some taxa have more than one family
+                //for unclear reasons some taxa have more than one family
                 let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
+                
+                function linkToTreatments(gn) {
+                    return gn.each(t => t)
+                            .then(ts => Promise.all(ts.map(async t => " <a href=\""+t.value+"\">"+
+                            (await t.out(dc("creator")).each(c => c.value)).join(", ")+
+                            "</a>")).then(links => links.join(" - ")));
+                }
+            
                 let preferedNameByGN = tn.in(treat("preferedName"));
-                function linkToTreatment() {
-                        return preferedNameByGN.each(f => f.value)
-                                .then(fs => fs.map(treatmentUri => " <a href=\""+treatmentUri+"\">ref</a>").join(", "));
-                    }
-                let preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatment() : 
+                let preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatments(preferedNameByGN) : 
                         "";
+                
+                let augmentingTreatmentGN = tn.in(treat("augmentsTaxonConcept"));
+                let augmentingTreatment = augmentingTreatmentGN.nodes.length > 0 ? "Augmented by: "+await linkToTreatments(augmentingTreatmentGN) : 
+                        "";
+                
                 let result = $("<li>").append("<strong>"+getFormattedName(tn.value)+"</strong>"+
                  preferedNameBy+"<br/>\n"+
                  "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
                  " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
                  " - Family: "+family+" - Genus: "+tn.out(dwc("genus")).value+
-                 " - Species: "+tn.out(dwc("species")).value);
+                 " - Species: "+tn.out(dwc("species")).value+"<br/>"+augmentingTreatment);
                  if (!names[tn.value]) {
                      let deprecationsArea = $("<div class=\"deprecations\">looking for deprecations....</div>");
                      result = result.append(deprecationsArea)
