@@ -140,10 +140,31 @@ function specificInfos(genus, species) {
 
 function getTaxonConcepts(genus, species) {
     let query = "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
-        "DESCRIBE ?taxonConcept WHERE {\n" +
-        "?taxonConcept dwc:genus \""+genus+"\" .\n"+    
-        "?taxonConcept dwc:species \""+species+"\" .\n"+
-        "?taxonConcept a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept>\n"+
+            "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
+            "CONSTRUCT {\n"+
+            "  ?tc dwc:rank ?rank .\n" +
+            "  ?tc dwc:phylum ?phylum .\n" +
+            "  ?tc dwc:kingdom ?kingdom .\n" +
+            "  ?tc dwc:class ?class .\n" +
+            "  ?tc dwc:family ?family .\n" +
+            "  ?tc dwc:order ?oder .\n" +
+            "  ?tc dwc:genus \""+genus+"\" .\n"+    
+            "  ?tc dwc:species \""+species+"\" .\n"+
+            "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n"+
+            "  ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n"+
+            "  ?definingTreatment treat:definesTaxonConcept ?tc .\n"+
+            "} WHERE { \n" +
+            "  ?tc dwc:rank ?rank .\n" +
+            "  ?tc dwc:phylum ?phylum .\n" +
+            "  ?tc dwc:kingdom ?kingdom .\n" +
+            "  ?tc dwc:class ?class .\n" +
+            "  ?tc dwc:family ?family .\n" +
+            "  ?tc dwc:order ?oder .\n" +
+            "  ?tc dwc:genus \""+genus+"\" .\n"+    
+            "  ?tc dwc:species \""+species+"\" .\n"+
+            "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> . \n"+
+            "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . }\n"+
+            "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . }\n"+
         "}";
     return getSparqlRDF(query).then(graph => {
         let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"),graph);
