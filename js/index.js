@@ -69,6 +69,10 @@ function getNewTaxa(oldTaxon) {
             "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n"+
             "  ?treatment treat:preferedName ?tc.\n" +
             "  ?treatment dc:creator ?treatmentCreator .\n" +
+            "  ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n"+
+            "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator ." +
+            "  ?definingTreatment treat:definesTaxonConcept ?tc .\n"+
+            "  ?definingTreatment dc:creator ?definingTreatmentCreator .\n"+
             "} WHERE { \n" +
             " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
             "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .\n" +
@@ -83,6 +87,10 @@ function getNewTaxa(oldTaxon) {
             "  ?tc dwc:species ?species .\n" +
             "  ?treatment ?treatmentTaxonRelation ?tc .\n" +
             "  ?treatment dc:creator ?treatmentCreator .\n" +
+            "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . \n"+
+            "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}\n"+
+            "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . \n"+
+            "  ?definingTreatment dc:creator ?definingTreatmentCreator .}\n"+
             " }\n" +
             "} ";
     return getSparqlRDF(query).then(graph => {
@@ -158,6 +166,7 @@ function getTaxonConcepts(genus, species) {
             "  ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n"+
             "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator ." +
             "  ?definingTreatment treat:definesTaxonConcept ?tc .\n"+
+            "  ?definingTreatment dc:creator ?definingTreatmentCreator .\n"+
             "} WHERE { \n" +
             "  ?tc dwc:rank ?rank .\n" +
             "  ?tc dwc:phylum ?phylum .\n" +
@@ -170,7 +179,8 @@ function getTaxonConcepts(genus, species) {
             "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> . \n"+
             "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . \n"+
             "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}\n"+
-            "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . }\n"+
+            "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . \n"+
+            "  ?definingTreatment dc:creator ?definingTreatmentCreator .}\n"+
         "}";
     return getSparqlRDF(query).then(graph => {
         let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"),graph);
@@ -243,6 +253,9 @@ function report(genus, species) {
                 let preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatments(preferedNameByGN) : 
                         "";
                 
+                let definingTreatmentGN = tn.in(treat("definesTaxonConcept"));
+                let definingTreatment = definingTreatmentGN.nodes.length > 0 ? "Defined by: "+await linkToTreatments(definingTreatmentGN) : "Defining treatment not yet on plazi"; 
+                
                 let augmentingTreatmentGN = tn.in(treat("augmentsTaxonConcept"));
                 let augmentingTreatment = augmentingTreatmentGN.nodes.length > 0 ? "Augmented by: "+await linkToTreatments(augmentingTreatmentGN) : 
                         "";
@@ -252,7 +265,7 @@ function report(genus, species) {
                  "Kingdom: "+tn.out(dwc("kingdom")).value+" - Phylum: "+tn.out(dwc("phylum")).value+
                  " - Class: "+tn.out(dwc("class")).value+" - Order: "+tn.out(dwc("order")).value+
                  " - Family: "+family+" - Genus: "+tn.out(dwc("genus")).value+
-                 " - Species: "+tn.out(dwc("species")).value+"<br/>"+augmentingTreatment);
+                 " - Species: "+tn.out(dwc("species")).value+"<br/>"+definingTreatment+"<br/>"+augmentingTreatment);
                  if (!names[tn.value]) {
                      let deprecationsArea = $("<div class=\"deprecations\">looking for deprecations....</div>");
                      result = result.append(deprecationsArea)
