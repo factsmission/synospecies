@@ -252,6 +252,7 @@ function report(genus, species) {
     $('#taxon-name').html("");
     $('#image-area').html("");
     let names = {};
+    addedImages = {};
     function getTaxonRenderer(title, target) {
         return tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
                 let y1 = tn1.value.substring(tn1.value.length -4);
