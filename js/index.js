@@ -128,23 +128,27 @@ function getNewTaxon(genus, species) {
         });
     });
 }
-function specificInfos(genus, species) {
-    let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
-"PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
-"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-"SELECT DISTINCT * WHERE {   " +
-"  OPTIONAL {?taxon      (^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept)) ?newTaxon . }" +
-"  ?taxon dwc:genus \"Munida\" .    " +
-"  ?taxon dwc:species \"irrasa\".    " +
-"  OPTIONAL { " +
-"    ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?taxon. " +
-"    ?treatment <http://purl.org/spar/cito/cites> ?cites." +
-"    ?cites rdf:type <http://purl.org/spar/fabio/Figure>. " +
-"    ?cites ?p ?o." +
-"  }" +
-"  OPTIONAL {?taxon  (dwc:authority|dwc:scientificNameAuthorship) ?authority .}" +
-"  " +
-"  } LIMIT 150";
+function getImages(taxon) {
+    let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
+        "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+        "PREFIX fabio: <http://purl.org/spar/fabio/>\n" +
+        "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+        "SELECT ?url ?description WHERE {   \n" +
+        "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) <"+taxon+"> .\n" +
+        "  ?treatment <http://purl.org/spar/cito/cites> ?cites.\n" +
+        "  ?cites rdf:type fabio:Figure. \n" +
+        "  ?cites fabio:hasRepresentation ?url.\n" +
+        "  ?cites dc:description ?description.  \n" +
+        "} ";
+    return getSparqlResultSet(query).then(json => {
+        return json.results.bindings.map(binding => {
+            let result = {};
+            result.url = binding.url.value;
+            result.description = binding.description.value;
+            return result;
+        });
+    });
 		
 };
 
@@ -199,6 +203,21 @@ function treat(localName) {
 
 function dc(localName) {
     return $rdf.sym("http://purl.org/dc/elements/1.1/"+localName);
+}
+
+let addedImages = {};
+
+function appendImages(taxon) {
+    getImages(taxon).then(images => {
+        var template = $('#imageTpl').html();
+        images.forEach(image => {
+            if (!addedImages[image.url]) {
+                addedImages[image.url] = true;
+                var html = Mustache.to_html(template, image);
+                $('#image-area').append(html);
+            }
+        });
+    });
 }
 
 function nameReport(genus, species) {
@@ -271,7 +290,8 @@ function report(genus, species) {
                      result = result.append(deprecationsArea)
                      names[tn.value] = true;
                      getNewTaxa(tn.value).then(getTaxonRenderer("Deprecated by",deprecationsArea));
-                 }        
+                 }
+                 appendImages(tn.value);
                  return result;
              }))
          ).then(listItems => {

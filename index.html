@@ -13,6 +13,13 @@
             <i>{{oldTaxon.genus}} {{oldTaxon.species}}</i> is deprecated by 
             <i>{{newTaxon.genus}} {{newTaxon.species}}</i></p>
         </script>
+        <script id="imageTpl" type="text/template">
+            <figure>
+                <img src="{{url}}" alt="missing" />
+                <figcaption>{{description}}</figcaption>
+            </figure>
+            <hr />
+        </script>
     </head>
     <body>
         <div class="container my-3">
@@ -26,6 +33,8 @@
         <div class="container" id="taxon-name"> </div>
         
         <div class="container" id="name-report"> </div>
+        <hr />
+        <div class="container" id="image-area"> </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
