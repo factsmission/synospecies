@@ -421,11 +421,10 @@ function getSpeciesSuggestions(prefix, genus) {
                 "PREFIX dwcfp: <http://filteredpush.org/ontologies/oa/dwcFP#>\n"+
                 "SELECT DISTINCT ?species WHERE {\n"+
                 " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
-                "?sub dwc:genus ?genus .\n"+
+                "?sub dwc:genus \""+genus+"\" .\n"+
                 "?sub dwc:species ?species .\n"+
                 "?sub rdf:type dwcfp:TaxonName.\n"+
                 "FILTER REGEX(?species, \"^"+prefix+"\",\"i\")\n"+
-                "FILTER REGEX(?genus, \"^"+genus+"\",\"i\")\n" +
                 " }\n" +
             "} ORDER BY UCASE(?species) LIMIT 10";
     return getSparqlResultSet(query).then(json => {
