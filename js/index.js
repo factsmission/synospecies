@@ -313,8 +313,12 @@ let gs = [];
 let cs = [];
 let ss = [];
 
-$("#lookup").on("click", e => {
+function lookup() {
     report(input.value.toString().substring(0,input.value.toString().indexOf(" ")), input.value.toString().substr(input.value.toString().indexOf(" ") + 1));
+}
+
+$("#lookup").on("click", e => {
+    lookup();
     return false;
 });
 
@@ -329,7 +333,16 @@ input.onkeyup = (e) => {
     return true;
 };
 
-awesomplete.addEventListener("awesomplete-selectcomplete", suggest());
+input.addEventListener("awesomplete-selectcomplete", (e) => {
+    let wordCount = input.value.trim().split(" ").length;
+    if (wordCount === 1) {
+        suggest();
+        awesomplete.open();
+    }
+    if (wordCount === 2) {
+        lookup();
+    }
+});
 
 function suggest() {
         if (input.value.toString().indexOf(" ") === -1) {
