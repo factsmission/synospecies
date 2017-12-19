@@ -250,6 +250,7 @@ function report(genus, species) {
                 ", "+nameSection.substring(lastSeparator+1);
     }
     $('#taxon-name').html("");
+    $('#image-area').html("");
     let names = {};
     function getTaxonRenderer(title, target) {
         return tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
