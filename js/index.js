@@ -100,34 +100,6 @@ function getNewTaxa(oldTaxon) {
 }
 
 
-function getNewTaxon(genus, species) {
-    let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>" +
-            "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>" +
-            "SELECT * WHERE { " +
-            " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
-            "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?newTaxon ." +
-            "    ?treatment treat:deprecates ?oldTaxon ." +
-            "    ?oldTaxon dwc:genus \"" + genus + "\"." +
-            "    ?oldTaxon dwc:species \"" + species + "\"." +
-            "    ?newTaxon dwc:genus ?newGenus." +
-            "    ?newTaxon dwc:species ?newSpecies." +
-            " }\n" +
-            "} ";
-    return getSparqlResultSet(query).then(json => {
-        //json.results.bindings[0].oldTaxon.value
-        return json.results.bindings.map(binding => {
-            let result = {};
-            result.newTaxon = {};
-            result.newTaxon.genus = binding.newGenus.value;
-            result.newTaxon.species = binding.newSpecies.value;
-            result.oldTaxon = {};
-            result.oldTaxon.species = species;
-            result.oldTaxon.genus = genus;
-            result.treatment = binding.treatment.value;
-            return result;
-        });
-    });
-}
 function getImages(taxon) {
     let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
         "PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n" +
@@ -220,27 +192,6 @@ function appendImages(taxon) {
     });
 }
 
-function nameReport(genus, species) {
-    let expandedTaxa = {};
-    function appendDeprecations(genus, species) {
-        let currentAcceptedName = "";
-        getNewTaxon(genus, species).then(deprecations => {
-            var template = $('#newTaxonTpl').html();
-            deprecations.forEach(deprecation => {
-                var html = Mustache.to_html(template, deprecation);
-                $('#name-report').append(html);
-            });
-            deprecations.forEach(deprecation => {
-                if (!expandedTaxa[deprecation.newTaxon.genus + deprecation.newTaxon.species]) {
-                    expandedTaxa[deprecation.newTaxon.genus + deprecation.newTaxon.species] = true;
-                    appendDeprecations(deprecation.newTaxon.genus, deprecation.newTaxon.species);
-                }
-            });
-        });
-    }
-    $('#report').html("");
-    appendDeprecations(genus, species);
-};
 
 function report(genus, species) {
     function getFormattedName(uri) {
@@ -311,7 +262,6 @@ function report(genus, species) {
             getTaxonRenderer(genus +" "+species, $('#taxon-name'))(taxonConcepts);
         }
     });
-    //nameReport(genus, species);
 }
 
 let input = document.getElementById("combinedfield");
@@ -335,7 +285,7 @@ awesomplete.sort = false;
 
 input.onkeyup = (e) => {
     if ((input.value.length >= 2) && (e.key !== "Enter") && (input.value !== previousValue)) {
-        suggest();
+        populateSuggestions();
     }
     return true;
 };
@@ -343,7 +293,7 @@ input.onkeyup = (e) => {
 input.addEventListener("awesomplete-selectcomplete", (e) => {
     let wordCount = input.value.trim().split(" ").length;
     if (wordCount === 1) {
-        suggest();
+        populateSuggestions();
         awesomplete.open();
     }
     if (wordCount === 2) {
@@ -351,27 +301,27 @@ input.addEventListener("awesomplete-selectcomplete", (e) => {
     }
 });
 
-function suggest() {
-        if (input.value.toString().indexOf(" ") === -1) {
-            previousValue = input.value;
-            Promise.all([getGenusSuggestions(input.value),getCombinedSuggestions(input.value)]).then(v => {
-                gs = gs.map(i => i+" ");
-                awesomplete.list = gs.concat(cs);
+function populateSuggestions() {
+    if (input.value.toString().indexOf(" ") === -1) {
+        previousValue = input.value;
+        Promise.all([getGenusSuggestions(input.value),getCombinedSuggestions(input.value)]).then(v => {
+            gs = gs.map(i => i+" ");
+            awesomplete.list = gs.concat(cs);
+        });
+    } else {
+        previousValue = input.value;
+        let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
+        let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
+        if (speciesIn.length > 0) {
+            getSpeciesSuggestions(speciesIn, genusIn).then(values => {
+                awesomplete.list = ss.map(i => genusIn + " " + i);
             });
         } else {
-            previousValue = input.value;
-            let speciesIn = input.value.toString().substr(input.value.toString().indexOf(" ") + 1);
-            let genusIn = input.value.toString().substring(0,input.value.toString().indexOf(" "));
-            if (speciesIn.length > 0) {
-                getSpeciesSuggestions(speciesIn, genusIn).then(values => {
-                    awesomplete.list = ss.map(i => genusIn + " " + i);
-                });
-            } else {
-                getSpeciesSuggestions("", genusIn).then(values => {
-                    awesomplete.list = ss.map(i => genusIn + " " + i);
-                });
-            }
+            getSpeciesSuggestions("", genusIn).then(values => {
+                awesomplete.list = ss.map(i => genusIn + " " + i);
+            });
         }
+    }
 };
 
 //
