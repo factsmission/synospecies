@@ -22,7 +22,7 @@
         </script>
     </head>
     <body>
-        <nav class="navbar navbar-light bg-light justify-content-between">
+        <nav class="navbar sticky-top navbar-light bg-light justify-content-between">
             <a class="navbar-brand">Synospecies</a>
             <form class="form-inline">
                 <span class="navbar-text">Input Genus and species here:</span>
@@ -30,13 +30,27 @@
                 <button class="btn btn-outline-success" id="lookup">Look up</button>
             </form>
         </nav>
+        
+        <div class="container mt-2 mb-1 hide" id="taxon-name"> </div>
+        <hr>
+        <div class="container my-1 hide" id="name-report"> </div>
+        <div class="container mt-1 mb-2 hide" id="image-area"> </div>
 
-        <div class="container" id="taxon-name"> </div>
-
-        <div class="container" id="name-report"> </div>
-        <hr />
-        <div class="container" id="image-area"> </div>
-
+        <nav class="navbar navbar-light bg-light invisible">
+            <span class="navbar-text">
+                Synospecies is created and maintained by FactsMission.
+            </span>
+            <a class="navbar-brand" href="https://factsmission.com">
+                <img class="align-baseline" src="images/FactsMissionTEO.png" height="15" alt="FactsMission.com">
+            </a>
+            <span class="navbar-text">
+                We get our taxons and related data from Plazi.
+            </span>
+            <a class="navbar-brand" href="https://plazi.org">
+                <img src="http://plazi.org/fileadmin/templates/img/logo.png" height="15" alt="Plazi.org">
+            </a>
+        </nav>
+        
         <nav class="navbar fixed-bottom navbar-light bg-light">
             <span class="navbar-text">
                 Synospecies is created and maintained by FactsMission.

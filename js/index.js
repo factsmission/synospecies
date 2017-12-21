@@ -248,6 +248,8 @@ function report(genus, species) {
                     return result;
                 }))
             ).then(listItems => {
+                $('#taxon-name').show;
+                $('#image-area').hide;
                 if (listItems.length > 0) {
                     target.html(title).append($("<ul>").append(listItems));
                 } else {
@@ -257,7 +259,9 @@ function report(genus, species) {
     }
     getTaxonConcepts(genus, species).then(taxonConcepts => {
         if (taxonConcepts.nodes.length === 0) {
-            $('#taxon-name').html("No treatment for " + genus + " " + species + " found on plazi.")
+            $('#taxon-name').show;
+            $('#image-area').hide;
+            $('#taxon-name').html("No treatment for " + genus + " " + species + " found on plazi.");
         } else {
             getTaxonRenderer(genus + " " + species, $('#taxon-name'))(taxonConcepts);
         }
