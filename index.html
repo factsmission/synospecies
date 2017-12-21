@@ -15,8 +15,8 @@
         </script>
         <script id="imageTpl" type="text/template">
             <figure>
-                <img src="{{url}}" alt="missing" style="width:100%; max-width:600px;" />
-                <figcaption>{{description}}</figcaption>
+            <img src="{{url}}" alt="missing" style="width:100%; max-width:600px;" />
+            <figcaption>{{description}}</figcaption>
             </figure>
             <hr />
         </script>
@@ -31,10 +31,25 @@
             </form>
         </div>
         <div class="container" id="taxon-name"> </div>
-        
+
         <div class="container" id="name-report"> </div>
         <hr />
         <div class="container" id="image-area"> </div>
+
+        <nav class="navbar fixed-bottom navbar-light bg-light">
+            <span class="navbar-text">
+                Synospecies is created and maintained by FactsMission.
+            </span>
+            <a class="navbar-brand" href="https://factsmission.com">
+                <img class="align-baseline" src="images/FactsMissionTEO.png" height="15" alt="FactsMission.com">
+            </a>
+            <span class="navbar-text">
+                We get our taxons and related data from Plazi.
+            </span>
+            <a class="navbar-brand" href="https://plazi.org">
+                <img src="http://plazi.org/fileadmin/templates/img/logo.png" height="15" alt="Plazi.org">
+            </a>
+        </nav>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -44,5 +59,5 @@
         <script src="https://solid.github.io/releases/rdflib.js/rdflib-0.16.2.min.js"></script>
         <script src="https://retog.github.io/GraphNodeJS/js/main.js"></script>
         <script src="js/index.js"></script>
-</body>
+    </body>
 </html>
