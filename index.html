@@ -22,14 +22,15 @@
         </script>
     </head>
     <body>
-        <div class="container my-3">
+        <nav class="navbar navbar-light bg-light justify-content-between">
+            <a class="navbar-brand">Synospecies</a>
             <form class="form-inline">
-                <input type="text" class="mx-3 form-control-plaintext" readonly id="name" value="SynoSpecies">
-                <label for="combinedfield">Input genus & species here:</label>
-                <input type="text" class="form-control mx-3" id="combinedfield" value="" placeholder="Sadayoshia acroporae">
-                <button class="btn btn-primary" id="lookup">Look up</button>
+                <span class="navbar-text">Input Genus and species here:</span>
+                <input type="text" class="form-control mx-2" id="combinedfield" value="" placeholder="Sadayoshia acroporae">
+                <button class="btn btn-outline-success" id="lookup">Look up</button>
             </form>
-        </div>
+        </nav>
+
         <div class="container" id="taxon-name"> </div>
 
         <div class="container" id="name-report"> </div>
