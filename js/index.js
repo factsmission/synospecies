@@ -272,6 +272,7 @@ function report(genus, species) {
 let input = document.getElementById("combinedfield");
 if (!input.value && window.location.hash) {
     input.value = window.location.hash.substring(1).replace("+"," ");
+    lookup();
 }
 let previousValue = input.value;
 let gs = [];
