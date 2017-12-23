@@ -263,12 +263,16 @@ function report(genus, species) {
             $('#image-area').hide;
             $('#taxon-name').html("No treatment for " + genus + " " + species + " found on plazi.");
         } else {
+            window.location.hash = genus+"+"+species;
             getTaxonRenderer(genus + " " + species, $('#taxon-name'))(taxonConcepts);
         }
     });
 }
 
 let input = document.getElementById("combinedfield");
+if (!input.value && window.location.hash) {
+    input.value = window.location.hash.substring(1).replace("+"," ");
+}
 let previousValue = input.value;
 let gs = [];
 let cs = [];
