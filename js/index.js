@@ -280,6 +280,7 @@ let cs = [];
 let ss = [];
 
 function lookup() {
+    $('#top-navbar').append($('#search-form'));
     report(input.value.toString().substring(0, input.value.toString().indexOf(" ")), input.value.toString().substr(input.value.toString().indexOf(" ") + 1));
 }
 
