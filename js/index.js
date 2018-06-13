@@ -1,5 +1,5 @@
 /* global Mustache, $rdf, fetch, Promise */
-let sparqlEndpoint = "http://plazi.factsmission.org:7200/repositories/plazi";
+let sparqlEndpoint = "https://graphdb.plazi.factsmission.org/repositories/plazi";
 //let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
 function getSparqlResultSet(query) {
     console.log(query);
