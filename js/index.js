@@ -186,65 +186,65 @@ function report(genus, species) {
     $('#image-area').html("");
     let names = {};
     addedImages = {};
-    /* retuns a function that renders a graphnode (possibly one that represent smultiple nodes)
+    /* renders a graphnode (possibly one that represents multiple nodes)
      */
-    function getTaxonRenderer(title, target) {
-        return tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
-                    let y1 = tn1.value.substring(tn1.value.length - 4);
-                    let y2 = tn2.value.substring(tn2.value.length - 4);
-                    return y1 - y2;
-                }).map(async tn => {
+    function render(tns, title, target) {
+        tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
+                let y1 = tn1.value.substring(tn1.value.length - 4);
+                let y2 = tn2.value.substring(tn2.value.length - 4);
+                return y1 - y2;
+            }).map(async tn => {
 
-                    //for unclear reasons some taxa have more than one family
-                    let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
+                //for unclear reasons some taxa have more than one family
+                let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
 
-                    function linkToTreatments(gn) {
-                        return gn.each(t => t)
-                                .then(ts => Promise.all(ts.map(async t => " <a href=\"" + t.value + "\">" +
-                                                (await t.out(dc("creator")).each(c => c.value)).join("; ") +
-                                                "</a>")).then(links => links.join(" - ")));
-                    }
-
-                    let preferedNameByGN = tn.in(treat("preferedName"));
-                    let preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatments(preferedNameByGN) :
-                            "";
-
-                    let definingTreatmentGN = tn.in(treat("definesTaxonConcept"));
-                    let definingTreatment = definingTreatmentGN.nodes.length > 0 ? "Defined by: " + await linkToTreatments(definingTreatmentGN) : "Defining treatment not yet on plazi";
-
-                    let augmentingTreatmentGN = tn.in(treat("augmentsTaxonConcept"));
-                    let augmentingTreatment = augmentingTreatmentGN.nodes.length > 0 ? "Augmented by: " + await linkToTreatments(augmentingTreatmentGN) :
-                            "";
-
-                    let result = $("<li>").append("<strong>" + getFormattedName(tn.value) + "</strong>" +
-                            preferedNameBy + "<br/>\n" +
-                            "Kingdom: " + tn.out(dwc("kingdom")).value + " - Phylum: " + tn.out(dwc("phylum")).value +
-                            " - Class: " + tn.out(dwc("class")).value + " - Order: " + tn.out(dwc("order")).value +
-                            " - Family: " + family + " - Genus: " + tn.out(dwc("genus")).value +
-                            " - Species: " + tn.out(dwc("species")).value + "<br/>" + definingTreatment + "<br/>" + augmentingTreatment);
-                    if (!names[tn.value]) {
-                        let deprecationsArea = $("<div class=\"deprecations\">looking for deprecations....</div>");
-                        result = result.append(deprecationsArea)
-                        names[tn.value] = true;
-                        getNewTaxa(tn.value).then(getTaxonRenderer("Deprecated by", deprecationsArea));
-                    }
-                    appendImages(tn.value);
-                    return result;
-                }))
-            ).then(listItems => {
-                if (listItems.length > 0) {
-                    target.html(title).append($("<ul>").append(listItems));
-                } else {
-                    target.html("");
+                function linkToTreatments(gn) {
+                    return gn.each(t => t)
+                            .then(ts => Promise.all(ts.map(async t => " <a href=\"" + t.value + "\">" +
+                                            (await t.out(dc("creator")).each(c => c.value)).join("; ") +
+                                            "</a>")).then(links => links.join(" - ")));
                 }
-            });
+
+                let preferedNameByGN = tn.in(treat("preferedName"));
+                let preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatments(preferedNameByGN) :
+                        "";
+
+                let definingTreatmentGN = tn.in(treat("definesTaxonConcept"));
+                let definingTreatment = definingTreatmentGN.nodes.length > 0 ? "Defined by: " + await linkToTreatments(definingTreatmentGN) : "Defining treatment not yet on plazi";
+
+                let augmentingTreatmentGN = tn.in(treat("augmentsTaxonConcept"));
+                let augmentingTreatment = augmentingTreatmentGN.nodes.length > 0 ? "Augmented by: " + await linkToTreatments(augmentingTreatmentGN) :
+                        "";
+
+                let result = $("<li>").append("<strong>" + getFormattedName(tn.value) + "</strong>" +
+                        preferedNameBy + "<br/>\n" +
+                        "Kingdom: " + tn.out(dwc("kingdom")).value + " - Phylum: " + tn.out(dwc("phylum")).value +
+                        " - Class: " + tn.out(dwc("class")).value + " - Order: " + tn.out(dwc("order")).value +
+                        " - Family: " + family + " - Genus: " + tn.out(dwc("genus")).value +
+                        " - Species: " + tn.out(dwc("species")).value + "<br/>" + definingTreatment + "<br/>" + augmentingTreatment);
+                if (!names[tn.value]) {
+                    let deprecationsArea = $("<div class=\"deprecations\">looking for deprecations....</div>");
+                    result = result.append(deprecationsArea)
+                    names[tn.value] = true;
+                    getNewTaxa(tn.value).then(newTaxa => render(newTaxa,"Deprecated by", deprecationsArea));
+                }
+                appendImages(tn.value);
+                return result;
+            }))
+        ).then(listItems => {
+            if (listItems.length > 0) {
+                target.html(title).append($("<ul>").append(listItems));
+            } else {
+                target.html("");
+            }
+        });
     }
     getTaxonConcepts(genus, species).then(taxonConcepts => {
         if (taxonConcepts.nodes.length === 0) {
             $('#taxon-name').html("No treatment for " + genus + " " + species + " found on plazi.");
         } else {
             window.location.hash = genus+"+"+species;
-            getTaxonRenderer(genus + " " + species, $('#taxon-name'))(taxonConcepts);
+            render(taxonConcepts,genus + " " + species, $('#taxon-name'));
         }
     });
 }
