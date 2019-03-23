@@ -186,6 +186,8 @@ function report(genus, species) {
     $('#image-area').html("");
     let names = {};
     addedImages = {};
+    /* retuns a function that renders a graphnode (possibly one that represent smultiple nodes)
+     */
     function getTaxonRenderer(title, target) {
         return tns => tns.each(tn => tn).then(tns => Promise.all(tns.sort((tn1, tn2) => {
                     let y1 = tn1.value.substring(tn1.value.length - 4);
@@ -230,8 +232,6 @@ function report(genus, species) {
                     return result;
                 }))
             ).then(listItems => {
-                $('#taxon-name').show;
-                $('#image-area').hide;
                 if (listItems.length > 0) {
                     target.html(title).append($("<ul>").append(listItems));
                 } else {
@@ -241,8 +241,6 @@ function report(genus, species) {
     }
     getTaxonConcepts(genus, species).then(taxonConcepts => {
         if (taxonConcepts.nodes.length === 0) {
-            $('#taxon-name').show;
-            $('#image-area').hide;
             $('#taxon-name').html("No treatment for " + genus + " " + species + " found on plazi.");
         } else {
             window.location.hash = genus+"+"+species;
@@ -316,7 +314,6 @@ function populateSuggestions() {
     }
 }
 
-//
 awesomplete.filter = (t, i) => {
     let foundPos = t.toLowerCase().indexOf(i.toLowerCase());
     return (foundPos === 0) || (foundPos === (t.indexOf(" ") + 1));
