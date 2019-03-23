@@ -18,37 +18,19 @@ function getSparqlResultSet(query) {
     });
 }
 
-/** a side-effects free rdf-fetch function
- */
-function rdfFetch(uri, init = {}) {
-    return fetch(uri, init).then(response => {
-        if (response.ok) {
-            let graph = $rdf.graph();
-            let mediaType = response.headers.get("Content-type");
-            return response.text().then(text => {
-                $rdf.parse(text, graph, uri, mediaType);
-                response.graph = graph;
-                return response;
-            });
-        } else {
-            return response;
-        }
-    });
-}
-
 function getSparqlRDF(query) {
     console.log(query);
     let encodedQuery = encodeURIComponent(query);
-    return rdfFetch(sparqlEndpoint + "?query=" + encodedQuery, {
-        headers: {
+    return GraphNode.rdfFetch(sparqlEndpoint + "?query=" + encodedQuery, {
+        headers: new Headers({
             accept: "text/turtle"
-        }
+        })
     }).then(response =>
     {
         if (!response.ok) {
             throw response.status;
         } else {
-            return response.graph;
+            return response.graph();
         }
     });
 }
