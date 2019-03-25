@@ -1,39 +1,120 @@
 /* global Mustache, $rdf, fetch, Promise */
-let sparqlEndpoint = "https://lindas-data.ch/sparql";
-//let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
-function getSparqlResultSet(query) {
-    console.log(query);
-    let encodedQuery = encodeURIComponent(query);
-    return fetch(sparqlEndpoint + "?query=" + encodedQuery, {
-        headers: {
-            accept: "application/sparql-results+json"
-        }
-    }).then(response =>
-    {
-        if (!response.ok) {
-            throw response.status;
-        } else {
-            return response.json();
-        }
-    });
+
+class SparqlEndpoint {
+    constructor(uri) {
+        this._uri = uri;
+    }
+
+    getSparqlResultSet = function(query) {
+        console.log(query);
+        let encodedQuery = encodeURIComponent(query);
+        return fetch(this._uri + "?query=" + encodedQuery, {
+            headers: {
+                accept: "application/sparql-results+json"
+            }
+        }).then(response =>
+        {
+            if (!response.ok) {
+                throw response.status;
+            } else {
+                return response.json();
+            }
+        });
+    }
+    
+    getSparqlRDF = function(query) {
+        console.log(query);
+        let encodedQuery = encodeURIComponent(query);
+        return GraphNode.rdfFetch(this._uri + "?query=" + encodedQuery, {
+            headers: new Headers({
+                accept: "text/turtle"
+            })
+        }).then(response =>
+        {
+            if (!response.ok) {
+                throw response.status;
+            } else {
+                return response.graph();
+            }
+        });
+    }
 }
 
-function getSparqlRDF(query) {
-    console.log(query);
-    let encodedQuery = encodeURIComponent(query);
-    return GraphNode.rdfFetch(sparqlEndpoint + "?query=" + encodedQuery, {
-        headers: new Headers({
-            accept: "text/turtle"
-        })
-    }).then(response =>
-    {
-        if (!response.ok) {
-            throw response.status;
-        } else {
-            return response.graph();
+
+class WikidataViewer {
+    
+    _taxonNames = {};
+    _sparqlEndpoint = new SparqlEndpoint("https://query.wikidata.org/sparql");
+
+    constructor(element) {
+        this._element = element;
+        element.innerHTML = "<div>WIKIDATA</div>";
+        element.classList.remove("hide");
+    }
+
+    _query = taxonName =>`
+        DESCRIBE ?item WHERE 
+        {
+            ?item wdt:P225 "${taxonName}"
+        }`;
+        
+    
+
+    /*$("<li>").append("<strong>" + getFormattedName(tn.value) + "</strong>" +
+                        preferedNameBy + "<br/>\n" +
+                        "Kingdom: " + tn.out(dwc("kingdom")).value + " - Phylum: " + tn.out(dwc("phylum")).value +
+                        " - Class: " + tn.out(dwc("class")).value + " - Order: " + tn.out(dwc("order")).value +
+                        " - Family: " + family + " - Genus: " + tn.out(dwc("genus")).value +
+                        " - Species: " + tn.out(dwc("species")).value + "<br/>" + definingTreatment + "<br/>" + augmentingTreatment);*/
+
+    addTaxon(taxonName) {
+        function wdt(localName) {
+            return $rdf.sym("http://www.wikidata.org/prop/direct/" + localName);
         }
-    });
+    
+        function wd(localName) {
+            return $rdf.sym("http://www.wikidata.org/entity/" + localName);
+        }
+
+        function schema(localName) {
+            return $rdf.sym("http://schema.org/" + localName);
+        }
+
+        function render(gn) {
+            let result = "<div>Wikidata Resource: <a href=\""+gn.value+"\">"+gn.value+"</a>";
+            result += "<ul>"
+            gn.out(wdt("P225")).each(taxonName => {
+                result += "<li>Taxon Name "+taxonName.value+"</li>";
+            });
+            gn.in(schema("about")).each(about => {
+                result += "<li>Is subject of: <a href=\""+about.value+"\">"+about.value+"</a></li>";
+            });
+            gn.out(wdt("P846")).each(gbifId => {
+                result += "<li>GBIF ID <a href=\"https://www.gbif.org/species/"+gbifId.value+"\">"+gbifId.value+"</a></li>";
+            });
+            result += "</ul>"
+            result += "</div>"
+            return result;
+        }
+        if (!this._taxonNames[taxonName]) {
+            this._taxonNames[taxonName] = true;
+            return this._sparqlEndpoint.getSparqlRDF(this._query(taxonName)).then(graph => {
+                if (graph.length === 0) {
+                    throw Error("Not in wikidata: "+taxonName);
+                }
+                let tnClass = GraphNode(wd("Q16521"), graph);
+                return tnClass.in(wdt("P31"));
+            }).then(gn => {
+                    this._element.innerHTML = this._element.innerHTML+render(gn);    
+            });
+        }
+    }
 }
+
+
+let sparqlEndpoint = new SparqlEndpoint("https://lindas-data.ch/sparql");
+//let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
+
 
 function getNewTaxa(oldTaxon) {
     let query = "PREFIX treat: <http://plazi.org/vocab/treatment#>\n" +
@@ -75,7 +156,7 @@ function getNewTaxa(oldTaxon) {
             "  ?definingTreatment dc:creator ?definingTreatmentCreator .}\n" +
             " }\n" +
             "} ";
-    return getSparqlRDF(query).then(graph => {
+    return sparqlEndpoint.getSparqlRDF(query).then(graph => {
         let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"), graph);
         return tnClass.in($rdf.sym("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
     });
@@ -95,7 +176,7 @@ function getImages(taxon) {
             "  ?cites fabio:hasRepresentation ?url.\n" +
             "  ?cites dc:description ?description.  \n" +
             "} ";
-    return getSparqlResultSet(query).then(json => {
+    return sparqlEndpoint.getSparqlResultSet(query).then(json => {
         return json.results.bindings.map(binding => {
             let result = {};
             result.url = binding.url.value;
@@ -140,7 +221,7 @@ function getTaxonConcepts(genus, species) {
             "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . \n" +
             "  ?definingTreatment dc:creator ?definingTreatmentCreator .}\n" +
             "}";
-    return getSparqlRDF(query).then(graph => {
+    return sparqlEndpoint.getSparqlRDF(query).then(graph => {
         let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"), graph);
         return tnClass.in($rdf.sym("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
     });
@@ -160,6 +241,7 @@ function dc(localName) {
 }
 
 let addedImages = {};
+let wikidataViewer = new WikidataViewer(document.getElementById("wikidata-area"));
 
 function appendImages(taxon) {
     getImages(taxon).then(images => {
@@ -226,7 +308,12 @@ function report(genus, species) {
                     let deprecationsArea = $("<div class=\"deprecations\">looking for deprecations....</div>");
                     result = result.append(deprecationsArea)
                     names[tn.value] = true;
-                    getNewTaxa(tn.value).then(newTaxa => render(newTaxa,"Deprecated by", deprecationsArea));
+                    getNewTaxa(tn.value).then(newTaxa => {
+                        render(newTaxa,"Deprecated by", deprecationsArea);
+                        newTaxa.each(newTaxa => 
+                            wikidataViewer.addTaxon(newTaxa.out(dwc("genus")).value + " " + newTaxa.out(dwc("species")).value)
+                        )
+                    });
                 }
                 appendImages(tn.value);
                 return result;
@@ -246,8 +333,11 @@ function report(genus, species) {
             window.location.hash = genus+"+"+species;
             render(taxonConcepts,genus + " " + species, $('#taxon-name'));
         }
+        wikidataViewer.addTaxon(genus + " " + species);
     });
 }
+
+//Search field
 
 let input = document.getElementById("combinedfield");
 if (!input.value && window.location.hash) {
@@ -355,7 +445,7 @@ function getGenusSuggestions(prefix) {
             "FILTER REGEX(?genus, \"^" + prefix + "\",\"i\")\n" +
             " }\n" +
             "} ORDER BY UCASE(?genus) LIMIT 10";
-    return getSparqlResultSet(query).then(json => {
+    return sparqlEndpoint.getSparqlResultSet(query).then(json => {
         gs = json.results.bindings.map(binding => binding.genus.value);
         return true;
     });
@@ -373,7 +463,7 @@ function getSpeciesSuggestions(prefix, genus) {
             "FILTER REGEX(?species, \"^" + prefix + "\",\"i\")\n" +
             " }\n" +
             "} ORDER BY UCASE(?species) LIMIT 10";
-    return getSparqlResultSet(query).then(json => {
+    return sparqlEndpoint.getSparqlResultSet(query).then(json => {
         ss = json.results.bindings.map(binding => binding.species.value);
         return true;
     });
@@ -391,7 +481,7 @@ function getCombinedSuggestions(prefix) {
             "FILTER REGEX(?species, \"^" + prefix + "\",\"i\")\n" +
             " }\n" +
             "} ORDER BY UCASE(?species) LIMIT 10";
-    return getSparqlResultSet(query).then(json => {
+    return sparqlEndpoint.getSparqlResultSet(query).then(json => {
         cs = json.results.bindings.map(binding => binding.genus.value + " " + binding.species.value);
         return true;
     });
