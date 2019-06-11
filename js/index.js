@@ -108,7 +108,11 @@ class WikidataViewer {
                     this._element.innerHTML = this._element.innerHTML+render(gn);    
             });
         }
-    }
+    };
+
+    reset() {
+        this._element.innerHTML = "";
+    };
 }
 
 
@@ -266,6 +270,7 @@ function report(genus, species) {
     }
     $('#taxon-name').html("");
     $('#image-area').html("");
+    wikidataViewer.reset();
     let names = {};
     addedImages = {};
     /* renders a graphnode (possibly one that represents multiple nodes)
