@@ -1,0 +1,22 @@
+sudo: false
+language: node_js
+node_js:
+  - "8.9.3"
+env:
+  - CXX=g++-5
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-5
+script:
+  - npm run build
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
+  keep-history: true
+  local-dir: dist
+  on:
+    branch: master
