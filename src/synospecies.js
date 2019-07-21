@@ -5,7 +5,7 @@ class SparqlEndpoint {
         this._uri = uri;
     }
 
-    getSparqlResultSet = function(query) {
+    getSparqlResultSet(query) {
         console.log(query);
         let encodedQuery = encodeURIComponent(query);
         return fetch(this._uri + "?query=" + encodedQuery, {
@@ -22,7 +22,7 @@ class SparqlEndpoint {
         });
     }
     
-    getSparqlRDF = function(query) {
+    getSparqlRDF(query) {
         console.log(query);
         let encodedQuery = encodeURIComponent(query);
         return GraphNode.rdfFetch(this._uri + "?query=" + encodedQuery, {
