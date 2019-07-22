@@ -43,20 +43,20 @@ class SparqlEndpoint {
 
 class WikidataViewer {
     
-    _taxonNames = {};
-    _sparqlEndpoint = new SparqlEndpoint("https://query.wikidata.org/sparql");
+    
 
     constructor(element) {
         this._element = element;
         element.innerHTML = "<div>WIKIDATA</div>";
         element.classList.remove("hide");
+        this._taxonNames = {};
+        this._sparqlEndpoint = new SparqlEndpoint("https://query.wikidata.org/sparql");
+        this._query = taxonName =>`
+            DESCRIBE ?item WHERE 
+            {
+                ?item wdt:P225 "${taxonName}"
+            }`;
     }
-
-    _query = taxonName =>`
-        DESCRIBE ?item WHERE 
-        {
-            ?item wdt:P225 "${taxonName}"
-        }`;
         
     
 

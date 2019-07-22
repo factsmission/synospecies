@@ -37,8 +37,7 @@ module.exports = {
                     "regenerator": true
                   }
                 ],
-                ["@babel/plugin-transform-object-assign"],
-                ["@babel/plugin-proposal-class-properties"]
+                ["@babel/plugin-transform-object-assign"]
             ]
           }
         }
