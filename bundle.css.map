@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack:///./src/css/synospecies.css"],"names":[],"mappings":"AAAA;AACA;AACA;AACA;AACA;AACA,C","file":"bundle.css","sourcesContent":["mark {\n    background-color: inherit !important;\n    color: black;\n    font-weight: bold;\n    padding: 0 0;\n}"],"sourceRoot":""}
