@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const fs = require('fs');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   entry: path.resolve(__dirname, 'src', 'synospecies.js'),
@@ -52,12 +53,16 @@ module.exports = {
         ]
       },
       {
-        test: /\.js$/,
-        /* ... */
-      },
-      {
-        test: /\.(sa|sc|c)ss$/,
-        /* ... */
+        test: /\.css$/,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: "css-loader",
+          }
+          
+        ]
       },
       {
         // Now we apply rule for images
@@ -95,7 +100,11 @@ module.exports = {
     new HtmlWebPackPlugin({
       template: "./src/index.html",
       filename: "./index.html"
+    }),
+    new MiniCssExtractPlugin({
+      filename: "bundle.css"
     })
+  
   ],
   devServer: {
     compress: true,

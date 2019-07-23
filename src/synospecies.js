@@ -1,5 +1,7 @@
 /* global Mustache, $rdf, fetch, Promise */
 
+import style from "./css/synospecies.css";
+
 class SparqlEndpoint {
     constructor(uri) {
         this._uri = uri;
