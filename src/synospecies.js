@@ -1,6 +1,10 @@
-/* global Mustache, $rdf, fetch, Promise */
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 
 import style from "./css/synospecies.css";
+import $rdf from "ext-rdflib";
+import Mustache from "mustache";
+import GraphNode from "rdfgraphnode-rdfext";
 
 class SparqlEndpoint {
     constructor(uri) {

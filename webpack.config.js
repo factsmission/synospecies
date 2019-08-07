@@ -18,9 +18,9 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-           /* "presets": [
-              "@babel/preset-env", {
-                "targets": " > 1%, not IE 11, chrome 41",
+            "presets": [
+              ["@babel/preset-env", {
+                "targets": " > 1%, IE 11, chrome 41",
                 "spec": true,
                 "useBuiltIns": "entry",
                 "corejs": 3,
@@ -29,10 +29,10 @@ module.exports = {
                 "modules": "commonjs",
                 "debug": false, 
                 "include": ["@babel/plugin-transform-arrow-functions"]
-              }
-            ],*/
+              }]
+            ],
             "plugins": [
-                ["@babel/plugin-transform-arrow-functions", { "spec": true }],
+                ["@babel/plugin-transform-arrow-functions", { "spec": false }],
                 ["@babel/plugin-transform-runtime",
                   {
                     "regenerator": true
@@ -88,6 +88,7 @@ module.exports = {
     '@nleanba/ndjs': 'window',
     'jsonld': 'jsonld',
     'ext-rdflib': '$rdf',
+    'mustache': 'Mustache'
   },
   optimization: {
     minimize: true
