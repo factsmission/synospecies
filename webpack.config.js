@@ -86,8 +86,6 @@ module.exports = {
     'node-fetch': 'fetch',
     'xmldom': 'window',
     '@nleanba/ndjs': 'window',
-    'jsonld': 'jsonld',
-    'ext-rdflib': '$rdf',
     'mustache': 'Mustache'
   },
   optimization: {
