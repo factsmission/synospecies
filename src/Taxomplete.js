@@ -12,11 +12,6 @@ export default class Taxomplete {
 
         let self = this;
 
-        $("#lookup").on("click", e => {
-            this.lookup();
-            return false;
-        });
-
         var awesomplete = new Awesomplete(input);
         awesomplete.maxItems = 15;
         awesomplete.sort = false;
@@ -83,7 +78,10 @@ export default class Taxomplete {
                         suggestion.substring(0, i.length) +
                         "</mark>" + suggestion.substring(i.length);
             }
-            return $("<li aria-selected='false'>" + html + "</li>")[0];
+            let result = document.createElement("li");
+            result.setAttribute("aria-selected", "false");
+            result.innerHTML = html;
+            return result;
         };
 
 
@@ -147,8 +145,11 @@ export default class Taxomplete {
     }
 
     lookup() {
-        $('#top-navbar').append($('#search-form'));
         this.action(this._input.value.toString());
+    }
+
+    action(value) {
+        console.log("Value "+value+" selected, overwrite action(value) method to have something happen.")
     }
 
 }

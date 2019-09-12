@@ -140,9 +140,16 @@ function report(genus, species) {
 let input = document.getElementById("combinedfield");
 let taxomplete = new Taxomplete(sparqlEndpoint, input);
 taxomplete.action = function(value) {
+    $('#top-navbar').append($('#search-form'));
     report(value.substring(0, value.indexOf(" ")), 
             value.substr(value.indexOf(" ") + 1));
 }
+document.getElementById("lookup").addEventListener("click", e => {
+    taxomplete.lookup();
+    e.preventDefault();
+    return false;
+});
+
 if (!input.value && window.location.hash) {
     input.value = window.location.hash.substring(1).replace("+"," ");
     taxomplete.lookup();
