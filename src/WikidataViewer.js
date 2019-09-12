@@ -64,7 +64,13 @@ export default class WikidataViewer {
                     throw Error("Not in wikidata: "+taxonName);
                 }
                 let tnClass = GraphNode(wd("Q16521"), graph);
-                return tnClass.in(wdt("P31"));
+                let instance = tnClass.in(wdt("P31"));
+                if (instance.nodes.length === 0) {
+                    //maybe it's a fossil taxon (a subclass of taxon)
+                    tnClass = GraphNode(wd("Q23038290"), graph);
+                    instance = tnClass.in(wdt("P31"));
+                }
+                return instance;
             }).then(gn => {
                     this._element.innerHTML = this._element.innerHTML+render(gn);    
             });
