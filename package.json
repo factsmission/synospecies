@@ -12,10 +12,11 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.6.0",
-    "awesomplete": "^1.1.5",
-    "ext-rdflib": "^0.5.1",
+    "@retog/sparql-client": "^1.0.2",
+    "ext-rdflib": "^0.5.5",
     "mustache": "^3.0.3",
-    "rdfgraphnode-rdfext": "^1.6.1"
+    "rdfgraphnode-rdfext": "^1.6.1",
+    "taxomplete": "^1.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.0",

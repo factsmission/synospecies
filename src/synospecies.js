@@ -7,12 +7,12 @@ import Mustache from "mustache";
 import GraphNode from "rdfgraphnode-rdfext";
 
 import Vernacular from "./vernacular.js"
-import SparqlEndpoint from "./SparqlEndpoint.js";
+import SparqlEndpoint from "@retog/sparql-client"
 
 import WikidataViewer from "./WikidataViewer.js";
 import TaxaManager from "./TaxaManager.js";
 import TaxonReport from "./TaxonReport.js";
-import Taxomplete from "./Taxomplete.js";
+import Taxomplete from "Taxomplete";
 
 
 let sparqlEndpoint = new SparqlEndpoint("https://lindas-data.ch/sparql");
@@ -138,7 +138,7 @@ function report(genus, species) {
 //Search field
 
 let input = document.getElementById("combinedfield");
-let taxomplete = new Taxomplete(sparqlEndpoint, input);
+let taxomplete = new Taxomplete(input, sparqlEndpoint);
 taxomplete.action = function(value) {
     $('#top-navbar').append($('#search-form'));
     report(value.substring(0, value.indexOf(" ")), 

@@ -1,6 +1,6 @@
 import $rdf from "ext-rdflib";
 import GraphNode from "rdfgraphnode-rdfext";
-import SparqlEndpoint from "./SparqlEndpoint.js";
+import SparqlEndpoint from "@retog/sparql-client"
 
 export default class TaxaManager {
     constructor(sparqlEndpoint) {

@@ -1,4 +1,4 @@
-import SparqlEndpoint from "./SparqlEndpoint.js";
+import SparqlEndpoint from "@retog/sparql-client"
 import $rdf from "ext-rdflib";
 import GraphNode from "rdfgraphnode-rdfext";
 
