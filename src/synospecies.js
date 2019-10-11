@@ -12,7 +12,7 @@ import SparqlEndpoint from "@retog/sparql-client"
 import WikidataViewer from "./WikidataViewer.js";
 import TaxaManager from "./TaxaManager.js";
 import TaxonReport from "./TaxonReport.js";
-import Taxomplete from "Taxomplete";
+import Taxomplete from "taxomplete";
 
 
 let sparqlEndpoint = new SparqlEndpoint("https://lindas-data.ch/sparql");
