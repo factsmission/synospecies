@@ -48,7 +48,7 @@ export default class WikidataViewer {
                 result += "<li>Taxon Name "+taxonName.value+"</li>";
             });
             gn.in(schema("about")).each(about => {
-                result += "<li>Is subject of: <a href=\""+about.value+"\">"+about.value+"</a></li>";
+                result += "<li>Is subject of: <a href=\""+about.value+"\">"+decodeURI(about.value)+"</a></li>";
             });
             gn.out(wdt("P846")).each(gbifId => {
                 result += "<li>GBIF ID <a href=\"https://www.gbif.org/species/"+gbifId.value+"\">"+gbifId.value+"</a></li>";

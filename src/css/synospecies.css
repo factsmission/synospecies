@@ -4,3 +4,18 @@ mark {
     font-weight: bold;
     padding: 0 0;
 }
+
+.expandbtn {
+    padding: 0 .2ch;
+    text-decoration: none;
+    border-radius: .5ch;
+    margin: 0 .2ch;
+}
+
+.expandbtn:hover,
+.expandbtn:active,
+.expandbtn:focus {
+    background-color: #28a745;
+    color: #ffffff;
+    text-decoration: none;
+}

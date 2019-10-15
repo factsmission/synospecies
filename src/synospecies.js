@@ -6,10 +6,10 @@ import $rdf from "ext-rdflib";
 import Mustache from "mustache";
 import GraphNode from "rdfgraphnode-rdfext";
 
-import Vernacular from "./vernacular.js"
 import SparqlEndpoint from "@retog/sparql-client"
 
 import WikidataViewer from "./WikidataViewer.js";
+import VernacularViewer from "./VernacularViewer.js"
 import TaxaManager from "./TaxaManager.js";
 import TaxonReport from "./TaxonReport.js";
 import Taxomplete from "taxomplete";
@@ -21,7 +21,23 @@ let sparqlEndpoint = new SparqlEndpoint("https://lindas-data.ch/sparql");
 let taxaManager = new TaxaManager(sparqlEndpoint);
 let taxonReport = new TaxonReport(taxaManager, document.getElementById('taxon-name'));
 
-
+function truncate () {
+    const toTruncate = document.getElementsByClassName("truncate");
+    toTruncate.forEach(el => {
+            let tc = el.textContent;
+        if (tc.length > 80) {
+            el.innerHTML = tc.slice(0, 81) + '<span hidden aria-hidden="false">' + tc.slice(81) + '</span>';
+            let expandbtn = document.createElement("span");
+            expandbtn.innerHTML = "...";
+            expandbtn.classList.add("expandbtn");
+            expandbtn.addEventListener("click", e => {
+                el.innerHTML = tc;
+                e.preventDefault();
+            });
+            el.append(expandbtn);
+        }
+    })
+}
 
 
 function dwc(localName) {
@@ -38,6 +54,7 @@ function dc(localName) {
 
 let addedImages = {};
 let wikidataViewer = new WikidataViewer(document.getElementById("wikidata-area"));
+const vernacularViewer = new VernacularViewer(document.getElementById("vernacular-area"));
 
 function appendImages(taxon) {
     taxaManager.getImages(taxon).then(images => {
@@ -63,6 +80,7 @@ function report(genus, species) {
     $('#taxon-name').html("");
     $('#image-area').html("");
     wikidataViewer.reset();
+    vernacularViewer.reset();
     let names = {};
     addedImages = {};
     /* renders a graphnode (possibly one that represents multiple nodes)
@@ -79,7 +97,7 @@ function report(genus, species) {
 
                 function linkToTreatments(gn) {
                     return gn.each(t => t)
-                            .then(ts => Promise.all(ts.map(async t => " <a href=\"" + t.value + "\">" +
+                            .then(ts => Promise.all(ts.map(async t => " <a class=\"truncate\" href=\"" + t.value + "\">" +
                                             (await t.out(dc("creator")).each(c => c.value)).join("; ") +
                                             "</a>")).then(links => links.join(" - ")));
                 }
@@ -107,8 +125,10 @@ function report(genus, species) {
                     names[tn.value] = true;
                     taxaManager.getNewTaxa(tn.value).then(newTaxa => {
                         render(newTaxa,"Deprecated by", deprecationsArea);
-                        newTaxa.each(newTaxa => 
-                            wikidataViewer.addTaxon(newTaxa.out(dwc("genus")).value + " " + newTaxa.out(dwc("species")).value)
+                        newTaxa.each(newTaxa => { 
+                            wikidataViewer.addTaxon(newTaxa.out(dwc("genus")).value + " " + newTaxa.out(dwc("species")).value);
+                            vernacularViewer.addTaxonUrl(newTaxa.out(treat(hasTaxonName)).value);
+                        }
                         )
                     });
                 }
@@ -118,6 +138,7 @@ function report(genus, species) {
         ).then(listItems => {
             if (listItems.length > 0) {
                 target.html(title).append($("<ul>").append(listItems));
+                truncate();
             } else {
                 target.html("");
             }
@@ -132,6 +153,7 @@ function report(genus, species) {
             render(taxonConcepts,genus + " " + species, $('#taxon-name'));
         }
         wikidataViewer.addTaxon(genus + " " + species);
+        vernacularViewer.addTaxon(genus + " " + species);
     });
 }
 
