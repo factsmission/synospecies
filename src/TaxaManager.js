@@ -91,6 +91,7 @@ export default class TaxaManager {
                 "  ?tc dwc:genus \"" + genus + "\" .\n" +
                 "  ?tc dwc:species \"" + species + "\" .\n" +
                 "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n" +
+                "  ?tc treat:hasTaxonName ?tn .\n" +
                 "  ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n" +
                 "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator ." +
                 "  ?definingTreatment treat:definesTaxonConcept ?tc .\n" +
@@ -105,6 +106,7 @@ export default class TaxaManager {
                 "  ?tc dwc:genus \"" + genus + "\" .\n" +
                 "  ?tc dwc:species \"" + species + "\" .\n" +
                 "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> . \n" +
+                "  OPTIONAL { ?tc treat:hasTaxonName ?tn . }\n" +
                 "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . \n" +
                 "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}\n" +
                 "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . \n" +
