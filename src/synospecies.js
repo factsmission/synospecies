@@ -15,8 +15,8 @@ import TaxonReport from "./TaxonReport.js";
 import Taxomplete from "taxomplete";
 
 
-let sparqlEndpoint = new SparqlEndpoint("https://lindas-data.ch/sparql");
-//let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
+//let sparqlEndpoint = new SparqlEndpoint("https://lindas-data.ch/sparql");
+let sparqlEndpoint = new SparqlEndpoint("https://plazi.factsmission.org/sparql");
 
 let taxaManager = new TaxaManager(sparqlEndpoint);
 let taxonReport = new TaxonReport(taxaManager, document.getElementById('taxon-name'));
