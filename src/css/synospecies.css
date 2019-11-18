@@ -64,6 +64,26 @@ hr {
     border-top: 1px solid #eee;
 }
 
+.section{
+    border-bottom: 1px solid #eee;
+    margin: 12px 0;
+}
+
+.section:empty {
+    display: none;
+}
+
+.section.card_header {
+    font-family: Oswald, Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+}
+
+.section.card_body {
+    margin: 0;
+    width: 100%;
+}
+
 .card {
     border: 1px solid #dadce0;
     border-radius: 8px;
