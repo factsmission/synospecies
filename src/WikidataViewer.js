@@ -79,5 +79,6 @@ export default class WikidataViewer {
 
     reset() {
         this._element.innerHTML = "";
+        this._taxonNames = {};
     };
 }

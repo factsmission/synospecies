@@ -23,5 +23,6 @@ export default class ImageSplash {
 
     reset() {
         this._element.innerHTML = "";
+        this.addedImages = {};
     };
 }

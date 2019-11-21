@@ -49,5 +49,6 @@ GROUP BY ?value`;
 
     reset() {
         this._element.innerHTML = "";
+        this._taxonUrls = {};
     };
 }
