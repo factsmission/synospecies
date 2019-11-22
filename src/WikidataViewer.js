@@ -20,14 +20,6 @@ export default class WikidataViewer {
     }
         
     
-
-    /*$("<li>").append("<strong>" + getFormattedName(tn.value) + "</strong>" +
-                        preferedNameBy + "<br/>\n" +
-                        "Kingdom: " + tn.out(dwc("kingdom")).value + " - Phylum: " + tn.out(dwc("phylum")).value +
-                        " - Class: " + tn.out(dwc("class")).value + " - Order: " + tn.out(dwc("order")).value +
-                        " - Family: " + family + " - Genus: " + tn.out(dwc("genus")).value +
-                        " - Species: " + tn.out(dwc("species")).value + "<br/>" + definingTreatment + "<br/>" + augmentingTreatment);*/
-
     addTaxon(taxonName) {
         function wdt(localName) {
             return $rdf.sym("http://www.wikidata.org/prop/direct/" + localName);

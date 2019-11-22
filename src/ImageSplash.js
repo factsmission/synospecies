@@ -6,15 +6,20 @@ export default class ImageSplash {
         element.classList.remove("hide");
         this._taxaManager = taxaManager;
         this.addedImages = {};
+        this.template = `
+        <figure>
+            <img src="{{url}}" alt="{{description}}" style="width:100%; max-width:600px;" />
+            <figcaption>{{description}}</figcaption>
+        </figure>
+        `;
     }
 
     appendImages(taxon) {
         this._taxaManager.getImages(taxon).then(images => {
-            var template = $('#imageTpl').html();
             images.forEach(image => {
                 if (!this.addedImages[image.url]) {
                     this.addedImages[image.url] = true;
-                    var html = Mustache.to_html(template, image);
+                    var html = Mustache.to_html(this.template, image);
                     this._element.innerHTML += html;
                 }
             });

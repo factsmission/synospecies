@@ -7,18 +7,6 @@
         integrity="sha256-WucYll9Mn2FE68lRHrTpBwzWC+Ra3IeEok0re4TBmgc=" crossorigin="anonymous" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script id="newTaxonTpl" type="text/template">
-        <h3>New Name: {{newTaxon.genus}} {{newTaxon.species}}</h3>
-        <p>According to: <a href="{{treatment}}">{{treatment}}</a>
-        <i>{{oldTaxon.genus}} {{oldTaxon.species}}</i> is deprecated by 
-        <i>{{newTaxon.genus}} {{newTaxon.species}}</i></p>
-    </script>
-    <script id="imageTpl" type="text/template">
-        <figure>
-            <img src="{{url}}" alt="{{description}}" style="width:100%; max-width:600px;" />
-            <figcaption>{{description}}</figcaption>
-        </figure>
-    </script>
 </head>
 
 <body>
@@ -54,7 +42,6 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
         integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous">
     </script>

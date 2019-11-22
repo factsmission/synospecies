@@ -34,7 +34,6 @@ const vernacularViewer = new VernacularViewer(document.getElementById("vernacula
 let input = document.getElementById("combinedfield");
 let taxomplete = new Taxomplete(input, sparqlEndpoint);
 taxomplete.action = function(value) {
-    $('#top-navbar').append($('#search-form'));
     wikidataViewer.reset();
     vernacularViewer.reset();
     imageSplash.reset();
