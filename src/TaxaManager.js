@@ -28,7 +28,6 @@ export default class TaxaManager {
                 "  ?definingTreatment treat:definesTaxonConcept ?tc .\n" +
                 "  ?definingTreatment dc:creator ?definingTreatmentCreator .\n" +
                 "} WHERE { \n" +
-                " GRAPH <https://linked.opendata.swiss/graph/plazi> {\n" +
                 "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .\n" +
                 "  ?treatment treat:deprecates <" + oldTaxon + ">.\n" +
                 "  ?tc dwc:rank ?rank .\n" +
@@ -45,7 +44,6 @@ export default class TaxaManager {
                 "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}\n" +
                 "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . \n" +
                 "  ?definingTreatment dc:creator ?definingTreatmentCreator .}\n" +
-                " }\n" +
                 "} ";
         return this._sparqlEndpoint.getSparqlRDF(query).then(graph => {
             let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"), graph);
