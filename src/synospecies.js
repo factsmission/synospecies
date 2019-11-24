@@ -15,19 +15,14 @@ import TaxonReport from "./TaxonReport.js";
 import Taxomplete from "taxomplete";
 
 
-const sparqlEndpoint = new SparqlEndpoint("https://lindas-data.ch/sparql");
-//let sparqlEndpoint = "https://plazi.factsmission.com/plazi/query";
+const params = new URLSearchParams(window.location.search);
 
+const sparqlEndpoint = new SparqlEndpoint(params.get("endpoint") || "https://lindas-data.ch/sparql");
 const taxaManager = new TaxaManager(sparqlEndpoint);
 const taxonReport = new TaxonReport(taxaManager, document.getElementById('taxon-name'));
 const imageSplash = new ImageSplash(taxaManager, document.getElementById("image-area"));
 const wikidataViewer = new WikidataViewer(document.getElementById("wikidata-area"));
 const vernacularViewer = new VernacularViewer(document.getElementById("vernacular-area"));
-
-
-
-
-
 
 //Search field
 
