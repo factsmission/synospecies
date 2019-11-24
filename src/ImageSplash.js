@@ -2,8 +2,6 @@ export default class ImageSplash {
 
     constructor(taxaManager, element) {
         this._element = element;
-        element.innerHTML = "<div>Taxon images</div>";
-        element.classList.remove("hide");
         this._taxaManager = taxaManager;
         this.addedImages = {};
         this.template = `

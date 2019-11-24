@@ -8,8 +8,6 @@ export default class WikidataViewer {
 
     constructor(element) {
         this._element = element;
-        element.innerHTML = "<div>WIKIDATA</div>";
-        element.classList.remove("hide");
         this._taxonNames = {};
         this._sparqlEndpoint = new SparqlEndpoint("https://query.wikidata.org/sparql");
         this._query = taxonName =>`
