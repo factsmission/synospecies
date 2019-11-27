@@ -28,7 +28,11 @@ export default class TaxaManager {
                 "  ?definingTreatment treat:definesTaxonConcept ?tc .\n" +
                 "  ?definingTreatment dc:creator ?definingTreatmentCreator .\n" +
                 "} WHERE { \n" +
-                "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .\n" +
+                "  { \n" + 
+                "      ?treatment treat:augmentsTaxonConcept ?tc . \n" +
+                "  } UNION { \n" +
+                "    ?treatment treat:definesTaxonConcept ?tc . \n" +
+                "  }\n" +
                 "  ?treatment treat:deprecates <" + oldTaxon + ">.\n" +
                 "  ?tc dwc:rank ?rank .\n" +
                 "  ?tc dwc:phylum ?phylum .\n" +
@@ -58,7 +62,11 @@ export default class TaxaManager {
                 "PREFIX fabio: <http://purl.org/spar/fabio/>\n" +
                 "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
                 "SELECT ?url ?description WHERE {   \n" +
-                "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) <" + taxon + "> .\n" +
+                "  { \n" + 
+                "      ?treatment treat:augmentsTaxonConcept <" + taxon + "> . \n" +
+                "  } UNION { \n" +
+                "    ?treatment treat:definesTaxonConcept <" + taxon + "> . \n" +
+                "  }\n" +
                 "  ?treatment <http://purl.org/spar/cito/cites> ?cites.\n" +
                 "  ?cites rdf:type fabio:Figure. \n" +
                 "  ?cites fabio:hasRepresentation ?url.\n" +
