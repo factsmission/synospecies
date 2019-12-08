@@ -204,6 +204,18 @@ a img {
     column-gap: 0.5em;
 }
 
+#image-area.twocol {
+    -webkit-column-count: 2;
+    -moz-column-count: 2;
+    column-count: 2;
+}
+
+#image-area.threecol {
+    -webkit-column-count: 3;
+    -moz-column-count: 3;
+    column-count: 3;
+}
+
 #image-area figure {
     margin: 0.5em;
     width: 100%;

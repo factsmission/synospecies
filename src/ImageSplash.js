@@ -38,11 +38,18 @@ export default class ImageSplash {
                     this._element.append(this.to_html(image));
                 }
             });
+            if (Object.keys(this.addedImages).length === 1) {
+                this._element.classList.add('twocol')
+            } else if (Object.keys(this.addedImages).length <= 3) {
+                this._element.classList.add('threecol')
+            }
         });
     }
 
     reset() {
         this._element.innerHTML = "";
+        this._element.classList.remove('twocol')
+        this._element.classList.remove('threecol')
         this.addedImages = {};
     };
 }
