@@ -17,7 +17,7 @@ import Taxomplete from "taxomplete";
 
 const params = new URLSearchParams(window.location.search);
 
-const sparqlEndpoint = new SparqlEndpoint(params.get("endpoint") || "https://lindas-data.ch/sparql");
+const sparqlEndpoint = new SparqlEndpoint(params.get("endpoint") || "https://treatment.ld.plazi.org/sparql");
 const taxaManager = new TaxaManager(sparqlEndpoint);
 const taxonReport = new TaxonReport(taxaManager, document.getElementById('taxon-name'));
 const imageSplash = new ImageSplash(taxaManager, document.getElementById("image-area"));
