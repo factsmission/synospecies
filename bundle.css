@@ -111,11 +111,13 @@ table {
     border-collapse: collapse;
 }
 
+table tr th,
 table tr td {
     border-top: 1px solid #dadce0;
     padding: .5rem;
 }
 
+table tr:last-child th,
 table tr:last-child td {
     border-bottom: 1px solid #dadce0;
 }
@@ -236,6 +238,11 @@ a img {
     padding: .5rem 0;
     font-size: .8rem;
     font-family: serif;
+}
+
+.nobold,
+.nobold * {
+    font-weight: normal;
 }
 
 /*# sourceMappingURL=bundle.css.map*/
