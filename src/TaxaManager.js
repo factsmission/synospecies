@@ -23,10 +23,13 @@ export default class TaxaManager {
                 "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n" +
                 "  ?treatment treat:preferedName ?tc.\n" +
                 "  ?treatment dc:creator ?treatmentCreator .\n" +
+                "  ?treatment dc:date ?date . \n" +
                 "  ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n" +
-                "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator ." +
+                "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .\n" +
+                "  ?augmentingTreatment dc:date ?augmentingDate . \n" +
                 "  ?definingTreatment treat:definesTaxonConcept ?tc .\n" +
                 "  ?definingTreatment dc:creator ?definingTreatmentCreator .\n" +
+                "  ?definingTreatment dc:date ?definingDate . \n" +
                 "} WHERE { \n" +
                 "  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .\n" +
                 "  ?treatment treat:deprecates <" + oldTaxon + ">.\n" +
@@ -40,11 +43,17 @@ export default class TaxaManager {
                 "  ?tc dwc:species ?species .\n" +
                 "  ?treatment ?treatmentTaxonRelation ?tc .\n" +
                 "  ?treatment dc:creator ?treatmentCreator .\n" +
-                "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . \n" +
-                "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}\n" +
-                "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . \n" +
-                "  ?definingTreatment dc:creator ?definingTreatmentCreator .}\n" +
-                "} ";
+                "  OPTIONAL { ?treatment treat:publishedIn ?publ .\n" +
+                "    ?publ dc:date ?date . } \n" +
+                "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n" +
+                "    ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .\n" +
+                "    OPTIONAL { ?augmentingTreatment treat:publishedIn ?augmentingPubl .\n" +
+                "      ?augmentingPubl dc:date ?augmentingDate . }} \n" +
+                "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc .\n" +
+                "    ?definingTreatment dc:creator ?definingTreatmentCreator .\n" +
+                "    OPTIONAL { ?definingTreatment treat:publishedIn ?definingPubl .\n" +
+                "      ?definingPubl dc:date ?definingDate . }} \n" +
+                "}";
         return this._sparqlEndpoint.getSparqlRDF(query).then(graph => {
             let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"), graph);
             return tnClass.in($rdf.sym("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
@@ -91,9 +100,11 @@ export default class TaxaManager {
                 "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> .\n" +
                 "  ?tc treat:hasTaxonName ?tn .\n" +
                 "  ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n" +
-                "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator ." +
+                "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .\n" +
+                "  ?augmentingTreatment dc:date ?augmentingDate . \n" +
                 "  ?definingTreatment treat:definesTaxonConcept ?tc .\n" +
                 "  ?definingTreatment dc:creator ?definingTreatmentCreator .\n" +
+                "  ?definingTreatment dc:date ?definingDate . \n" +
                 "} WHERE { \n" +
                 "  ?tc dwc:rank ?rank .\n" +
                 "  ?tc dwc:phylum ?phylum .\n" +
@@ -105,10 +116,14 @@ export default class TaxaManager {
                 "  ?tc dwc:species \"" + species + "\" .\n" +
                 "  ?tc a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> . \n" +
                 "  OPTIONAL { ?tc treat:hasTaxonName ?tn . }\n" +
-                "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . \n" +
-                "  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}\n" +
-                "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . \n" +
-                "  ?definingTreatment dc:creator ?definingTreatmentCreator .}\n" +
+                "  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc .\n" +
+                "    ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .\n" +
+                "    OPTIONAL { ?augmentingTreatment treat:publishedIn ?augmentingPubl .\n" +
+                "      ?augmentingPubl dc:date ?augmentingDate . }} \n" +
+                "  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc .\n" +
+                "    ?definingTreatment dc:creator ?definingTreatmentCreator .\n" +
+                "    OPTIONAL { ?definingTreatment treat:publishedIn ?definingPubl .\n" +
+                "      ?definingPubl dc:date ?definingDate . }} \n" +
                 "}";
         return this._sparqlEndpoint.getSparqlRDF(query).then(graph => {
             let tnClass = GraphNode($rdf.sym("http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept"), graph);

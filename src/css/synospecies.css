@@ -217,7 +217,7 @@ a img {
 }
 
 #image-area figure {
-    margin: 0.5em;
+    margin: 0.5rem;
     width: 100%;
 }
 
@@ -234,6 +234,7 @@ a img {
 #image-area figure figcaption {
     /*background-color: #7d7d7d54;
     padding: .5em;*/
+    padding: .5rem 0;
     font-size: .8rem;
     font-family: serif;
 }

@@ -61,6 +61,7 @@ export default class TaxonReport {
                         return gn.each(t => t)
                                 .then(ts => Promise.all(ts.map(async t => " <a class=\"truncate\" href=\"" + t.value + "\">" +
                                                 (await t.out(dc("creator")).each(c => c.value)).join("; ") +
+                                                (await t.out(dc("date")).each(d => " " + d.value)).join("/") +
                                                 "</a>")).then(links => links.join(" - ")));
                     }
     

@@ -38,9 +38,9 @@ export default class ImageSplash {
                     this._element.append(this.to_html(image));
                 }
             });
-            if (Object.keys(this.addedImages).length === 1) {
+            if (Object.keys(this.addedImages).length <= 2) {
                 this._element.classList.add('twocol')
-            } else if (Object.keys(this.addedImages).length <= 3) {
+            } else if (Object.keys(this.addedImages).length === 3) {
                 this._element.classList.add('threecol')
             }
         });
