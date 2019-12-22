@@ -76,12 +76,25 @@ export default class TaxonReport {
                 let result = document.createElement("li");
 
                 result.innerHTML += "<strong>" + getFormattedName(tn.value) + "</strong>";
-                result.innerHTML +=
-                    preferedNameBy + "<br/>\n" +
+                result.innerHTML += preferedNameBy;
+                result.innerHTML += `<table class="nobold card">
+    <tr><th>Kingdom</th><th>Phylum</th><th>Class</th><th>Order</th><th>Family</th><th>Genus</th><th>Species</th></tr>
+    <tr>
+        <td>${tn.out(dwc("kingdom")).value}</td>
+        <td>${tn.out(dwc("phylum")).value}</td>
+        <td>${tn.out(dwc("class")).value}</td>
+        <td>${tn.out(dwc("order")).value}</td>
+        <td>${family}</th>
+        <td>${tn.out(dwc("genus")).value}</td>
+        <td>${tn.out(dwc("species")).value}</td>
+    </tr>
+</table>`
+                /*result.innerHTML += "<br/>\n" +
                     "Kingdom: " + tn.out(dwc("kingdom")).value + " - Phylum: " + tn.out(dwc("phylum")).value +
                     " - Class: " + tn.out(dwc("class")).value + " - Order: " + tn.out(dwc("order")).value +
                     " - Family: " + family + " - Genus: " + tn.out(dwc("genus")).value +
-                    " - Species: " + tn.out(dwc("species")).value + "<br/>" + definingTreatment + "<br/>" + augmentingTreatment;
+                    " - Species: " + tn.out(dwc("species")).value + "<br/>"*/
+                    result.innerHTML += "<br/>" + definingTreatment + "<br/>" + augmentingTreatment;
                 if (!names[tn.value]) {
                     let deprecationsArea = document.createElement("div");
                     deprecationsArea.classList.add("deprecations");
@@ -95,6 +108,7 @@ export default class TaxonReport {
                         })
                     });
                 }
+
                 self.taxonRendered(tn.value);
                 return result;
             }))).then(listItems => {
