@@ -53,8 +53,8 @@ export default class TaxonReport {
                 return y1 - y2;
             }).map(async tn => {
 
-                //for unclear reasons some taxa have more than one family
-                let family = await tn.out(dwc("family")).each(f => f.value).then(fs => fs.join(", "));
+                //for unclear reasons some taxa have more than one order or family (maybe other ranks, so generalized)
+                const ranks = await Promise.all(["kingdom", "phylum", "class", "order", "family", "genus", "species"].map(async r => await tn.out(dwc(r)).each(f => f.value).then(fs => fs.join(", ")))).then(rs => "<tr><td>" + rs.join("</td><td>") + "</td></tr>")
 
                 function linkToTreatments(gn) {
                     return gn.each(t => t)
@@ -77,24 +77,9 @@ export default class TaxonReport {
 
                 result.innerHTML += "<strong>" + getFormattedName(tn.value) + "</strong>";
                 result.innerHTML += preferedNameBy;
-                result.innerHTML += `<table class="nobold card">
-    <tr><th>Kingdom</th><th>Phylum</th><th>Class</th><th>Order</th><th>Family</th><th>Genus</th><th>Species</th></tr>
-    <tr>
-        <td>${tn.out(dwc("kingdom")).value}</td>
-        <td>${tn.out(dwc("phylum")).value}</td>
-        <td>${tn.out(dwc("class")).value}</td>
-        <td>${tn.out(dwc("order")).value}</td>
-        <td>${family}</th>
-        <td>${tn.out(dwc("genus")).value}</td>
-        <td>${tn.out(dwc("species")).value}</td>
-    </tr>
-</table>`
-                /*result.innerHTML += "<br/>\n" +
-                    "Kingdom: " + tn.out(dwc("kingdom")).value + " - Phylum: " + tn.out(dwc("phylum")).value +
-                    " - Class: " + tn.out(dwc("class")).value + " - Order: " + tn.out(dwc("order")).value +
-                    " - Family: " + family + " - Genus: " + tn.out(dwc("genus")).value +
-                    " - Species: " + tn.out(dwc("species")).value + "<br/>"*/
-                    result.innerHTML += "<br/>" + definingTreatment + "<br/>" + augmentingTreatment;
+                result.innerHTML += '<table class="nobold card"><tr><th>Kingdom</th><th>Phylum</th><th>Class</th><th>Order</th><th>Family</th><th>Genus</th><th>Species</th></tr>' +
+                    ranks + '</table>'
+                result.innerHTML += "<br/>" + definingTreatment + "<br/>" + augmentingTreatment;
                 if (!names[tn.value]) {
                     let deprecationsArea = document.createElement("div");
                     deprecationsArea.classList.add("deprecations");
