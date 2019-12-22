@@ -123,6 +123,6 @@ export default class TaxonReport {
         this._element.innerHTML = "";
     };
 
-    relatedTaxonEncountered(genus, species) { /* TODO */ }
-    taxonRendered(taxonConcept) { /* TODO */ }
+    relatedTaxonEncountered(genus, species) { /* Can be overwritten externally to do something with related taxa found */ }
+    taxonRendered(taxonConcept) { /* Can be overwritten externally to do something with and for each rendered taxon */ }
 }
