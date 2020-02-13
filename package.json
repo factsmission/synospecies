@@ -1,22 +1,30 @@
 {
   "name": "synospecies",
   "version": "0.9.0",
+  "private": true,
   "description": "Search for species using the Plazi RDF data and find the currently accepted scientific name.",
-  "license": "MIT",
-  "repository": "git@github.com:factsmission/synospecies.git",
-  "author": "Reto Gmür <reto@factsmission.com>",
+  "author": {
+    "name": "Reto Gmür",
+    "email": "reto@factsmission.com"
+  },
   "scripts": {
-    "build": "webpack -p",
+    "serve": "./node_modules/\\@vue/cli-service/bin/vue-cli-service.js serve",
+    "build": "./node_modules/\\@vue/cli-service/bin/vue-cli-service.js build",
+    "lint": "./node_modules/\\@vue/cli-service/bin/vue-cli-service.js lint",
     "start": "webpack-dev-server --hot --inline --content-base src --host 0.0.0.0",
     "test": "echo \"There are no tests yet.\""
   },
   "dependencies": {
     "@babel/runtime": "^7.6.0",
     "@retog/sparql-client": "^1.0.2",
+    "core-js": "^3.6.4",
     "ext-rdflib": "^0.5.5",
     "mustache": "^3.0.3",
     "rdfgraphnode-rdfext": "^1.6.1",
-    "taxomplete": "^1.2.0"
+    "taxomplete": "^1.2.0",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.2",
+    "vue-property-decorator": "^8.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.0",
@@ -26,15 +34,44 @@
     "@babel/plugin-transform-runtime": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
     "@babel/register": "^7.6.0",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "@vue/cli-plugin-babel": "~4.2.0",
+    "@vue/cli-plugin-eslint": "~4.2.0",
+    "@vue/cli-plugin-typescript": "~4.2.0",
+    "@vue/cli-service": "~4.2.0",
+    "@vue/eslint-config-standard": "^5.1.0",
+    "@vue/eslint-config-typescript": "^5.0.1",
     "babel-loader": "^8.0.6",
     "babel-plugin-add-module-exports": "^1.0.2",
     "css-loader": "^3.2.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^6.1.2",
     "file-loader": "^4.2.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.8.0",
+    "sass": "^1.25.0",
+    "sass-loader": "^8.0.2",
+    "typescript": "~3.7.5",
+    "vue-template-compiler": "^2.6.11",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8",
     "webpack-dev-server": "^3.8.0"
+  },
+  "_id": "synospecies@0.9.0",
+  "bugs": {
+    "url": "https://github.com/factsmission/synospecies/issues"
+  },
+  "homepage": "https://github.com/factsmission/synospecies#readme",
+  "license": "MIT",
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/factsmission/synospecies.git"
   }
 }
