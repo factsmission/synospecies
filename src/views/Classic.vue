@@ -32,48 +32,47 @@ import Taxomplete from 'taxomplete'
 
 let taxomplete;
 
-window.addEventListener("load", _ => {
-  const params = new URLSearchParams(window.location.search)
-
-  const sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || 'https://treatment.ld.plazi.org/sparql')
-  const taxaManager = new TaxaManager(sparqlEndpoint)
-  const taxonReport = new TaxonReport(taxaManager, document.getElementById('taxon-name'))
-  const imageSplash = new ImageSplash(taxaManager, document.getElementById('image-area'))
-  const wikidataViewer = new WikidataViewer(document.getElementById('wikidata-area'))
-  const vernacularViewer = new VernacularViewer(document.getElementById('vernacular-area'))
-
-  // Search field
-  const input = document.getElementById('combinedfield')
-  taxomplete = new Taxomplete(input, sparqlEndpoint)
-  taxomplete.action = function (value) {
-    wikidataViewer.reset()
-    vernacularViewer.reset()
-    imageSplash.reset()
-    taxonReport.reset()
-    const genus = value.substring(0, value.indexOf(' '))
-    const species = value.substr(value.indexOf(' ') + 1)
-    taxonReport.relatedTaxonEncountered = (genus, species) => {
-      wikidataViewer.addTaxon(genus + ' ' + species)
-      vernacularViewer.addTaxon(genus + ' ' + species)
-    }
-    taxonReport.taxonRendered = (taxonConcept) => {
-      imageSplash.appendImages(taxonConcept)
-    }
-    taxonReport.setTaxon(genus, species)
-    wikidataViewer.addTaxon(genus + ' ' + species)
-    vernacularViewer.addTaxon(genus + ' ' + species)
-  }
-
-  if (!input.value && window.location.hash) {
-    input.value = window.location.hash.substring(1).replace('+', ' ')
-    taxomplete.lookup()
-  }
-})
-
 @Component
 export default class Classic extends Vue {
   onClick () {
     taxomplete.lookup()
+  }
+  mounted () {
+    const params = new URLSearchParams(window.location.search)
+
+    const sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || 'https://treatment.ld.plazi.org/sparql')
+    const taxaManager = new TaxaManager(sparqlEndpoint)
+    const taxonReport = new TaxonReport(taxaManager, document.getElementById('taxon-name'))
+    const imageSplash = new ImageSplash(taxaManager, document.getElementById('image-area'))
+    const wikidataViewer = new WikidataViewer(document.getElementById('wikidata-area'))
+    const vernacularViewer = new VernacularViewer(document.getElementById('vernacular-area'))
+
+    // Search field
+    const input = document.getElementById('combinedfield')
+    taxomplete = new Taxomplete(input, sparqlEndpoint)
+    taxomplete.action = function (value) {
+      wikidataViewer.reset()
+      vernacularViewer.reset()
+      imageSplash.reset()
+      taxonReport.reset()
+      const genus = value.substring(0, value.indexOf(' '))
+      const species = value.substr(value.indexOf(' ') + 1)
+      taxonReport.relatedTaxonEncountered = (genus, species) => {
+        wikidataViewer.addTaxon(genus + ' ' + species)
+        vernacularViewer.addTaxon(genus + ' ' + species)
+      }
+      taxonReport.taxonRendered = (taxonConcept) => {
+        imageSplash.appendImages(taxonConcept)
+      }
+      taxonReport.setTaxon(genus, species)
+      wikidataViewer.addTaxon(genus + ' ' + species)
+      vernacularViewer.addTaxon(genus + ' ' + species)
+    }
+
+    if (!input.value && window.location.hash) {
+      input.value = window.location.hash.substring(1).replace('+', ' ')
+      taxomplete.lookup()
+    }
   }
 }
 </script>
