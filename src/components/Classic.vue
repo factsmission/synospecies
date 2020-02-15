@@ -1,3 +1,21 @@
+<template>
+<div>
+  <h1>SynoSpecies</h1>
+  <form id="search-form">
+    <span>Input Genus and species here:</span>
+    <input type="text" id="combinedfield" placeholder="Sadayoshia acroporae" />
+    <button @click.prevent="onClick" id="lookup">Look up</button>
+  </form>
+  <hr />
+  <div class="section" id="taxon-name"></div>
+  <div class="section" id="image-area"></div>
+  <div class="section" id="vernacular-area"></div>
+  <div class="section" id="wikidata-area"></div>
+</div>
+</template>
+
+<script lang="js">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 /* eslint-disable */
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
@@ -5,12 +23,14 @@ import Mustache from 'mustache'
 
 import SparqlEndpoint from '@retog/sparql-client'
 
-import WikidataViewer from './WikidataViewer.js'
-import VernacularViewer from './VernacularViewer.js'
-import ImageSplash from './ImageSplash.js'
-import TaxaManager from './TaxaManager.js'
-import TaxonReport from './TaxonReport.js'
+import WikidataViewer from '@/WikidataViewer.js'
+import VernacularViewer from '@/VernacularViewer.js'
+import ImageSplash from '@/ImageSplash.js'
+import TaxaManager from '@/TaxaManager.js'
+import TaxonReport from '@/TaxonReport.js'
 import Taxomplete from 'taxomplete'
+
+let taxomplete;
 
 window.addEventListener("load", _ => {
   const params = new URLSearchParams(window.location.search)
@@ -24,7 +44,7 @@ window.addEventListener("load", _ => {
 
   // Search field
   const input = document.getElementById('combinedfield')
-  const taxomplete = new Taxomplete(input, sparqlEndpoint)
+  taxomplete = new Taxomplete(input, sparqlEndpoint)
   taxomplete.action = function (value) {
     wikidataViewer.reset()
     vernacularViewer.reset()
@@ -43,14 +63,21 @@ window.addEventListener("load", _ => {
     wikidataViewer.addTaxon(genus + ' ' + species)
     vernacularViewer.addTaxon(genus + ' ' + species)
   }
-  document.getElementById('lookup').addEventListener('click', e => {
-    e.preventDefault()
-    taxomplete.lookup()
-    return false
-  })
 
   if (!input.value && window.location.hash) {
     input.value = window.location.hash.substring(1).replace('+', ' ')
     taxomplete.lookup()
   }
 })
+
+@Component
+export default class Classic extends Vue {
+  onClick () {
+    taxomplete.lookup()
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>

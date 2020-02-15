@@ -17,17 +17,7 @@
     </header>
 
     <main class="container">
-      <h1>SynoSpecies</h1>
-      <form id="search-form">
-        <span>Input Genus and species here:</span>
-        <input type="text" id="combinedfield" placeholder="Sadayoshia acroporae" />
-        <button id="lookup">Look up</button>
-      </form>
-      <hr />
-      <div class="section" id="taxon-name"></div>
-      <div class="section" id="image-area"></div>
-      <div class="section" id="vernacular-area"></div>
-      <div class="section" id="wikidata-area"></div>
+      <classic />
     </main>
 
     <div class="plazi-footer">
@@ -43,12 +33,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import HelloWorld from './components/HelloWorld.vue'
-import './synospecies'
+import Classic from './components/Classic.vue'
 
 @Component({
   components: {
-    HelloWorld
+    Classic
   }
 })
 export default class App extends Vue {}
@@ -273,29 +262,29 @@ a img {
     -moz-column-count: 3;
     column-count: 3;
   }
-}
 
-#image-area figure {
-  margin: 0.5rem;
-  width: 100%;
-}
+  & img {
+    width: 100% !important;
+    height: auto !important;
+  }
 
-#image-area figure:not(:last-child) {
-  padding-bottom: 0.5em;
-  border-bottom: 1px solid #dadce0;
-}
+  & figure {
+    margin: 0.5rem;
+    width: 100%;
 
-#image-area img {
-  width: 100% !important;
-  height: auto !important;
-}
+    &:not(:last-child) {
+      padding-bottom: 0.5em;
+      border-bottom: 1px solid #dadce0;
+    }
 
-#image-area figure figcaption {
-  /*background-color: #7d7d7d54;
-    padding: .5em;*/
-  padding: 0.5rem 0;
-  font-size: 0.8rem;
-  font-family: serif;
+    & figcaption {
+      /*background-color: #7d7d7d54;
+        padding: .5em;*/
+      padding: 0.5rem 0;
+      font-size: 0.8rem;
+      font-family: serif;
+    }
+  }
 }
 
 .nobold,
