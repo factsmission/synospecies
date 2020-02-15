@@ -17,7 +17,11 @@
     </header>
 
     <main class="container">
-      <classic />
+      <div id="nav">
+        <router-link to="/">Home</router-link> |
+        <router-link to="/advanced">Advanced</router-link>
+      </div>
+      <router-view/>
     </main>
 
     <div class="plazi-footer">
@@ -33,7 +37,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import Classic from './components/Classic.vue'
+import Classic from '@/views/Classic.vue'
 
 @Component({
   components: {

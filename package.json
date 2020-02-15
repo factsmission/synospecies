@@ -17,6 +17,10 @@
   "dependencies": {
     "@babel/runtime": "^7.6.0",
     "@retog/sparql-client": "^1.0.2",
+    "@triply/yasqe": "^4.0.105",
+    "@triply/yasr": "^4.0.105",
+    "@types/codemirror": "0.0.85",
+    "@types/superagent": "^4.1.7",
     "core-js": "^3.6.4",
     "ext-rdflib": "^0.5.5",
     "mustache": "^3.0.3",
@@ -24,7 +28,8 @@
     "taxomplete": "^1.2.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.2",
-    "vue-property-decorator": "^8.3.0"
+    "vue-property-decorator": "^8.3.0",
+    "vue-router": "^3.1.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.0",
