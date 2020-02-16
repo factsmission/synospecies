@@ -17,16 +17,10 @@ import { endpoint } from '@/config'
 @Component
 export default class QueryEditor extends Vue {
   @Prop() private query!: string;
+
   mounted () {
     const queryElement: HTMLElement = this.$el.getElementsByClassName('query')[0] as HTMLElement
     const yasqe = new YASQE(queryElement, {
-      createShortLink: function (yasqe: any) {
-        const shareLink = YASQE.createShareLink('https://yasgui.triply.cc/')
-        // eslint-disable-next-line
-          console.log("shareLink", shareLink);
-        shareLink.endpoint = yasqe.options.sparql.endpoint
-        return shareLink
-      },
       requestConfig: {
         showQueryButton: true,
         endpoint
@@ -56,7 +50,22 @@ export default class QueryEditor extends Vue {
       (instance: YASQE, req: superagent.SuperAgentRequest, duration: number) => {
         yasr.setResponse(req)
       })
-    yasqe.setValue(this.query)
+    if (this.query) {
+      yasqe.setValue(this.query)
+    } else {
+      // yasqe.setValue(this.$slots.default[0].text)
+
+      const defaultSlot = this.$slots!.default![0]
+      // eslint-disable-next-line
+      console.log("ds", defaultSlot.elm!.textContent)
+      yasqe.setValue(defaultSlot.elm!.textContent)
+      // eslint-disable-next-line
+      // console.log("text", this.$slots.default[0].elm)
+      // eslint-disable-next-line
+      // console.log("tc", this.$slots.default[0].elm.textContent)
+      // eslint-disable-next-line
+      // console.log("fcd", this.$slots.default[0].elm.firstChild.data)
+    }
     yasqe.addPrefixes({ rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#' })
   }
 }

@@ -1,9 +1,19 @@
-<template>
+<!-- eslint-disable -->
+<template dir>
   <div class="home">
-    <img alt="Plazi logo" src="../assets/logo.png">
-    <query-editor query="SELECT * WHERE {?s ?p ?o} LIMIT 10"/>
-    <hr>
-    <query-editor query="CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o} LIMIT 10"/>
+  <query-editor query="SELECT ?s ?p ?o WHERE {?s ?p ?o} LIMIT 10"/>
+  <hr>
+  <query-editor query="CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o} LIMIT 10"/>
+  <hr>
+  <query-editor>
+    <pre>
+PREFIX treat: &lt;http://plazi.org/vocab/treatment#>
+SELECT DISTINCT * WHERE {
+  &lt;http://taxon-concept.plazi.org/id/Animalia/Munida_Man_1888> ((^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept))|((^treat:augmentsTaxonConcept|^treat:definesTaxonConcept)/treat:deprecates))* ?tc .
+}
+    </pre>
+  </query-editor>
+
   </div>
 </template>
 
@@ -17,3 +27,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+ p {
+   white-space: pre;
+   background: red;
+ }
+</style>
