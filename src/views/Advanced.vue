@@ -65,13 +65,14 @@ CONSTRUCT {?s ?p ?o} { GRAPH &lt;https://raw.githubusercontent.com/plazi/treatme
 PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dwc: &lt;http://rs.tdwg.org/dwc/terms/>
 PREFIX dwcfp: &lt;http://filteredpush.org/ontologies/oa/dwcFP#>
-SELECT DISTINCT ?graph ?genus WHERE { GRAPH ?graph {
-?sub dwc:genus ?genus .
-?sub dwc:species ?species .
-?sub rdf:type dwcfp:TaxonName.
-  FILTER regex(?genus, "[^a-zA-Z0-9s|]")
+SELECT DISTINCT ?graph ?genus WHERE { 
+  GRAPH ?graph {
+    ?sub dwc:genus ?genus .
+    ?sub dwc:species ?species .
+    ?sub rdf:type dwcfp:TaxonName.
+    FILTER regex(?genus, "[^a-zA-Z0-9s|]")
   }
-  } ORDER BY UCASE(?genus) LIMIT 100
+} ORDER BY UCASE(?genus) LIMIT 100
     </pre>
   </query-editor>
 

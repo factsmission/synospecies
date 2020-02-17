@@ -48,27 +48,27 @@ export default class QueryEditor extends Vue {
     })
     yasqe.on('queryResponse',
       (instance: YASQE, req: superagent.SuperAgentRequest, duration: number) => {
-        yasr.setResponse(req)
+        yasr.setResponse(req, duration)
       })
     if (this.query) {
       yasqe.setValue(this.query)
     } else {
       // yasqe.setValue(this.$slots.default[0].text)
 
-      const defaultSlot = this.$slots!.default![0]
-      // eslint-disable-next-line
-      console.log("ds", defaultSlot)
-      // eslint-disable-next-line
-      console.log("dstc", defaultSlot.children![0]!.text)
-      // eslint-disable-next-line
-      //console.log("dsetc", defaultSlot.elm!.textContent)
-      yasqe.setValue(defaultSlot.children![0]!.text)
-      // eslint-disable-next-line
-      // console.log("text", this.$slots.default[0].elm)
-      // eslint-disable-next-line
-      // console.log("tc", this.$slots.default[0].elm.textContent)
-      // eslint-disable-next-line
-      // console.log("fcd", this.$slots.default[0].elm.firstChild.data)
+      if (this.$slots.default) {
+        const defaultSlot = this.$slots.default[0]
+        // eslint-disable-next-line
+        //console.log("ds", defaultSlot)
+        // eslint-disable-next-line
+        //console.log("dstc", defaultSlot.children![0]!.text)
+        // eslint-disable-next-line
+        //console.log("dsetc", defaultSlot.elm!.textContent)
+        if (defaultSlot.children) {
+          yasqe.setValue(defaultSlot.children[0].text)
+        } else {
+          yasqe.setValue(defaultSlot.text)
+        }
+      }
     }
     yasqe.addPrefixes({ rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#' })
   }
