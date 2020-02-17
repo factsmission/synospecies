@@ -57,8 +57,12 @@ export default class QueryEditor extends Vue {
 
       const defaultSlot = this.$slots!.default![0]
       // eslint-disable-next-line
-      console.log("ds", defaultSlot.elm!.textContent)
-      yasqe.setValue(defaultSlot.elm!.textContent)
+      console.log("ds", defaultSlot)
+      // eslint-disable-next-line
+      console.log("dstc", defaultSlot.children![0]!.text)
+      // eslint-disable-next-line
+      //console.log("dsetc", defaultSlot.elm!.textContent)
+      yasqe.setValue(defaultSlot.children![0]!.text)
       // eslint-disable-next-line
       // console.log("text", this.$slots.default[0].elm)
       // eslint-disable-next-line
