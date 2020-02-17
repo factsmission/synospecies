@@ -75,6 +75,38 @@ SELECT DISTINCT ?graph ?genus WHERE {
 } ORDER BY UCASE(?genus) LIMIT 100
     </pre>
   </query-editor>
+  <h2>Treatments by genus</h2>
+  <query-editor>
+    <pre>
+PREFIX dwc: &lt;http://rs.tdwg.org/dwc/terms/>
+PREFIX treat: &lt;http://plazi.org/vocab/treatment#>
+PREFIX dc: &lt;http://purl.org/dc/elements/1.1/>
+SELECT * WHERE { 
+  ?tc dwc:rank ?rank .
+  ?tc dwc:phylum ?phylum .
+  ?tc dwc:kingdom ?kingdom .
+  ?tc dwc:class ?class .
+  ?tc dwc:family ?family .
+  ?tc dwc:order ?oder .
+  ?tc dwc:genus "Lestes" .
+  ?tc a &lt;http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept> . 
+  OPTIONAL { ?tc treat:hasTaxonName ?tn . }
+  OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc . 
+  ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .}
+  OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc . 
+  ?definingTreatment dc:creator ?definingTreatmentCreator .}
+}
+    </pre>
+  </query-editor>
+  <h2>Count quads</h2>
+  <query-editor>
+    SELECT (COUNT(*) AS ?quads) WHERE { GRAPH ?g { ?s ?p ?o } }
+  </query-editor>
+
+  <h2>Count triples</h2>
+  <query-editor>
+    SELECT (COUNT(DISTINCT *) AS ?triples) WHERE {?s ?p ?o } 
+  </query-editor>
 
   </div>
 </template>
