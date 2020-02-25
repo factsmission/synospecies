@@ -23,12 +23,14 @@ export default class QueryEditor extends Vue {
     const yasqe = new YASQE(queryElement, {
       requestConfig: {
         showQueryButton: true,
+        persistencyExpire: 0,
         endpoint
       }
     })
     const resultElement: HTMLElement = this.$el.getElementsByClassName('result')[0] as HTMLElement
     // eslint-disable-next-line
         console.log("intitailizing yasr on", resultElement);
+    resultElement.id = Math.random().toString(36).substring(7)
     const yasr = new YASR(resultElement, {
       pluginOrder: ['table', 'response'],
       prefixes: {
@@ -44,7 +46,8 @@ export default class QueryEditor extends Vue {
         publication: 'http://publication.plazi.org/id/',
         doi: 'http://dx.doi.org/',
         fabio: 'http://purl.org/spar/fabio/'
-      }
+      },
+      persistencyExpire: 0
     })
     yasqe.on('queryResponse',
       (instance: YASQE, req: superagent.SuperAgentRequest, duration: number) => {
