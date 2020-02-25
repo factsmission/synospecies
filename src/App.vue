@@ -4,7 +4,7 @@
       <div class="container">
         <a href="http://plazi.org/">
           <img
-            src="http://plazi.org/fileadmin/templates/img/logo.png"
+            src="./assets/logo.png"
             alt="Plazi - take care of freedom"
             width="200"
             height="50"
