@@ -20,16 +20,22 @@ export default class QueryEditor extends Vue {
 
   mounted () {
     const queryElement: HTMLElement = this.$el.getElementsByClassName('query')[0] as HTMLElement
+    const persistenceId = Math.random().toString(36).substring(7)
     const yasqe = new YASQE(queryElement, {
       requestConfig: {
         showQueryButton: true,
-        persistencyExpire: 0,
+        persistenceId,
         endpoint
       }
     })
     const resultElement: HTMLElement = this.$el.getElementsByClassName('result')[0] as HTMLElement
+    /* if (!global.yasrcount) {
+      global.yasrcount = 0;
+    }
     // eslint-disable-next-line
-        console.log("intitailizing yasr on", resultElement);
+    console.log("intitailizing yasr on", resultElement);
+    // eslint-disable-next-line
+    console.log("yasr-count", global.yasrcount++); */
     resultElement.id = Math.random().toString(36).substring(7)
     const yasr = new YASR(resultElement, {
       pluginOrder: ['table', 'response'],
@@ -47,7 +53,7 @@ export default class QueryEditor extends Vue {
         doi: 'http://dx.doi.org/',
         fabio: 'http://purl.org/spar/fabio/'
       },
-      persistencyExpire: 0
+      persistenceId
     })
     yasqe.on('queryResponse',
       (instance: YASQE, req: superagent.SuperAgentRequest, duration: number) => {
