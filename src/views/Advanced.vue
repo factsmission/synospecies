@@ -1,11 +1,16 @@
 <!-- eslint-disable -->
 <template dir>
   <div class="home">
+  <h2>Retrrieving triples</h2>
+  This query retrieves 10 arbitrary triples from the SPARQL endpoint.
   <query-editor query="SELECT ?s ?p ?o WHERE {?s ?p ?o} LIMIT 10"/>
   <hr>
-  <query-editor query="CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o} LIMIT 10"/>
-  <hr>
   <h2>All synonyms</h2>
+  This query returns all synonyms of 
+  <code>&lt;http://taxon-concept.plazi.org/id/Animalia/Munida_Man_1888></code>.
+  It uses a transitive property path to get the taxa (Taxon-Concepts) 
+  augmented or defined by a treatmented that deprecates this taxon or that are
+  deprecated by a treatement that defines or deprecates this taxon.
   <query-editor>
     <pre>
 PREFIX treat: &lt;http://plazi.org/vocab/treatment#>
@@ -14,34 +19,9 @@ SELECT DISTINCT * WHERE {
 }
     </pre>
   </query-editor>
-  <hr>
-  <h2>Union</h2>
-  This query is faster than the property-paths verison on Fuseki but slower with allegro 6
-    <query-editor>
-    <pre>
-PREFIX franzOption_memoryLimit: &lt;franz:15G> 
-PREFIX treat: &lt;http://plazi.org/vocab/treatment#>
-PREFIX dwc: &lt;http://rs.tdwg.org/dwc/terms/>
-PREFIX dc: &lt;http://purl.org/dc/elements/1.1/>
-SELECT * WHERE { 
-  ?treatment treat:deprecates &lt;http://taxon-concept.plazi.org/id/Animalia/Sadayoshia_miyakei_Baba_1969>.
-  { 
-    ?treatment treat:augmentsTaxonConcept ?tc . 
-  } UNION { 
-    ?treatment treat:definesTaxonConcept ?tc . 
-  }
-  ?tc dwc:kingdom ?kingdom .
-  ?tc dwc:class ?class .
-  ?tc dwc:family ?family .
-  ?tc dwc:order ?oder .
-  ?tc dwc:genus ?genus .
-  ?treatment ?treatmentTaxonRelation ?tc .
-
-} 
-    </pre>
-  </query-editor>
     <hr>
   <h2>Largest graphs</h2>
+  This query returns the 10 largest graphs on the SPARQL endpoint.
   <query-editor>
     <pre>
 SELECT DISTINCT ?g (COUNT(?sub) AS ?size) WHERE {
@@ -53,6 +33,7 @@ LIMIT 10
   </query-editor>
     <hr>
   <h2>Single graph</h2>
+  This query returns the triples of a single graphs.
   <query-editor>
     <pre>
 CONSTRUCT {?s ?p ?o} { GRAPH &lt;https://raw.githubusercontent.com/plazi/treatments-rdf/master/8E33E30FFFD9FFCC4AD302B2FFB04209> {?s ?p ?o} }
@@ -60,6 +41,9 @@ CONSTRUCT {?s ?p ?o} { GRAPH &lt;https://raw.githubusercontent.com/plazi/treatme
   </query-editor>
   <hr>
   <h2>Unusual names</h2>
+  This query returns genus with contain a non-alphanumeric character 
+  (note that this includes genus with white-spaces which are not visible in the
+  table-results, you might want to switch to the raw response view).
   <query-editor>
     <pre>
 PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -107,7 +91,32 @@ SELECT * WHERE {
   <query-editor>
     SELECT (COUNT(DISTINCT *) AS ?triples) WHERE {?s ?p ?o } 
   </query-editor>
+  <hr>
+  <h2>Union</h2>
+  This query is faster than the property-paths version on Fuseki but slower with allegro 6
+  <query-editor>
+    <pre>
+PREFIX franzOption_memoryLimit: &lt;franz:15G> 
+PREFIX treat: &lt;http://plazi.org/vocab/treatment#>
+PREFIX dwc: &lt;http://rs.tdwg.org/dwc/terms/>
+PREFIX dc: &lt;http://purl.org/dc/elements/1.1/>
+SELECT * WHERE { 
+  ?treatment treat:deprecates &lt;http://taxon-concept.plazi.org/id/Animalia/Sadayoshia_miyakei_Baba_1969>.
+  { 
+    ?treatment treat:augmentsTaxonConcept ?tc . 
+  } UNION { 
+    ?treatment treat:definesTaxonConcept ?tc . 
+  }
+  ?tc dwc:kingdom ?kingdom .
+  ?tc dwc:class ?class .
+  ?tc dwc:family ?family .
+  ?tc dwc:order ?oder .
+  ?tc dwc:genus ?genus .
+  ?treatment ?treatmentTaxonRelation ?tc .
 
+} 
+    </pre>
+  </query-editor>
   </div>
 </template>
 
