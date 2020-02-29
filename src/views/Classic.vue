@@ -15,7 +15,7 @@
 </template>
 
 <script lang="js">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 /* eslint-disable */
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
@@ -35,6 +35,8 @@ let taxomplete;
 @Component
 export default class Classic extends Vue {
   onClick () {
+    const input = document.getElementById('combinedfield')
+    if (!input.value) input.value = 'Sadayoshia acroporae'
     taxomplete.lookup()
   }
   mounted () {

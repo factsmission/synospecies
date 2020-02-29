@@ -15,12 +15,14 @@
         </a>
       </div>
     </header>
-
-    <main class="container">
-      <div id="nav">
-        <router-link to="/">Home</router-link> |
+    <nav class="plazi-nav" id="nav">
+      <div class="container">
+        <router-link to="/">Home</router-link>
         <router-link to="/advanced">Advanced</router-link>
       </div>
+    </nav>
+
+    <main class="container">
       <router-view/>
     </main>
 
@@ -206,7 +208,6 @@ a:active {
 a img {
   display: block;
 }
-
 .plazi-header {
   flex-shrink: 0;
   min-height: 80px;
@@ -218,6 +219,41 @@ a img {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
   z-index: 1001;
+}
+
+.plazi-nav {
+  flex-shrink: 0;
+  flex-shrink: 0;
+  padding: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid #dddddd;
+  border-radius: 0;
+  z-index: 1001;
+
+  & > .container {
+    display: flex;
+    padding-top: 0;
+    padding-bottom: 0;
+
+    & a {
+      display: block;
+      line-height: 28px;
+      padding: 0 15px;
+      color: inherit;
+
+      &:active,
+      &:hover,
+      &:focus {
+        color: inherit !important;
+        text-decoration: none !important;
+        background-color: #dddddd;
+      }
+    }
+  }
+}
+
+.router-link-active {
+  background-color: #f3f3f3;
 }
 
 .plazi-header > .container {
