@@ -16,8 +16,8 @@
   "dependencies": {
     "@babel/runtime": "^7.6.0",
     "@retog/sparql-client": "^1.0.2",
-    "@triply/yasqe": "^4.0.107",
-    "@triply/yasr": "^4.0.107",
+    "@triply/yasqe": "4.0.105",
+    "@triply/yasr": "4.0.105",
     "@types/codemirror": "0.0.85",
     "@types/superagent": "^4.1.7",
     "core-js": "^3.6.4",
