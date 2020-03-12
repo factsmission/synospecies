@@ -73,9 +73,13 @@ export default class QueryEditor extends Vue {
         // eslint-disable-next-line
         //console.log("dsetc", defaultSlot.elm!.textContent)
         if (defaultSlot.children) {
-          yasqe.setValue(defaultSlot.children[0].text)
+          if (defaultSlot.children[0].text) {
+            yasqe.setValue(defaultSlot.children[0].text)
+          }
         } else {
-          yasqe.setValue(defaultSlot.text)
+          if (defaultSlot.text) {
+            yasqe.setValue(defaultSlot.text)
+          }
         }
       }
     }
