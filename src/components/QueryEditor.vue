@@ -20,7 +20,7 @@ export default class QueryEditor extends Vue {
 
   mounted () {
     const queryElement: HTMLElement = this.$el.getElementsByClassName('query')[0] as HTMLElement
-    const persistenceId = Math.random().toString(36).substring(7)
+    const persistenceId = null
     const yasqe = new YASQE(queryElement, {
       requestConfig: {
         showQueryButton: true,
