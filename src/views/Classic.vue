@@ -14,6 +14,7 @@
     @relatedTaxonEncountered="relatedTaxonEncountered"
     @taxonRendered="taxonRendered"
   />
+  <hr />
   <div class="section" id="image-area"></div>
   <div class="section" id="vernacular-area"></div>
   <div class="section" id="wikidata-area"></div>

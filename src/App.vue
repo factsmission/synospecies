@@ -147,7 +147,8 @@ hr {
   display: none;
 }
 
-.card .card_header {
+.card .card_header,
+.card .card_header>* {
   font-family: Oswald, Arial, Helvetica, sans-serif;
   font-weight: 700;
   margin: 0 0 16px 0;
@@ -166,6 +167,7 @@ table {
 
 table tr th,
 table tr td {
+  text-align: center;
   border-top: 1px solid #dadce0;
   padding: 0.5rem;
 }

@@ -1,8 +1,19 @@
 <template>
 <div class="card">
-  <h2>{{ title }}</h2>
-  {{ preferedNameBy }}
-  <table class="nobold card">
+  <hgroup>
+    <h2 class="card_header">{{ title }}</h2>
+    <h3
+      class="card_header"
+      v-for="p in preferedNameBy"
+      :key="p.url"
+    >
+      Preferred by
+      <a :href="p.url">
+        {{ p.creators.join('; ') }} {{ p.dates.join('/') }}
+      </a>
+    </h3>
+  </hgroup>
+  <table class="nobold">
     <tr>
       <th>Kingdom</th>
       <th>Phylum</th>
@@ -36,7 +47,7 @@
   </p>
   <p v-if="augmentingTreatments">
     Augmenting Treatments:
-    <ul v-if="augmentingTreatments">
+    <ul>
       <li
         v-for="t in augmentingTreatments"
         :key="t.url"
@@ -44,6 +55,17 @@
         <a :href="t.url">
           {{ t.creators.join('; ') }} {{ t.dates.join('/') }}
         </a>
+      </li>
+    </ul>
+  </p>
+  <p v-if="deprecations.length > 0">
+    Deprecated By:
+    <ul>
+      <li
+        v-for="d in deprecations"
+        :key="d.value"
+      >
+        {{ getFormattedName(d.value) }}
       </li>
     </ul>
   </p>
@@ -84,22 +106,21 @@ function truncate () {
   }
 }
 
-function getFormattedName (uri: string) {
-  const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
-  const lastSeparator = nameSection.lastIndexOf('_')
-  return nameSection.substring(0, lastSeparator)
-    .replace(new RegExp('_', 'g'), ' ') +
-    ', ' +
-    nameSection.substring(lastSeparator + 1)
-}
-
 @Component
 export default class TaxonReport extends Vue {
   @Prop() taxon!: {value: string; [key: string]: any}
+  @Prop() taxamanager!: TaxaManager;
 
   title = ''
-  preferedNameBy = ''
   ranks = []
+
+  deprecations = []
+
+  preferedNameBy: {
+    creators: string[];
+    dates: string[];
+    url: string;
+  }[] | null = null
 
   definingTreatments: {
     creators: string[];
@@ -112,6 +133,15 @@ export default class TaxonReport extends Vue {
     dates: string[];
     url: string;
   }[] | null = null
+
+  getFormattedName (uri: string) {
+    const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
+    const lastSeparator = nameSection.lastIndexOf('_')
+    return nameSection.substring(0, lastSeparator)
+      .replace(new RegExp('_', 'g'), ' ') +
+      ', ' +
+      nameSection.substring(lastSeparator + 1)
+  }
 
   async renderTaxon () {
     // for unclear reasons some taxa have more than one order or family (maybe other ranks, thus generalized)
@@ -129,7 +159,7 @@ export default class TaxonReport extends Vue {
     }
 
     const preferedNameByGN = this.taxon.in(treat('preferedName'))
-    this.preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatments(preferedNameByGN) : ''
+    this.preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatments(preferedNameByGN) : null
 
     const definingTreatmentGN = this.taxon.in(treat('definesTaxonConcept'))
     this.definingTreatments = definingTreatmentGN.nodes.length > 0 ? await linkToTreatments(definingTreatmentGN) : null
@@ -137,22 +167,13 @@ export default class TaxonReport extends Vue {
     const augmentingTreatmentGN = this.taxon.in(treat('augmentsTaxonConcept'))
     this.augmentingTreatments = augmentingTreatmentGN.nodes.length > 0 ? await linkToTreatments(augmentingTreatmentGN) : null
 
-    this.title = getFormattedName(this.taxon.value)
+    this.title = this.getFormattedName(this.taxon.value)
     // if (!this.names[this.taxon.value]) {
-    const deprecationsArea = document.createElement('div')
-    deprecationsArea.classList.add('deprecations')
-    deprecationsArea.innerHTML = 'looking for deprecations...'
-    this.$el.appendChild(deprecationsArea)
-    // this.names[this.taxon.value] = true
-    // this.taxamanager.getNewTaxa(this.taxon.value).then((newTaxa: any) => {
-    //   this.renderTns(newTaxa, 'Deprecated by')
-    //   newTaxa.each((newTaxa: any) => {
-    //     this.relatedTaxonEncountered(newTaxa.out(dwc('genus')).value + ' ' + newTaxa.out(dwc('species')).value)
-    //   })
-    // })
-    // }
-
-    this.$emit('taxonRendered', this.taxon.value)
+    this.$emit('taxonRendered', this.taxon)
+    this.taxamanager.getNewTaxa(this.taxon.value).then(async (newTaxa: any) => {
+      this.deprecations = this.deprecations.concat(await newTaxa.each((tn: any) => tn))
+      this.$emit('relatedTaxaEncountered', newTaxa)
+    })
   }
 
   mounted () {
