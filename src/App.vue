@@ -113,11 +113,11 @@ hr {
   margin-top: 20px;
   margin-bottom: 20px;
   border: 0;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #00000033;
 }
 
 .section {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #00000033;
   margin: 12px 0;
 }
 
@@ -137,7 +137,7 @@ hr {
 }
 
 .card {
-  border: 1px solid #dadce0;
+  border: 1px solid #00000033;
   border-radius: 8px;
   padding: 16px;
   margin: 12px;
@@ -168,13 +168,13 @@ table {
 table tr th,
 table tr td {
   text-align: center;
-  border-top: 1px solid #dadce0;
+  border-top: 1px solid #00000033;
   padding: 0.5rem;
 }
 
 table tr:last-child th,
 table tr:last-child td {
-  border-bottom: 1px solid #dadce0;
+  border-bottom: 1px solid #00000033;
 }
 
 table a {
@@ -228,7 +228,7 @@ a img {
   flex-shrink: 0;
   padding: 0;
   margin-bottom: 0;
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid #00000033;
   border-radius: 0;
   z-index: 1001;
 
@@ -316,7 +316,7 @@ a img {
 
     &:not(:last-child) {
       padding-bottom: 0.5em;
-      border-bottom: 1px solid #dadce0;
+      border-bottom: 1px solid #00000033;
     }
 
     & figcaption {

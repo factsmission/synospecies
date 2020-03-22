@@ -1,5 +1,5 @@
 <template>
-<div class="card">
+<div :class="'card' + (deprecates.length > 0 ? ' deprecates ' : ' ') + (deprecations.length > 0 ? 'deprecated' : '')">
   <hgroup>
     <h2 class="card_header">{{ title }}</h2>
     <h3
@@ -69,6 +69,17 @@
       </li>
     </ul>
   </p>
+  <p v-if="deprecates.length > 0">
+    Deprecates:
+    <ul>
+      <li
+        v-for="d in deprecates"
+        :key="d.value"
+      >
+        {{ getFormattedName(d.value) }}
+      </li>
+    </ul>
+  </p>
 </div>
 </template>
 
@@ -115,6 +126,7 @@ export default class TaxonReport extends Vue {
   ranks = []
 
   deprecations = []
+  deprecates = []
 
   preferedNameBy: {
     creators: string[];
@@ -171,8 +183,14 @@ export default class TaxonReport extends Vue {
     // if (!this.names[this.taxon.value]) {
     this.$emit('taxonRendered', this.taxon)
     this.taxamanager.getNewTaxa(this.taxon.value).then(async (newTaxa: any) => {
+      console.log('got newtaxa for ' + this.title, newTaxa)
       this.deprecations = this.deprecations.concat(await newTaxa.each((tn: any) => tn))
       this.$emit('relatedTaxaEncountered', newTaxa)
+    })
+    this.taxamanager.getOldTaxa(this.taxon.value).then(async (oldTaxa: any) => {
+      console.log('got oldtaxa for ' + this.title, oldTaxa)
+      this.deprecates = this.deprecates.concat(await oldTaxa.each((tn: any) => tn))
+      this.$emit('relatedTaxaEncountered', oldTaxa)
     })
   }
 
@@ -181,3 +199,12 @@ export default class TaxonReport extends Vue {
   }
 }
 </script>
+
+<style scoped>
+.deprecated {
+  background-color: #fbe9e7;
+}
+.deprecates {
+  background-color: #e8f5e9;
+}
+</style>
