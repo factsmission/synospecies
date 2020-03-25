@@ -11,6 +11,7 @@
     :genus="current.genus"
     :species="current.species"
     :taxamanager="taxamanager"
+    ref="taxonreports"
     @relatedTaxonEncountered="relatedTaxonEncountered"
     @taxonRendered="taxonRendered"
   />
@@ -89,6 +90,7 @@ export default class Classic extends Vue {
       self.wikidataViewer.reset()
       self.vernacularViewer.reset()
       self.imageSplash.reset()
+      self.$refs.taxonreports.reset()
       self.current.genus = value.substring(0, value.indexOf(' '))
       self.current.species = value.substr(value.indexOf(' ') + 1)
       self.wikidataViewer.addTaxon(self.current.genus + ' ' + self.current.species)

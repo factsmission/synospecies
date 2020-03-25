@@ -7,7 +7,7 @@
     :taxon="taxon"
     :taxamanager="taxamanager"
     @taxonRendered="t => onTaxonRendered(t)"
-    @relatedTaxaEncountered="t => renderTns(t)"
+    @relatedTaxaEncountered="t => renderTns(t).then(cle.log('related rendered',t))"
   />
 </div>
 </template>
@@ -32,20 +32,29 @@ export default class TaxonReports extends Vue {
   @Prop() species!: string;
   @Prop() taxamanager!: TaxaManager;
 
+  cle = console
+
   names: {[key: string]: boolean} = {};
 
   message = ''
   taxa: {[key: string]: any}[] = []
 
-  // @Watch('genus')
+  @Watch('genus')
   @Watch('species')
   onGenusChanged () {
     this.rendering()
   }
 
+  reset () {
+    console.log('reset taxonreports')
+    this.rendering()
+  }
+
   rendering () {
+    console.log('Searching for treatments')
     this.message = 'Searching for treatments'
     this.taxa = []
+    this.names = {}
     this.taxamanager.getTaxonConcepts(this.genus, this.species)
       .then((taxonConcepts: any) => { // eslint-disable-line
         if (taxonConcepts.nodes.length === 0) {
@@ -59,12 +68,15 @@ export default class TaxonReports extends Vue {
   }
 
   async renderTns (tns: any) { // eslint-disable-line
+    console.log('rendering Tns')
+    console.table(tns.nodes)
     this.taxa = this.taxa.concat(( await tns.each((tn: any) => tn) // eslint-disable-line
       .then((tns: any) => Promise.all(tns.sort((tn1: any, tn2: any) => { // eslint-disable-line
         const y1 = tn1.value.substring(tn1.value.length - 4)
         const y2 = tn2.value.substring(tn2.value.length - 4)
         return y1 - y2
       })))).filter((taxon: any) => !this.names[taxon.value]))
+    console.log(this.taxa)
   }
 
   onTaxonRendered (taxon: any) {

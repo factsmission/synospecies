@@ -31,6 +31,7 @@ export default class ImageSplash {
   }
 
   appendImages (taxon) {
+    console.log('Image splashing ' + taxon)
     this._taxaManager.getImages(taxon).then(images => {
       images.forEach(image => {
         if (!this.addedImages[image.url]) {
