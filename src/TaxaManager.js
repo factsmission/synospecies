@@ -87,7 +87,6 @@ export default class TaxaManager {
     } WHERE {
       ?newtreatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) <${newTaxon}> .
       ?newtreatment treat:deprecates ?tc .
-      ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .
       ?tc dwc:rank ?rank .
       ?tc dwc:phylum ?phylum .
       ?tc dwc:kingdom ?kingdom .
@@ -96,18 +95,19 @@ export default class TaxaManager {
       ?tc dwc:order ?oder .
       ?tc dwc:genus ?genus .
       ?tc dwc:species ?species .
-      ?treatment ?treatmentTaxonRelation ?tc .
-      ?treatment dc:creator ?treatmentCreator .
-      OPTIONAL { ?treatment treat:publishedIn ?publ .
-        ?publ dc:date ?date . } 
-      OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc .
-        ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .
-        OPTIONAL { ?augmentingTreatment treat:publishedIn ?augmentingPubl .
-          ?augmentingPubl dc:date ?augmentingDate . }} 
-      OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc .
-        ?definingTreatment dc:creator ?definingTreatmentCreator .
-        OPTIONAL { ?definingTreatment treat:publishedIn ?definingPubl .
-          ?definingPubl dc:date ?definingDate . }} 
+      OPTIONAL { ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?tc .
+        ?treatment ?treatmentTaxonRelation ?tc .
+        ?treatment dc:creator ?treatmentCreator . 
+        OPTIONAL { ?treatment treat:publishedIn ?publ .
+          ?publ dc:date ?date . } 
+        OPTIONAL { ?augmentingTreatment treat:augmentsTaxonConcept ?tc .
+          ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .
+          OPTIONAL { ?augmentingTreatment treat:publishedIn ?augmentingPubl .
+            ?augmentingPubl dc:date ?augmentingDate . }} 
+        OPTIONAL { ?definingTreatment treat:definesTaxonConcept ?tc .
+          ?definingTreatment dc:creator ?definingTreatmentCreator .
+          OPTIONAL { ?definingTreatment treat:publishedIn ?definingPubl .
+            ?definingPubl dc:date ?definingDate . }}}
     }`
     return this._sparqlEndpoint.getSparqlRDF(query).then(graph => {
       const tnClass = GraphNode($rdf.sym('http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept'), graph)
