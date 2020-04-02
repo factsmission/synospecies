@@ -123,7 +123,7 @@ export default class TaxonReport extends Vue {
   @Prop() taxamanager!: TaxaManager;
 
   title = ''
-  ranks = []
+  ranks: any[] | never[] = []
 
   deprecations = []
   deprecates = []
