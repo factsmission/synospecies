@@ -183,12 +183,12 @@ export default class TaxonReport extends Vue {
     // if (!this.names[this.taxon.value]) {
     this.$emit('taxonRendered', this.taxon)
     this.taxamanager.getNewTaxa(this.taxon.value).then(async (newTaxa: any) => {
-      console.log('got newtaxa for ' + this.title, newTaxa)
+      // console.log('got newtaxa for ' + this.title, newTaxa)
       this.deprecations = this.deprecations.concat(await newTaxa.each((tn: any) => tn))
       this.$emit('relatedTaxaEncountered', newTaxa)
     })
     this.taxamanager.getOldTaxa(this.taxon.value).then(async (oldTaxa: any) => {
-      console.log('got oldtaxa for ' + this.title, oldTaxa)
+      // console.log('got oldtaxa for ' + this.title, oldTaxa)
       this.deprecates = this.deprecates.concat(await oldTaxa.each((tn: any) => tn))
       this.$emit('relatedTaxaEncountered', oldTaxa)
     })
