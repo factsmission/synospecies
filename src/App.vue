@@ -15,12 +15,14 @@
         </a>
       </div>
     </header>
-
-    <main class="container">
-      <div id="nav">
-        <router-link to="/">Home</router-link> |
+    <nav class="plazi-nav" id="nav">
+      <div class="container">
+        <router-link to="/">Home</router-link>
         <router-link to="/advanced">Advanced</router-link>
       </div>
+    </nav>
+
+    <main class="container">
       <router-view/>
     </main>
 
@@ -111,11 +113,11 @@ hr {
   margin-top: 20px;
   margin-bottom: 20px;
   border: 0;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #00000033;
 }
 
 .section {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #00000033;
   margin: 12px 0;
 }
 
@@ -135,7 +137,7 @@ hr {
 }
 
 .card {
-  border: 1px solid #dadce0;
+  border: 1px solid #00000033;
   border-radius: 8px;
   padding: 16px;
   margin: 12px;
@@ -145,7 +147,8 @@ hr {
   display: none;
 }
 
-.card .card_header {
+.card .card_header,
+.card .card_header>* {
   font-family: Oswald, Arial, Helvetica, sans-serif;
   font-weight: 700;
   margin: 0 0 16px 0;
@@ -164,13 +167,14 @@ table {
 
 table tr th,
 table tr td {
-  border-top: 1px solid #dadce0;
+  text-align: center;
+  border-top: 1px solid #00000033;
   padding: 0.5rem;
 }
 
 table tr:last-child th,
 table tr:last-child td {
-  border-bottom: 1px solid #dadce0;
+  border-bottom: 1px solid #00000033;
 }
 
 table a {
@@ -206,7 +210,6 @@ a:active {
 a img {
   display: block;
 }
-
 .plazi-header {
   flex-shrink: 0;
   min-height: 80px;
@@ -218,6 +221,41 @@ a img {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
   z-index: 1001;
+}
+
+.plazi-nav {
+  flex-shrink: 0;
+  flex-shrink: 0;
+  padding: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid #00000033;
+  border-radius: 0;
+  z-index: 1001;
+
+  & > .container {
+    display: flex;
+    padding-top: 0;
+    padding-bottom: 0;
+
+    & a {
+      display: block;
+      line-height: 28px;
+      padding: 0 15px;
+      color: inherit;
+
+      &:active,
+      &:hover,
+      &:focus {
+        color: inherit !important;
+        text-decoration: none !important;
+        background-color: #dddddd;
+      }
+    }
+  }
+}
+
+.router-link-active {
+  background-color: #f3f3f3;
 }
 
 .plazi-header > .container {
@@ -278,7 +316,7 @@ a img {
 
     &:not(:last-child) {
       padding-bottom: 0.5em;
-      border-bottom: 1px solid #dadce0;
+      border-bottom: 1px solid #00000033;
     }
 
     & figcaption {

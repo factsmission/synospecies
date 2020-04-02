@@ -7,7 +7,15 @@
     <button @click.prevent="onClick" id="lookup">Look up</button>
   </form>
   <hr />
-  <div class="section" id="taxon-name"></div>
+  <taxon-reports
+    :genus="current.genus"
+    :species="current.species"
+    :taxamanager="taxamanager"
+    ref="taxonreports"
+    @relatedTaxonEncountered="relatedTaxonEncountered"
+    @taxonRendered="taxonRendered"
+  />
+  <hr />
   <div class="section" id="image-area"></div>
   <div class="section" id="vernacular-area"></div>
   <div class="section" id="wikidata-area"></div>
@@ -15,7 +23,7 @@
 </template>
 
 <script lang="js">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 /* eslint-disable */
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
@@ -27,51 +35,71 @@ import WikidataViewer from '@/WikidataViewer.js'
 import VernacularViewer from '@/VernacularViewer.js'
 import ImageSplash from '@/ImageSplash.js'
 import TaxaManager from '@/TaxaManager.js'
-import TaxonReport from '@/TaxonReport.js'
+import TaxonReports from '@/components/TaxonReports'
 import Taxomplete from 'taxomplete'
 
-let taxomplete;
-
-@Component
-export default class Classic extends Vue {
-  onClick () {
-    taxomplete.lookup()
+@Component({
+  components: {
+    TaxonReports
   }
-  mounted () {
+})
+export default class Classic extends Vue {
+  current = {
+    genus: null,
+    species: null
+  };
+
+  taxamanager;
+  sparqlEndpoint;
+  taxomplete;
+  wikidataViewer;
+  vernacularViewer;
+  imageSplash;
+
+  onClick () {
+    const input = document.getElementById('combinedfield')
+    if (!input.value) input.value = 'Sadayoshia acroporae'
+    this.taxomplete.lookup()
+  }
+
+  relatedTaxonEncountered(genus, species) {
+    wikidataViewer.addTaxon(genus + ' ' + species)
+    vernacularViewer.addTaxon(genus + ' ' + species)
+  }
+
+  taxonRendered(taxonConcept) {
+    this.imageSplash.appendImages(taxonConcept)
+  }
+
+  beforeMount () {
     const params = new URLSearchParams(window.location.search)
 
-    const sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || 'https://treatment.ld.plazi.org/sparql')
-    const taxaManager = new TaxaManager(sparqlEndpoint)
-    const taxonReport = new TaxonReport(taxaManager, document.getElementById('taxon-name'))
-    const imageSplash = new ImageSplash(taxaManager, document.getElementById('image-area'))
-    const wikidataViewer = new WikidataViewer(document.getElementById('wikidata-area'))
-    const vernacularViewer = new VernacularViewer(document.getElementById('vernacular-area'))
+    this.sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || 'https://treatment.ld.plazi.org/sparql')
+    this.taxamanager = new TaxaManager(this.sparqlEndpoint)
+  }
 
+  mounted () {
+    const self = this;
+    this.imageSplash = new ImageSplash(this.taxamanager, document.getElementById('image-area'))
+    this.wikidataViewer = new WikidataViewer(document.getElementById('wikidata-area'))
+    this.vernacularViewer = new VernacularViewer(document.getElementById('vernacular-area'))
     // Search field
     const input = document.getElementById('combinedfield')
-    taxomplete = new Taxomplete(input, sparqlEndpoint)
-    taxomplete.action = function (value) {
-      wikidataViewer.reset()
-      vernacularViewer.reset()
-      imageSplash.reset()
-      taxonReport.reset()
-      const genus = value.substring(0, value.indexOf(' '))
-      const species = value.substr(value.indexOf(' ') + 1)
-      taxonReport.relatedTaxonEncountered = (genus, species) => {
-        wikidataViewer.addTaxon(genus + ' ' + species)
-        vernacularViewer.addTaxon(genus + ' ' + species)
-      }
-      taxonReport.taxonRendered = (taxonConcept) => {
-        imageSplash.appendImages(taxonConcept)
-      }
-      taxonReport.setTaxon(genus, species)
-      wikidataViewer.addTaxon(genus + ' ' + species)
-      vernacularViewer.addTaxon(genus + ' ' + species)
+    this.taxomplete = new Taxomplete(input, this.sparqlEndpoint)
+    this.taxomplete.action = function (value) {
+      self.wikidataViewer.reset()
+      self.vernacularViewer.reset()
+      self.imageSplash.reset()
+      self.$refs.taxonreports.reset()
+      self.current.genus = value.substring(0, value.indexOf(' '))
+      self.current.species = value.substr(value.indexOf(' ') + 1)
+      self.wikidataViewer.addTaxon(self.current.genus + ' ' + self.current.species)
+      self.vernacularViewer.addTaxon(self.current.genus + ' ' + self.current.species)
     }
 
     if (!input.value && window.location.hash) {
       input.value = window.location.hash.substring(1).replace('+', ' ')
-      taxomplete.lookup()
+      this.taxomplete.lookup()
     }
   }
 }
