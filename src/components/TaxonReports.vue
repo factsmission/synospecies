@@ -2,6 +2,7 @@
 <div>
   {{ message }}
   <timeline
+    v-if="names.length > 0"
     :names="names"
     :years="years"
   />
@@ -60,36 +61,39 @@ export default class TaxonReports extends Vue {
   message = ''
   taxa: {[key: string]: any}[] = []
 
-  @Watch('genus')
-  @Watch('species')
-  onGenusChanged () {
+  /* @Watch('species')
+  onSpeciesChanged () {
+    console.log('changed!')
     this.rendering()
-  }
+  } */
 
   reset () {
-    this.rendering()
+    console.log('ooh?', this.genus, this.species)
+    Promise.resolve().then(this.rendering) // This apparently fixes a timing issue (this got called before Vue updates genus & species' value
   }
 
   rendering () {
-    this.message = 'Searching for treatments'
-    this.taxa = []
-    this.oldNames = {}
-    this.names = []
-    this.years = []
-    this.taxamanager.getTaxonConcepts(this.genus, this.species)
-      .then((taxonConcepts: any) => { // eslint-disable-line
-        if (taxonConcepts.nodes.length === 0) {
-          this.message = 'No treatment for ' + this.genus + ' ' + this.species + ' found on Plazi.'
-        } else {
-          window.location.hash = this.genus + '+' + this.species
-          this.renderTns(taxonConcepts)
-          this.message = 'Loading Timeline'
-          this.taxa.forEach((taxon) => {
-            this.taxamanager.getSynonymsWithTreatments(taxon.value).then(this.processSynonymsWithTreatments)
-          })
-          this.message = ''
-        }
-      })
+    if (this.genus && this.species) {
+      this.message = 'Searching for treatments...'
+      this.taxa = []
+      this.oldNames = {}
+      this.names = []
+      this.years = []
+      this.taxamanager.getTaxonConcepts(this.genus, this.species)
+        .then(async (taxonConcepts: any) => { // eslint-disable-line
+          if (taxonConcepts.nodes.length === 0) {
+            this.message = 'No treatment for ' + this.genus + ' ' + this.species + ' found on Plazi.'
+          } else {
+            window.location.hash = this.genus + '+' + this.species
+            await this.renderTns(taxonConcepts)
+            this.message = 'Loading Timeline'
+            this.taxa.forEach((taxon) => {
+              this.taxamanager.getSynonymsWithTreatments(taxon.value).then(this.processSynonymsWithTreatments)
+            })
+            this.message = ''
+          }
+        })
+    }
   }
 
   async renderTns (tns: any) { // eslint-disable-line

@@ -90,9 +90,9 @@ export default class Classic extends Vue {
       self.wikidataViewer.reset()
       self.vernacularViewer.reset()
       self.imageSplash.reset()
-      self.$refs.taxonreports.reset()
       self.current.genus = value.substring(0, value.indexOf(' '))
       self.current.species = value.substr(value.indexOf(' ') + 1)
+      self.$refs.taxonreports.reset() // requres new values to be set
       self.wikidataViewer.addTaxon(self.current.genus + ' ' + self.current.species)
       self.vernacularViewer.addTaxon(self.current.genus + ' ' + self.current.species)
     }
