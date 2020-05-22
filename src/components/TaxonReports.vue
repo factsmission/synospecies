@@ -68,7 +68,6 @@ export default class TaxonReports extends Vue {
   } */
 
   reset () {
-    console.log('ooh?', this.genus, this.species)
     Promise.resolve().then(this.rendering) // This apparently fixes a timing issue (this got called before Vue updates genus & species' value
   }
 
