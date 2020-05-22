@@ -8,23 +8,25 @@
     </div>
     <div class="sep">
     </div>
-    <div v-for="year in years" :class="year === 'sep' ? 'sep' : 'year'">
-      <div class="label center" v-if="year !== 'sep'"> {{ year.year }} </div>
-      <div class="treatments" v-if="year !== 'sep'">
-        <div class="treatment" v-for="treatment in year.treatments">
-          <div class="label" v-for="dot in treatment.data">
-            <svg v-if="dot === 'def'" class="green" viewBox="0 0 24 24">
-              <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-            </svg>
-            <svg v-else-if="dot === 'ass'" class="green" viewBox="0 0 24 24">
-              <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
-            </svg>
-            <svg v-else-if="dot === 'aug'" class="blue" viewBox="0 0 24 24">
-              <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-            </svg>
-            <svg v-else-if="dot === 'dpr'" class="red" viewBox="0 0 24 24">
-              <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
-            </svg>
+    <div class="scroll-x">
+      <div v-for="year in years" :class="year === 'sep' ? 'sep' : 'year'">
+        <div class="label center" v-if="year !== 'sep'"> {{ year.year }} </div>
+        <div class="treatments" v-if="year !== 'sep'">
+          <div class="treatment" v-for="treatment in year.treatments">
+            <div class="label" v-for="dot in treatment.data">
+              <svg v-if="dot === 'def'" class="green" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+              </svg>
+              <svg v-else-if="dot === 'ass'" class="green" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+              </svg>
+              <svg v-else-if="dot === 'aug'" class="blue" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+              </svg>
+              <svg v-else-if="dot === 'dpr'" class="red" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -135,7 +137,13 @@ html {
   display: flex;
   flex-direction: row;
   width: 100%;
+}
+
+.scroll-x {
   overflow-x: auto;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
 }
 
 .treatments {
@@ -184,7 +192,7 @@ html {
 .year {
   font-size: 1rem;
   line-height: 1.8rem;
-  margin: 0 .8rem;
+  margin: 0;
   padding: 0 .4rem;
 }
 
