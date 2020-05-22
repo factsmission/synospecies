@@ -36,12 +36,12 @@
     </svg>
     Defining treatment
   </div>
-  <div class="label">
+  <!--<div class="label">
     <svg class="green" viewBox="0 0 24 24">
       <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
     </svg>
     Assumed defining treatment
-  </div>
+  </div>-->
   <div class="label">
     <svg class="blue" viewBox="0 0 24 24">
       <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
@@ -122,7 +122,7 @@ export default class Timeline extends Vue {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 * {
   box-sizing: border-box;
 }
@@ -145,15 +145,40 @@ html {
 
 .treatment {
   margin: .4rem;
-  padding: .4rem;
+  padding: .4rem 0;
   background-color: beige;
   border-radius: .4rem;
+
+  .label:nth-child(6n+2),
+  .label:nth-child(6n+4){
+    background-color: #0000000f;
+  }
+
+  .label:nth-child(6n) {
+    background: #0000001f;
+  }
 }
 
 .labels {
   font-size: 1rem;
   margin: 0 .8rem;
   padding: .8rem .4rem;
+
+  // Offset by 1 because of the empty label on top for spacing
+  .label:nth-child(6n+3),
+  .label:nth-child(6n+5){
+    background-color: #0000000f;
+    border-radius: .2rem;
+  }
+
+  .label:nth-child(6n+1) {
+    background: #0000001f;
+    border-radius: .2rem;
+  }
+
+  .label:nth-child(1) {
+    background: none;
+  }
 }
 
 .year {
@@ -166,6 +191,7 @@ html {
 .label {
   height: 1.8rem;
   line-height: 1.8rem;
+  padding: 0 .4rem;
   white-space: nowrap;
 }
 
@@ -181,6 +207,7 @@ html {
 
 .center {
   text-align: center;
+  padding: 0;
 }
 
 .blue {

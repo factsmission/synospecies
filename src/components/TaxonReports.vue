@@ -83,9 +83,10 @@ export default class TaxonReports extends Vue {
         } else {
           window.location.hash = this.genus + '+' + this.species
           this.renderTns(taxonConcepts)
-          if (this.taxa[0]) {
-            this.taxamanager.getSynonymsWithTreatments(this.taxa[0].value).then(this.processSynonymsWithTreatments)
-          }
+          this.message = 'Loading Timeline'
+          this.taxa.forEach((taxon) => {
+            this.taxamanager.getSynonymsWithTreatments(taxon.value).then(this.processSynonymsWithTreatments)
+          })
           this.message = ''
         }
       })
@@ -102,7 +103,6 @@ export default class TaxonReports extends Vue {
 
   processSynonymsWithTreatments (j: SparqlJson) {
     j.results.bindings.forEach(b => {
-      console.log(b)
       let index = this.names.indexOf(b.tc.value)
       if (index === -1) {
         index = this.names.push(b.tc.value) - 1
@@ -184,7 +184,6 @@ export default class TaxonReports extends Vue {
           })
         } else {
           const dprtindex = (this.years[dpryindex] as TLYear).treatments.findIndex(t => t.url === b.dpr.value)
-          console.log(this.names, (this.years[dpryindex] as TLYear).year, index, b.dprcs.value)
           if (dprtindex === -1) {
             const data: ('dpr'|false)[] = []
             data[index] = 'dpr';
@@ -208,6 +207,13 @@ export default class TaxonReports extends Vue {
         return 1
       }
       return 0
+    })
+
+    this.years.forEach(y => {
+      if (y === 'sep') { return }
+      y.treatments.forEach(t => {
+        t.data = t.data.concat(Array(this.names.length - t.data.length).fill(false))
+      })
     })
   }
 
