@@ -63,12 +63,12 @@ export default class Classic extends Vue {
   }
 
   relatedTaxonEncountered(genus, species) {
-    wikidataViewer.addTaxon(genus + ' ' + species)
-    vernacularViewer.addTaxon(genus + ' ' + species)
+    // wikidataViewer.addTaxon(genus + ' ' + species)
+    // vernacularViewer.addTaxon(genus + ' ' + species)
   }
 
   taxonRendered(taxonConcept) {
-    this.imageSplash.appendImages(taxonConcept)
+    // this.imageSplash.appendImages(taxonConcept)
   }
 
   beforeMount () {

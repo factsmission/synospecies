@@ -3,12 +3,13 @@
 <div class="card" v-if="names && years">
   <div class="timeline">
     <div class="labels">
-      <div class="label" v-for="name in names" :key="name" > {{ name }} </div>
       <div class="label"></div>
+      <div class="label" v-for="name in names" :key="name" > {{ getFormattedName(name) }} </div>
     </div>
     <div class="sep">
     </div>
     <div v-for="year in years" :class="year === 'sep' ? 'sep' : 'year'">
+      <div class="label center" v-if="year !== 'sep'"> {{ year.year }} </div>
       <div class="treatments" v-if="year !== 'sep'">
         <div class="treatment" v-for="treatment in year.treatments">
           <div class="label" v-for="dot in treatment.data">
@@ -27,7 +28,6 @@
           </div>
         </div>
       </div>
-      <div class="label center" v-if="year !== 'sep'"> {{ year.year }} </div>
     </div>
   </div>
   <div class="label">
@@ -64,9 +64,18 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
-export default class TaxonReport extends Vue {
+export default class Timeline extends Vue {
   @Prop() names!: string[];
   @Prop() years!: ({ year: number; treatments: { data: ('def'|'ass'|'aug'|'dpr'|false)[]; url?: string }[] }|'sep')[];
+
+  getFormattedName (uri: string) {
+    const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
+    const lastSeparator = nameSection.lastIndexOf('_')
+    return nameSection.substring(0, lastSeparator)
+      .replace(new RegExp('_', 'g'), ' ') +
+      ', ' +
+      nameSection.substring(lastSeparator + 1)
+  }
 
   exampleYears = [
     {

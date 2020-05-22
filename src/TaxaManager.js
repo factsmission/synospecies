@@ -1,11 +1,45 @@
 // eslint-disable
 import $rdf from 'ext-rdflib'
 import GraphNode from 'rdfgraphnode-rdfext'
-import SparqlEndpoint from '@retog/sparql-client'
 
 export default class TaxaManager {
   constructor (sparqlEndpoint) {
     this._sparqlEndpoint = sparqlEndpoint
+  }
+
+  getSynonymsWithTreatments (taxon) {
+    const query =
+`PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX treat: <http://plazi.org/vocab/treatment#>
+SELECT DISTINCT
+?tc
+?aug ?augd (group_concat(DISTINCT ?augc;separator="; ") as ?augcs)
+?def ?defd (group_concat(DISTINCT ?defc;separator="; ") as ?defcs)
+?dpr ?dprd (group_concat(DISTINCT ?dprc;separator="; ") as ?dprcs)
+WHERE {
+  <${taxon}> ((^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept))|
+    ((^treat:augmentsTaxonConcept|^treat:definesTaxonConcept)/treat:deprecates))* ?tc .
+  OPTIONAL {
+    ?aug treat:augmentsTaxonConcept ?tc;
+         treat:publishedIn ?augp;
+         dc:creator ?augc.
+    ?augp dc:date ?augd .
+  }
+  OPTIONAL {
+    ?def treat:definesTaxonConcept ?tc;
+         treat:publishedIn ?defp;
+         dc:creator ?defc.
+    ?defp dc:date ?defd .
+  }
+  OPTIONAL {
+    ?dpr treat:deprecates ?tc;
+          treat:publishedIn ?dprp;
+          dc:creator ?dprc.
+    ?dprp dc:date ?dprd .
+  }
+}
+GROUP BY ?tc ?aug ?augd ?def ?defd ?dpr ?dprd`
+    return this._sparqlEndpoint.getSparqlResultSet(query).then(json => json)
   }
 
   getNewTaxa (oldTaxon) {

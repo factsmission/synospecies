@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Classic from '@/views/Classic.vue'
+import Timeline from '@/views/Timeline.vue'
 
 Vue.use(VueRouter)
 
