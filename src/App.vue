@@ -58,6 +58,7 @@ export default class App extends Vue {}
 
 html {
   height: 100%;
+  overflow-wrap: break-word;
 }
 
 body {
@@ -332,5 +333,19 @@ a img {
 .nobold,
 .nobold * {
   font-weight: normal;
+}
+
+@media (max-width: 140ch) {
+  .container {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+
+    .card {
+      margin-left: 0;
+      margin-right: 0;
+      padding: .8rem;
+    }
+  }
 }
 </style>

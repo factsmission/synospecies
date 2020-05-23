@@ -13,25 +13,27 @@
       </a>
     </h3>
   </hgroup>
-  <table class="nobold">
-    <tr>
-      <th>Kingdom</th>
-      <th>Phylum</th>
-      <th>Class</th>
-      <th>Order</th>
-      <th>Family</th>
-      <th>Genus</th>
-      <th>Species</th>
-    </tr>
-    <tr>
-      <td
-        v-for="r in ranks"
-        :key="r"
-      >
-        {{ r }}
-      </td>
-    </tr>
-  </table>
+  <div class="scroll-x">
+    <table class="nobold">
+      <tr>
+        <th>Kingdom</th>
+        <th>Phylum</th>
+        <th>Class</th>
+        <th>Order</th>
+        <th>Family</th>
+        <th>Genus</th>
+        <th>Species</th>
+      </tr>
+      <tr>
+        <td
+          v-for="r in ranks"
+          :key="r"
+        >
+          {{ r }}
+        </td>
+      </tr>
+    </table>
+  </div>
   <p>
     {{ definingTreatments ? 'Defining Treatments: ' : 'Defining treatment not yet on Plazi' }}
     <ul v-if="definingTreatments">
@@ -206,5 +208,9 @@ export default class TaxonReport extends Vue {
 }
 .deprecates {
   background-color: #e8f5e9;
+}
+
+.scroll-x {
+  overflow-x: auto;
 }
 </style>
