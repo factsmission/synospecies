@@ -146,6 +146,17 @@ html {
   width: 100%;
 }
 
+@media (max-width: 140ch) {
+  .timeline {
+    overflow-x: auto;
+  }
+
+  .scroll-x {
+    overflow-x: initial;
+    width: initial;
+  }
+}
+
 .treatments {
   display: flex;
   flex-direction: row;
