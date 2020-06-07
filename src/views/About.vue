@@ -28,7 +28,7 @@
     </div>
     <div class="section">
       <h2>
-        <a href="https://factsmission.com/">Factsmission</a>
+        <a href="https://factsmission.com/">FactsMission</a>
       </h2>
       <p>FactsMission offers consulting and development services to create, process, store, publish, and consume linked data.</p>
       <p>FactsMission helps you provide data in such a way that it can be easily used as the foundation of different applications as well as linked to as an authoritative source.</p>
