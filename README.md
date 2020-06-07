@@ -21,13 +21,12 @@ Synospecies is an Open Source application running purely in the browser, the sou
 
 Plazi is an association supporting and promoting the development of persistent and openly accessible digital taxonomic
 literature. To this end Plazi will:
-    * Maintain a digital taxonomic literature repository to enable archiving of taxonomic treatments.
-    * Enhance submitted taxonomic treatments by creating TaxonX and Taxpub XML versions.
-    * Participate in the development of new models for publishing taxonomic treatments in order to maximize
-      interoperability with other relevant cyberinfrastructure components (e.g., name servers, biodiversity resources,
-      etc...)
-    * Advocate and educate about the vital importance of maintaining free and open access to scientific discourse and
-      data
+* Maintain a digital taxonomic literature repository to enable archiving of taxonomic treatments.
+* Enhance submitted taxonomic treatments by creating TaxonX and Taxpub XML versions.
+* Participate in the development of new models for publishing taxonomic treatments in order to maximize
+  interoperability with other relevant cyberinfrastructure components (e.g., name servers, biodiversity resources, etc...)
+* Advocate and educate about the vital importance of maintaining free and open access to scientific discourse and
+  data
 
 ## [FactsMission](https://factsmission.com/)
 
