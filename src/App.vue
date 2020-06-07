@@ -335,6 +335,24 @@ a img {
   font-weight: normal;
 }
 
+body.fullscreen-on {
+  overflow: hidden;
+
+  .fullscreen {
+    z-index: 10000;
+    background: #ffffff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    overflow: auto;
+  }
+}
+
 @media (max-width: 140ch) {
   .container {
     width: 100%;

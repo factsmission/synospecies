@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import SingleTaxonReport from '@/components/SingleTaxonReport.vue'
 import Timeline from '@/components/Timeline.vue'
 import TaxaManager from '@/TaxaManager'
@@ -36,10 +36,6 @@ type SparqlJson = {
 type TLYear = {
   year: number;
   treatments: { data: ('def'|'ass'|'aug'|'dpr'|false)[]; url?: string; creators?: string }[];
-}
-
-function dwc (localName: string) {
-  return $rdf.sym('http://rs.tdwg.org/dwc/terms/' + localName)
 }
 
 @Component({

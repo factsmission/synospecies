@@ -3,7 +3,15 @@
 <div class="card" v-if="names && years">
   <div class="timeline">
     <div class="labels">
-      <div class="label"></div>
+      <button class="label" @click.prevent="fullscreen()">
+        <svg v-if="isFullscreen" viewBox="0 0 24 24">
+          <path fill="currentcolor" d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>
+        </svg>
+        <svg v-else viewBox="0 0 24 24">
+          <path fill="currentcolor" d="M10,21V19H6.41L10.91,14.5L9.5,13.09L5,17.59V14H3V21H10M14.5,10.91L19,6.41V10H21V3H14V5H17.59L13.09,9.5L14.5,10.91Z"/>
+        </svg>
+        {{ isFullscreen ? 'Exit fullscreeen' : 'Fullscreen'}}
+      </button>
       <div class="label" v-for="name in names" :key="name" > {{ getFormattedName(name) }} </div>
     </div>
     <div class="sep">
@@ -65,10 +73,27 @@
 /* eslint-disable comma-dangle */
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
+// Required as typescript doesn't know about these nonstandard functions
+declare global {
+  interface Document {
+    mozCancelFullScreen?: () => Promise<void>;
+    webkitExitFullscreen?: () => Promise<void>;
+    msExitFullscreen?: () => Promise<void>;
+  }
+
+  interface Element {
+    mozRequestFullScreen?: (..._: any) => any;
+    webkitRequestFullscreen?: (..._: any) => any;
+    msRequestFullscreen?: (..._: any) => any;
+  }
+}
+
 @Component
 export default class Timeline extends Vue {
   @Prop() names!: string[];
   @Prop() years!: ({ year: number; treatments: { data: ('def'|'ass'|'aug'|'dpr'|false)[]; url?: string }[] }|'sep')[];
+
+  isFullscreen = false;
 
   getFormattedName (uri: string) {
     const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
@@ -77,6 +102,36 @@ export default class Timeline extends Vue {
       .replace(new RegExp('_', 'g'), ' ') +
       ', ' +
       nameSection.substring(lastSeparator + 1)
+  }
+
+  fullscreen () {
+    if (this.isFullscreen) {
+      document.body.classList.remove('fullscreen-on')
+      this.$el.classList.remove('fullscreen')
+      this.isFullscreen = false
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen()
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen()
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen()
+      }
+    } else {
+      document.body.classList.add('fullscreen-on')
+      this.$el.classList.add('fullscreen')
+      this.isFullscreen = true
+      if (this.$el.requestFullscreen) {
+        this.$el.requestFullscreen()
+      } else if (this.$el.mozRequestFullScreen) {
+        this.$el.mozRequestFullScreen()
+      } else if (this.$el.webkitRequestFullscreen) {
+        this.$el.webkitRequestFullscreen((Element as any).ALLOW_KEYBOARD_INPUT)
+      } else if (this.$el.msRequestFullscreen) {
+        this.$el.msRequestFullscreen()
+      }
+    }
   }
 
   exampleYears = [
@@ -212,6 +267,13 @@ html {
   line-height: 1.8rem;
   padding: 0 .4rem;
   white-space: nowrap;
+
+}
+
+button.label {
+  display: block;
+  font: inherit;
+  border: 1px solid grey;
 }
 
 .label>svg {
