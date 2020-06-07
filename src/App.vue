@@ -33,6 +33,11 @@
         taxonomic treatment data provided by
         <a href="http://plazi.org/">Plazi</a>.
       </div>
+      <div class="container">
+        <a href="https://github.com/factsmission/synospecies">
+          View the code on Github
+        </a>
+      </div>
     </div>
   </div>
 </template>
