@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Classic from '@/views/Classic.vue'
+import About from '@/views/About.vue'
 
 Vue.use(VueRouter)
 
@@ -9,6 +10,11 @@ const routes = [
     path: '/',
     name: 'classic',
     component: Classic
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: About
   },
   {
     path: '/advanced',

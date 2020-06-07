@@ -19,6 +19,7 @@
       <div class="container">
         <router-link to="/">Home</router-link>
         <router-link to="/advanced">Advanced</router-link>
+        <router-link to="/about">About</router-link>
       </div>
     </nav>
 
@@ -242,12 +243,15 @@ a img {
     display: flex;
     padding-top: 0;
     padding-bottom: 0;
+    flex-wrap: wrap;
 
     & a {
       display: block;
       line-height: 28px;
       padding: 0 15px;
       color: inherit;
+      flex: 1;
+      text-align: center;
 
       &:active,
       &:hover,
