@@ -37,6 +37,7 @@ import ImageSplash from '@/ImageSplash.js'
 import TaxaManager from '@/TaxaManager.js'
 import TaxonReports from '@/components/TaxonReports'
 import Taxomplete from 'taxomplete'
+import config from '@/config.ts'
 
 @Component({
   components: {
@@ -74,7 +75,7 @@ export default class Classic extends Vue {
   beforeMount () {
     const params = new URLSearchParams(window.location.search)
 
-    this.sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || 'https://treatment.ld.plazi.org/sparql')
+    this.sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || config.endpoint)
     this.taxamanager = new TaxaManager(this.sparqlEndpoint)
   }
 
