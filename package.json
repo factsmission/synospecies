@@ -73,7 +73,7 @@
   },
   "homepage": "https://github.com/factsmission/synospecies#readme",
   "license": "MIT",
-  "readme": "ERROR: No README data found!",
+  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/factsmission/synospecies.git"
