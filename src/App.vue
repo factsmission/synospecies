@@ -294,51 +294,6 @@ a img {
   text-decoration: underline;
 }
 
-#image-area {
-  margin: -0.5em;
-  -webkit-column-count: 4;
-  -webkit-column-gap: 0.5em;
-  -moz-column-count: 4;
-  -moz-column-gap: 0.5em;
-  column-count: 4;
-  column-gap: 0.5em;
-
-  &.twocol {
-    -webkit-column-count: 2;
-    -moz-column-count: 2;
-    column-count: 2;
-  }
-
-  & #image-area.threecol {
-    -webkit-column-count: 3;
-    -moz-column-count: 3;
-    column-count: 3;
-  }
-
-  & img {
-    width: 100% !important;
-    height: auto !important;
-  }
-
-  & figure {
-    margin: 0.5rem;
-    width: 100%;
-
-    &:not(:last-child) {
-      padding-bottom: 0.5em;
-      border-bottom: 1px solid #00000033;
-    }
-
-    & figcaption {
-      /*background-color: #7d7d7d54;
-        padding: .5em;*/
-      padding: 0.5rem 0;
-      font-size: 0.8rem;
-      font-family: serif;
-    }
-  }
-}
-
 .nobold,
 .nobold * {
   font-weight: normal;

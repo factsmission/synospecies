@@ -184,7 +184,7 @@ export default class TaxonReport extends Vue {
     this.title = this.getFormattedName(this.taxon.value)
     // if (!this.names[this.taxon.value]) {
     this.$emit('taxonRendered', this.taxon)
-    this.taxamanager.getNewTaxa(this.taxon.value).then(async (newTaxa: any) => {
+    /* this.taxamanager.getNewTaxa(this.taxon.value).then(async (newTaxa: any) => {
       // console.log('got newtaxa for ' + this.title, newTaxa)
       this.deprecations = this.deprecations.concat(await newTaxa.each((tn: any) => tn))
       this.$emit('relatedTaxaEncountered', newTaxa)
@@ -193,7 +193,7 @@ export default class TaxonReport extends Vue {
       // console.log('got oldtaxa for ' + this.title, oldTaxa)
       this.deprecates = this.deprecates.concat(await oldTaxa.each((tn: any) => tn))
       this.$emit('relatedTaxaEncountered', oldTaxa)
-    })
+    }) */
   }
 
   mounted () {
