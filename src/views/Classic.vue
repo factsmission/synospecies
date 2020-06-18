@@ -123,7 +123,6 @@ export default class Classic extends Vue {
                 ))
               )
           )
-          console.table(this.taxa) // eslint-disable-line
           this.taxa.forEach((taxon) => {
             this.taxamanager.getSynonymsWithTreatments(taxon.value).then(this.processSynonymsWithTreatments)
           })

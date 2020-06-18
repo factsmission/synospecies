@@ -29,17 +29,15 @@ export default class ImageSplash extends Vue {
   @Prop() taxa!: {[key: string]: any}[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   @Prop() taxamanager!: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  addedImages: {[key: string]: boolean} = {}
   images: Image[] = []
 
   @Watch('taxa')
   splash () {
-    this.addedImages = {}
     this.images = []
     this.taxa.forEach((taxon) => {
       this.taxamanager.getImages(taxon.value).then((images: Image[]) => {
-        this.images = this.images.concat(images.filter(i => !this.addedImages[i.url]))
-        console.log(this.images) // eslint-disable-line
+        this.images = this.images.concat(images)
+        this.images = this.images.filter((item, index) => this.images.findIndex(i => i.url === item.url) === index)
       })
     })
   }

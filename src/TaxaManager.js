@@ -155,7 +155,7 @@ GROUP BY ?tc ?aug ?augd ?def ?defd ?dpr ?dprd`
                 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n' +
                 'PREFIX fabio: <http://purl.org/spar/fabio/>\n' +
                 'PREFIX dc: <http://purl.org/dc/elements/1.1/>\n' +
-                'SELECT ?url ?description WHERE {   \n' +
+                'SELECT DISTINCT ?url ?description WHERE {   \n' +
                 '  ?treatment (treat:augmentsTaxonConcept|treat:definesTaxonConcept) <' + taxon + '> .\n' +
                 '  ?treatment <http://purl.org/spar/cito/cites> ?cites.\n' +
                 '  ?cites rdf:type fabio:Figure. \n' +
