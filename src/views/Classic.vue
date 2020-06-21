@@ -100,7 +100,7 @@ export default class Classic extends Vue {
   beforeMount () {
     const params = new URLSearchParams(window.location.search)
 
-    this.sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || config.endpoint)
+    this.sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || config.endpoint())
     this.taxamanager = new TaxaManager(this.sparqlEndpoint)
   }
 

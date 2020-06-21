@@ -25,7 +25,7 @@ export default class QueryEditor extends Vue {
       requestConfig: {
         showQueryButton: true,
         persistenceId,
-        endpoint
+        endpoint: endpoint()
       }
     })
     const resultElement: HTMLElement = this.$el.getElementsByClassName('result')[0] as HTMLElement
