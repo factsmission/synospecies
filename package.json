@@ -21,6 +21,7 @@
     "@types/codemirror": "0.0.87",
     "@types/superagent": "^4.1.7",
     "core-js": "^3.6.5",
+    "element-ui": "^2.13.2",
     "ext-rdflib": "^0.5.5",
     "mustache": "^4.0.0",
     "rdfgraphnode-rdfext": "^1.6.1",
