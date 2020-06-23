@@ -20,6 +20,7 @@
         <router-link to="/">Home</router-link>
         <router-link to="/advanced">Advanced</router-link>
         <router-link to="/about">About</router-link>
+        <router-link to="/settings">Settings</router-link>
       </div>
     </nav>
 
@@ -27,7 +28,7 @@
       <router-view/>
     </main>
 
-    <div class="plazi-footer">
+    <div class="plazi footer">
       <div class="container">
         Synospecies is created and maintained by
         <a href="https://factsmission.com">FactsMission</a> and uses the
@@ -65,6 +66,7 @@ export default class App extends Vue {}
 html {
   height: 100%;
   overflow-wrap: break-word;
+  background-color: #333333;
 }
 
 body {
@@ -73,6 +75,10 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+#app {
+  background-color: #ffffff;
 }
 
 main.container {
@@ -276,22 +282,25 @@ a img {
   align-items: center;
 }
 
-.plazi-footer {
-  flex-shrink: 0;
+.plazi.footer {
   background-color: #333333;
   border-top: 1px solid #2b2b2b;
   color: #ffffff;
+}
+
+.footer {
+  flex-shrink: 0;
   padding: 10px 0;
-}
 
-.plazi-footer > .container {
-  padding-top: 0;
-  padding-bottom: 0;
-}
+  & > .container {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 
-.plazi-footer a {
-  color: inherit;
-  text-decoration: underline;
+  & a {
+    color: inherit;
+    text-decoration: underline;
+  }
 }
 
 .nobold,
