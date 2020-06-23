@@ -3,73 +3,48 @@
     <h1>Settings</h1>
     <div class="card">
       <h2 class="card_header">
-        Choose SPARQL endpoint
+        Set SPARQL endpoint
       </h2>
-      <label>
-        <input type="radio" name="endpoint" value="https://trifid-lindas.test.cluster.ldbar.ch/query" v-model="inputEndpoint">
-        https://trifid-lindas.test.cluster.ldbar.ch/query (default)
-      </label>
-      <label>
-        <input type="radio" name="endpoint" value="https://treatment.ld.plazi.org/sparql" v-model="inputEndpoint">
-        https://treatment.ld.plazi.org/sparql
-      </label>
-      <label>
-        <input type="radio" name="endpoint" value="CUSTOM" v-model="inputEndpoint">
-        Custom:
-        <input type="text" v-model="customEndpoint" @focus.passive="inputEndpoint = 'CUSTOM'">
-      </label>
+      Sparql endpoint serving the Plazi Treatment Data: <el-select id="ep-select"
+        v-model="endpoint"
+        filterable
+        allow-create
+        placeholder="Define SPARQL Enpoint for Plazi treatments">
+        <el-option
+          v-for="(ep, index) in allEndpoints"
+          :key="index"
+          :label="ep"
+          :value="ep">
+        </el-option>
+      </el-select>
     </div>
   </div>
 </template>
 
 <script lang="js">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import config from '@/config'
+import {
+  Select, Option
+} from 'element-ui'
 
-@Component({})
+@Component({
+  components: { 'el-select': Select, 'el-option': Option }
+})
 export default class About extends Vue {
-  _inputEndpoint = 'https://trifid-lindas.test.cluster.ldbar.ch/query'
+  allEndpoints = ['https://trifid-lindas.test.cluster.ldbar.ch/query', 'https://treatment.ld.plazi.org/sparql']
 
-  customEndpoint = ''
+  endpoint = config.endpoint();
 
-  endpoint () {
-    return this.inputEndpoint !== 'CUSTOM' ? this._inputEndpoint : this.customEndpoint
-  }
-
-  get inputEndpoint () {
-    console.log('_inputEndpoint', this._inputEndpoint)
-    return config.endpoint()
-  }
-
-  set inputEndpoint (v) {
-    this._inputEndpoint = v
-    localStorage.setItem('plazi-treatments-endpoint', this.endpoint())
-    if (v === 'CUSTOM') {
-      localStorage.setItem('plazi-treatments-custom-endpoint', this.endpoint())
-    }
-    console.log(v, this._inputEndpoint, this.endpoint(), localStorage.getItem('plazi-treatments-custom-endpoint'))
+  @Watch('endpoint')
+  onEndpointChanged (v) {
+    localStorage.setItem('plazi-treatments-endpoint', v)
   }
 }
 </script>
 
-<style lang="scss" scoped>
-.card {
-  word-break: break-all;
-
-  & label {
-    padding: 0.4em 0;
-    display: flex;
-    flex-direction: row;
-  }
-
-  & input[type="radio"] {
-    margin-right: 1ch;
-    margin-top: 0.4em;
-  }
-
-  & input[type="text"] {
-    margin-left: 1ch;
-    flex: 1;
-  }
+<style lang="scss">
+#ep-select {
+  width: 30em;
 }
 </style>
