@@ -28,7 +28,7 @@
       <router-view/>
     </main>
 
-    <div class="plazi footer">
+    <div class="plazi-footer">
       <div class="container">
         Synospecies is created and maintained by
         <a href="https://factsmission.com">FactsMission</a> and uses the
@@ -47,7 +47,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import Classic from '@/views/Classic.vue'
-
 @Component({
   components: {
     Classic
@@ -58,17 +57,13 @@ export default class App extends Vue {}
 
 <style lang="scss">
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,800,800italic|Oswald:700&display=swap");
-
 * {
   box-sizing: border-box;
 }
-
 html {
   height: 100%;
   overflow-wrap: break-word;
-  background-color: #333333;
 }
-
 body {
   margin: 0;
   padding: 0;
@@ -76,15 +71,9 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-#app {
-  background-color: #ffffff;
-}
-
 main.container {
   flex: 1 0 auto;
 }
-
 .container {
   width: 140ch;
   max-width: 100%;
@@ -93,18 +82,15 @@ main.container {
   padding: 32px;
   border-radius: 8px;
 }
-
 * {
   font-family: "Open Sans", "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
-
 .flex-row {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
-
 .container h1,
 .container h1 * {
   margin: 0 0 16px;
@@ -112,114 +98,93 @@ main.container {
   font-weight: normal;
   color: #727272;
 }
-
 .image {
   border-radius: 4px;
 }
-
 .container > .card {
   margin-left: -16px;
   margin-right: -16px;
 }
-
 hr {
   margin-top: 20px;
   margin-bottom: 20px;
   border: 0;
   border-top: 1px solid #00000033;
 }
-
 .section {
   border-bottom: 1px solid #00000033;
   margin: 12px 0;
 }
-
 .section:empty {
   display: none;
 }
-
 .section.card_header {
   font-family: Oswald, Arial, Helvetica, sans-serif;
   font-weight: 700;
   margin: 0 0 16px 0;
 }
-
 .section.card_body {
   margin: 0;
   width: 100%;
 }
-
 .card {
   border: 1px solid #00000033;
   border-radius: 8px;
   padding: 16px;
   margin: 12px;
 }
-
 .card:empty {
   display: none;
 }
-
 .card .card_header,
 .card .card_header>* {
   font-family: Oswald, Arial, Helvetica, sans-serif;
   font-weight: 700;
   margin: 0 0 16px 0;
 }
-
 .card .card_body {
   margin: 0;
   width: 100%;
 }
-
 table {
   margin: 0 -0.5rem;
   width: calc(100% + 1rem);
   border-collapse: collapse;
 }
-
 table tr th,
 table tr td {
   text-align: center;
   border-top: 1px solid #00000033;
   padding: 0.5rem;
 }
-
 table tr:last-child th,
 table tr:last-child td {
   border-bottom: 1px solid #00000033;
 }
-
 table a {
   word-break: break-all;
 }
-
 .card table:first-child tr:first-child td {
   border-top: none;
 }
-
 .card table:last-child tr:last-child td {
   border-bottom: none;
 }
-
 a,
 a:visited {
   color: #476100;
   text-decoration: none;
 }
-
 .nolink {
   color: inherit;
   text-decoration: none;
 }
-
 a:hover,
 a:focus,
 a:active {
   color: #81951d !important;
   text-decoration: underline !important;
 }
-
 a img {
   display: block;
 }
@@ -235,7 +200,6 @@ a img {
   border-bottom-left-radius: 0;
   z-index: 1001;
 }
-
 .plazi-nav {
   flex-shrink: 0;
   flex-shrink: 0;
@@ -244,13 +208,11 @@ a img {
   border-bottom: 1px solid #00000033;
   border-radius: 0;
   z-index: 1001;
-
   & > .container {
     display: flex;
     padding-top: 0;
     padding-bottom: 0;
     flex-wrap: wrap;
-
     & a {
       display: block;
       line-height: 28px;
@@ -258,7 +220,6 @@ a img {
       color: inherit;
       flex: 1;
       text-align: center;
-
       &:active,
       &:hover,
       &:focus {
@@ -269,11 +230,9 @@ a img {
     }
   }
 }
-
 .router-link-active {
   background-color: #f3f3f3;
 }
-
 .plazi-header > .container {
   padding-top: 26px;
   padding-bottom: 16px;
@@ -281,36 +240,27 @@ a img {
   justify-content: space-between;
   align-items: center;
 }
-
-.plazi.footer {
+.plazi-footer {
+  flex-shrink: 0;
   background-color: #333333;
   border-top: 1px solid #2b2b2b;
   color: #ffffff;
-}
-
-.footer {
-  flex-shrink: 0;
   padding: 10px 0;
-
-  & > .container {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  & a {
-    color: inherit;
-    text-decoration: underline;
-  }
 }
-
+.plazi-footer > .container {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.plazi-footer a {
+  color: inherit;
+  text-decoration: underline;
+}
 .nobold,
 .nobold * {
   font-weight: normal;
 }
-
 body.fullscreen-on {
   overflow: hidden;
-
   .fullscreen {
     z-index: 10000;
     background: #ffffff;
@@ -325,13 +275,11 @@ body.fullscreen-on {
     overflow: auto;
   }
 }
-
 @media (max-width: 140ch) {
   .container {
     width: 100%;
     padding-left: 0;
     padding-right: 0;
-
     .card {
       margin-left: 0;
       margin-right: 0;
