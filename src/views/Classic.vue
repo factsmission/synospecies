@@ -132,6 +132,7 @@ export default class Classic extends Vue {
   }
 
   processSynonymsWithTreatments (j: SparqlJson) {
+    console.log(JSON.stringify(j))
     j.results.bindings.forEach(b => {
       let index = this.names.indexOf(b.tc.value)
       if (index === -1) {
@@ -255,6 +256,9 @@ export default class Classic extends Vue {
     this.taxomplete = new Taxomplete(input, this.sparqlEndpoint)
 
     const resetAll = (value: string) => {
+      this.taxa = []
+      this.names = []
+      this.years = []
       this.wikidataViewer.reset()
       this.vernacularViewer.reset()
       this.current.genus = value.substring(0, value.indexOf(' '))
