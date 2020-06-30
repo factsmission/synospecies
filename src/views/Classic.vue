@@ -132,7 +132,6 @@ export default class Classic extends Vue {
   }
 
   processSynonymsWithTreatments (j: SparqlJson) {
-    console.log(JSON.stringify(j))
     j.results.bindings.forEach(b => {
       let index = this.names.indexOf(b.tc.value)
       if (index === -1) {
