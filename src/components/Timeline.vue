@@ -10,7 +10,6 @@
         <svg v-else viewBox="0 0 24 24">
           <path fill="currentcolor" d="M10,21V19H6.41L10.91,14.5L9.5,13.09L5,17.59V14H3V21H10M14.5,10.91L19,6.41V10H21V3H14V5H17.59L13.09,9.5L14.5,10.91Z"/>
         </svg>
-        {{ isFullscreen ? 'Exit fullscreeen' : 'Fullscreen'}}
       </button>
       <div class="label" v-for="name in names" :key="name" > {{ getFormattedName(name) }} </div>
     </div>
@@ -242,8 +241,8 @@ html {
 
 .labels {
   font-size: 1rem;
-  margin: 0 .8rem;
-  padding: .8rem .4rem;
+  margin: 0 .8rem .8rem 0;
+  padding: 0;
 
   // Offset by 1 because of the empty label on top for spacing
   .label:nth-child(6n+3),
@@ -267,6 +266,10 @@ html {
   line-height: 1.8rem;
   margin: 0;
   padding: 0 .4rem;
+
+  &:last-child {
+    padding-right: 0;
+  }
 }
 
 .label {
@@ -281,6 +284,7 @@ button.label {
   display: block;
   font: inherit;
   border: 1px solid grey;
+  margin-bottom: .8rem;
 }
 
 .label>svg {
