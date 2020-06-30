@@ -21,21 +21,27 @@ WHERE {
     ((^treat:augmentsTaxonConcept|^treat:definesTaxonConcept)/treat:deprecates))* ?tc .
   OPTIONAL {
     ?aug treat:augmentsTaxonConcept ?tc;
-         treat:publishedIn ?augp;
          dc:creator ?augc.
-    ?augp dc:date ?augd .
+    OPTIONAL {
+      ?aug treat:publishedIn ?augp.
+      ?augp dc:date ?augd.
+    }
   }
   OPTIONAL {
     ?def treat:definesTaxonConcept ?tc;
-         treat:publishedIn ?defp;
          dc:creator ?defc.
-    ?defp dc:date ?defd .
+    OPTIONAL {
+      ?def treat:publishedIn ?defp.
+      ?defp dc:date ?defd.
+    }
   }
   OPTIONAL {
     ?dpr treat:deprecates ?tc;
-          treat:publishedIn ?dprp;
           dc:creator ?dprc.
-    ?dprp dc:date ?dprd .
+    OPTIONAL {
+      ?dpr treat:publishedIn ?dprp.
+      ?dprp dc:date ?dprd.
+    }
   }
 }
 GROUP BY ?tc ?aug ?augd ?def ?defd ?dpr ?dprd`

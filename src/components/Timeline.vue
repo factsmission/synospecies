@@ -18,7 +18,7 @@
     </div>
     <div class="scroll-x">
       <div v-for="year in years" :class="year === 'sep' ? 'sep' : 'year'">
-        <div class="label center" v-if="year !== 'sep'"> {{ year.year }} </div>
+        <div class="label center" v-if="year !== 'sep'"> {{ year.year === -1 ? 'Year Unknown' : year.year }} </div>
         <div class="treatments" v-if="year !== 'sep'">
           <div class="treatment" v-for="treatment in year.treatments">
             <div class="label" v-for="dot in treatment.data">

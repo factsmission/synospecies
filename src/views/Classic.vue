@@ -141,6 +141,9 @@ export default class Classic extends Vue {
 
       // Defining Treatments
       if (b.def) {
+        if (!b.defd || !b.defd.value) {
+          b.defd = { value: '-1', type: 'literal' }
+        }
         const defyindex = this.years.findIndex(y => y !== 'sep' && y.year.toString() === b.defd.value)
         if (defyindex === -1) {
           const data: ('def'|false)[] = []
@@ -171,6 +174,9 @@ export default class Classic extends Vue {
 
       // Augmenting treatments
       if (b.aug) {
+        if (!b.augd || !b.augd.value) {
+          b.augd = { value: '-1', type: 'literal' }
+        }
         const augyindex = this.years.findIndex(y => y !== 'sep' && y.year.toString() === b.augd.value)
         if (augyindex === -1) {
           const data: ('aug'|false)[] = []
@@ -201,6 +207,9 @@ export default class Classic extends Vue {
 
       // Deprecating Treatments
       if (b.dpr) {
+        if (!b.dprd || !b.dprd.value) {
+          b.dprd = { value: '-1', type: 'literal' }
+        }
         const dpryindex = this.years.findIndex(y => y !== 'sep' && y.year.toString() === b.dprd.value)
         if (dpryindex === -1) {
           const data: ('dpr'|false)[] = []
