@@ -1,5 +1,5 @@
 <template>
-<div :class="'card' + (deprecates.length > 0 ? ' deprecates ' : ' ') + (deprecations.length > 0 ? 'deprecated' : '')">
+<div :class="'card' + (deprecates.length > 0 ? ' deprecates ' : ' ') + (taxon.dpr.length > 0 ? 'deprecated' : '')">
   <hgroup>
     <h2 class="card_header">{{ title }}</h2>
     <h3
@@ -34,51 +34,58 @@
       </tr>
     </table>
   </div>
-  <p>
-    {{ definingTreatments ? 'Defining Treatments: ' : 'Defining treatment not yet on Plazi' }}
-    <ul v-if="definingTreatments">
+  <p v-if="taxon.loading">
+    <spinner/>
+    Loading Treatments
+  </p>
+  <p v-if="!taxon.loading">
+    <svg v-if="taxon.def.length" class="green" viewBox="0 0 24 24">
+      <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+    </svg>
+    <svg v-else class="green" viewBox="0 0 24 24">
+      <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+    </svg>
+    {{ taxon.def.length || taxon.loading ? 'Defining Treatments: ' : 'Defining treatment not yet on Plazi' }}
+    <ul v-if="taxon.def.length">
       <li
-        v-for="t in definingTreatments"
+        v-for="t in taxon.def"
         :key="t.url"
       >
         <a :href="t.url">
-          {{ t.creators.join('; ') }} {{ t.dates.join('/') }}
+          {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
         </a>
       </li>
     </ul>
   </p>
-  <p v-if="augmentingTreatments">
+  <p v-if="taxon.aug.length">
+    <svg class="blue" viewBox="0 0 24 24">
+      <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+    </svg>
     Augmenting Treatments:
     <ul>
       <li
-        v-for="t in augmentingTreatments"
+        v-for="t in taxon.aug"
         :key="t.url"
       >
         <a :href="t.url">
-          {{ t.creators.join('; ') }} {{ t.dates.join('/') }}
+          {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
         </a>
       </li>
     </ul>
   </p>
-  <p v-if="deprecations.length > 0">
-    Deprecated By:
+  <p v-if="taxon.dpr.length">
+    <svg class="red" viewBox="0 0 24 24">
+      <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+    </svg>
+    Deprecating Treatments:
     <ul>
       <li
-        v-for="d in deprecations"
-        :key="d.value"
+        v-for="t in taxon.dpr"
+        :key="t.url"
       >
-        {{ getFormattedName(d.value) }}
-      </li>
-    </ul>
-  </p>
-  <p v-if="deprecates.length > 0">
-    Deprecates:
-    <ul>
-      <li
-        v-for="d in deprecates"
-        :key="d.value"
-      >
-        {{ getFormattedName(d.value) }}
+        <a :href="t.url">
+          {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+        </a>
       </li>
     </ul>
   </p>
@@ -87,8 +94,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import Spinner from '@/components/Spinner.vue'
 import $rdf from 'ext-rdflib'
-import TaxaManager from '@/TaxaManager'
 
 function dwc (localName: string) {
   return $rdf.sym('http://rs.tdwg.org/dwc/terms/' + localName)
@@ -119,10 +126,22 @@ function truncate () {
   }
 }
 
-@Component
+type Treat = {
+  url: string;
+  creators?: string;
+  year?: number;
+}
+
+@Component({
+  components: { Spinner }
+})
 export default class TaxonReport extends Vue {
-  @Prop() taxon!: {value: string; [key: string]: any}
-  @Prop() taxamanager!: TaxaManager;
+  @Prop() taxon!: {url: string;
+      def: Treat[];
+      aug: Treat[];
+      dpr: Treat[];
+      loading: boolean;
+    }
 
   title = ''
   ranks: any[] | never[] = []
@@ -131,18 +150,6 @@ export default class TaxonReport extends Vue {
   deprecates = []
 
   preferedNameBy: {
-    creators: string[];
-    dates: string[];
-    url: string;
-  }[] | null = null
-
-  definingTreatments: {
-    creators: string[];
-    dates: string[];
-    url: string;
-  }[] | null = null
-
-  augmentingTreatments: {
     creators: string[];
     dates: string[];
     url: string;
@@ -158,42 +165,13 @@ export default class TaxonReport extends Vue {
   }
 
   async renderTaxon () {
-    // for unclear reasons some taxa have more than one order or family (maybe other ranks, thus generalized)
+    /* // for unclear reasons some taxa have more than one order or family (maybe other ranks, thus generalized)
     const ranks = await Promise.all(['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'].map(async r => this.taxon.out(dwc(r)).each((f: any) => f.value).then((fs: any) => fs.join(', '))))
-    this.ranks = ranks
+    this.ranks = ranks */
 
-    function linkToTreatments (gn: any) {
-      return gn.each((t: any) => t)
-        .then((ts: any) => Promise.all(ts.map(async (t: any) => {
-          const url = t.value
-          const creators = await t.out(dc('creator')).each((c: any) => c.value)
-          const dates = await t.out(dc('date')).each((d: any) => ' ' + d.value)
-          return { url, dates, creators }
-        })))
-    }
-
-    const preferedNameByGN = this.taxon.in(treat('preferedName'))
-    this.preferedNameBy = preferedNameByGN.nodes.length > 0 ? await linkToTreatments(preferedNameByGN) : null
-
-    const definingTreatmentGN = this.taxon.in(treat('definesTaxonConcept'))
-    this.definingTreatments = definingTreatmentGN.nodes.length > 0 ? await linkToTreatments(definingTreatmentGN) : null
-
-    const augmentingTreatmentGN = this.taxon.in(treat('augmentsTaxonConcept'))
-    this.augmentingTreatments = augmentingTreatmentGN.nodes.length > 0 ? await linkToTreatments(augmentingTreatmentGN) : null
-
-    this.title = this.getFormattedName(this.taxon.value)
+    this.title = this.getFormattedName(this.taxon.url)
     // if (!this.names[this.taxon.value]) {
     this.$emit('taxonRendered', this.taxon)
-    /* this.taxamanager.getNewTaxa(this.taxon.value).then(async (newTaxa: any) => {
-      // console.log('got newtaxa for ' + this.title, newTaxa)
-      this.deprecations = this.deprecations.concat(await newTaxa.each((tn: any) => tn))
-      this.$emit('relatedTaxaEncountered', newTaxa)
-    })
-    this.taxamanager.getOldTaxa(this.taxon.value).then(async (oldTaxa: any) => {
-      // console.log('got oldtaxa for ' + this.title, oldTaxa)
-      this.deprecates = this.deprecates.concat(await oldTaxa.each((tn: any) => tn))
-      this.$emit('relatedTaxaEncountered', oldTaxa)
-    }) */
   }
 
   mounted () {
@@ -212,5 +190,21 @@ export default class TaxonReport extends Vue {
 
 .scroll-x {
   overflow-x: auto;
+}
+
+svg {
+  height: 1em;
+}
+
+.blue {
+  color: #1e88e5;
+}
+
+.green {
+  color: #388e3c;
+}
+
+.red {
+  color: #e53935;
 }
 </style>

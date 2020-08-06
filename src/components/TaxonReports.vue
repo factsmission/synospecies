@@ -4,7 +4,6 @@
     v-for="taxon in taxa"
     :key="taxon.value"
     :taxon="taxon"
-    :taxamanager="taxamanager"
   />
 </div>
 </template>
@@ -12,7 +11,6 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import SingleTaxonReport from '@/components/SingleTaxonReport.vue'
-import TaxaManager from '@/TaxaManager'
 
 @Component({
   components: {
@@ -21,7 +19,6 @@ import TaxaManager from '@/TaxaManager'
 })
 export default class TaxonReports extends Vue {
   @Prop() taxa!: {[key: string]: any}[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-  @Prop() taxamanager!: TaxaManager;
 
   message = ''
 }

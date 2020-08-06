@@ -1,6 +1,6 @@
 <template>
 <!-- eslint-disable vue/require-v-for-key -->
-<div class="card" v-if="names && years" aria-hidden="true">
+<div class="card" v-if="taxa && years" aria-hidden="true">
   <div class="timeline">
     <div class="labels">
       <button class="label" @click.prevent="fullscreen()">
@@ -11,7 +11,10 @@
           <path fill="currentcolor" d="M10,21V19H6.41L10.91,14.5L9.5,13.09L5,17.59V14H3V21H10M14.5,10.91L19,6.41V10H21V3H14V5H17.59L13.09,9.5L14.5,10.91Z"/>
         </svg>
       </button>
-      <div class="label" v-for="name in names" :key="name" > {{ getFormattedName(name) }} </div>
+      <div class="label" v-for="taxon in taxa" :key="taxon.url" >
+        {{ getFormattedName(taxon.url) }}
+        <spinner v-if="taxon.loading"/>
+      </div>
     </div>
     <div class="sep">
     </div>
@@ -77,6 +80,7 @@
 <script lang="ts">
 /* eslint-disable comma-dangle */
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import Spinner from '@/components/Spinner.vue'
 
 // Required as typescript doesn't know about these nonstandard functions
 declare global {
@@ -93,9 +97,18 @@ declare global {
   }
 }
 
-@Component
+@Component({
+  components: { Spinner }
+})
 export default class Timeline extends Vue {
-  @Prop() names!: string[];
+  @Prop() taxa!: {
+    url: string;
+    def: any[];
+    aug: any[];
+    dpr: any[];
+    loading: boolean;
+  }[]
+
   @Prop() years!: ({ year: number; treatments: { data: ('def'|'ass'|'aug'|'dpr'|false)[]; url?: string }[] }|'sep')[];
 
   isFullscreen = false;
@@ -243,6 +256,11 @@ html {
   font-size: 1rem;
   margin: 0 .8rem .8rem 0;
   padding: 0;
+
+  .label {
+    display: flex;
+    justify-content: space-between;
+  }
 
   // Offset by 1 because of the empty label on top for spacing
   .label:nth-child(6n+3),

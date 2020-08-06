@@ -275,6 +275,13 @@ body.fullscreen-on {
     overflow: auto;
   }
 }
+
+pre,
+code,
+.CodeMirror {
+    font-family: 'Fira Code', monospace;
+}
+
 @media (max-width: 140ch) {
   .container {
     width: 100%;
