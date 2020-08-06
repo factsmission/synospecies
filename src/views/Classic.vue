@@ -16,6 +16,7 @@
   <hr />
   <taxon-reports
     :taxa="taxa"
+    :taxamanager="taxamanager"
     ref="taxonreports"
   />
   <hr />
@@ -120,6 +121,7 @@ export default class Classic extends Vue {
       if (j.results.bindings.length === 0) {
         this.message = 'No treatment for ' + this.current.genus + ' ' + this.current.species + ' found on Plazi.'
       } else {
+        window.location.hash = this.current.genus + '+' + this.current.species
         this.taxa = j.results.bindings.map(t => {
           return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true }
         })
@@ -127,32 +129,8 @@ export default class Classic extends Vue {
           this.taxamanager.getSynonymsWithTreatments(taxon.url).then(this.processSynonymsWithTreatments)
         })
         this.message = ''
-        console.table(this.taxa)
       }
     })
-    /* .then(async (taxonConcepts: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-      if (taxonConcepts.nodes.length === 0) {
-        this.message = 'No treatment for ' + this.current.genus + ' ' + this.current.species + ' found on Plazi.'
-      } else {
-        window.location.hash = this.current.genus + '+' + this.current.species
-        this.taxa = this.taxa.concat(
-          await taxonConcepts.each((tn: any) => tn) // eslint-disable-line
-            .then(
-              (tns: any) => Promise.all(tns.sort(
-                (tn1: any, tn2: any) => { // eslint-disable-line
-                  const y1 = tn1.value.substring(tn1.value.length - 4)
-                  const y2 = tn2.value.substring(tn2.value.length - 4)
-                  return y1 - y2
-                }
-              ))
-            )
-        )
-        this.taxa.forEach((taxon) => {
-          this.taxamanager.getSynonymsWithTreatments(taxon.value).then(this.processSynonymsWithTreatments)
-        })
-        this.message = ''
-      }
-    }) */
   }
 
   processSynonymsWithTreatments (j: SparqlJson) {
@@ -193,7 +171,8 @@ export default class Classic extends Vue {
             (this.years[defyindex] as TLYear).treatments[deftindex].data[index] = 'def'
           }
         }
-        this.taxa[index].def.push({ url: b.def.value, creators: b.defcs.value, year: parseInt(b.defd.value, 10) })
+        const i = this.taxa[index].def.findIndex(d => d.url === b.def.value && d.creators === b.defcs.value && d.year === parseInt(b.defd.value, 10))
+        if (i === -1) this.taxa[index].def.push({ url: b.def.value, creators: b.defcs.value, year: parseInt(b.defd.value, 10) })
       }
 
       // Augmenting treatments
@@ -227,7 +206,8 @@ export default class Classic extends Vue {
             (this.years[augyindex] as TLYear).treatments[augtindex].data[index] = 'aug'
           }
         }
-        this.taxa[index].aug.push({ url: b.aug.value, creators: b.augcs.value, year: parseInt(b.augd.value, 10) })
+        const i = this.taxa[index].aug.findIndex(d => d.url === b.aug.value && d.creators === b.augcs.value && d.year === parseInt(b.augd.value, 10))
+        if (i === -1) this.taxa[index].aug.push({ url: b.aug.value, creators: b.augcs.value, year: parseInt(b.augd.value, 10) })
       }
 
       // Deprecating Treatments
@@ -261,10 +241,9 @@ export default class Classic extends Vue {
             (this.years[dpryindex] as TLYear).treatments[dprtindex].data[index] = 'dpr'
           }
         }
-        this.taxa[index].dpr.push({ url: b.dpr.value, creators: b.dprcs.value, year: parseInt(b.dprd.value, 10) })
+        const i = this.taxa[index].dpr.findIndex(d => d.url === b.dpr.value && d.creators === b.dprcs.value && d.year === parseInt(b.dprd.value, 10))
+        if (i === -1) this.taxa[index].dpr.push({ url: b.dpr.value, creators: b.dprcs.value, year: parseInt(b.dprd.value, 10) })
       }
-
-      console.log('finished loading', JSON.stringify(this.taxa[index]))
       this.taxa[index].loading = false
     });
 

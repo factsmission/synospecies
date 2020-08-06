@@ -1,7 +1,7 @@
 <template>
 <div :class="'card' + (deprecates.length > 0 ? ' deprecates ' : ' ') + (taxon.dpr.length > 0 ? 'deprecated' : '')">
   <hgroup>
-    <h2 class="card_header">{{ title }}</h2>
+     <h2 class="card_header">{{ getFormattedName(taxon.url) }}</h2>
     <h3
       class="card_header"
       v-for="p in preferedNameBy"
@@ -32,6 +32,14 @@
           {{ r }}
         </td>
       </tr>
+      <tr>
+        <td
+          colspan="7"
+          v-if="loading"
+        >
+          <spinner />
+        </td>
+      </tr>
     </table>
   </div>
   <p v-if="taxon.loading">
@@ -54,6 +62,11 @@
         <a :href="t.url">
           {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
         </a>
+        <ul v-if="deprecates.find(d => d.url === t.url)">
+          <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
+            Deprecates {{ getFormattedName(d.old) }}
+          </li>
+        </ul>
       </li>
     </ul>
   </p>
@@ -70,6 +83,11 @@
         <a :href="t.url">
           {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
         </a>
+        <ul v-if="deprecates.find(d => d.url === t.url)">
+          <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
+            Deprecates {{ getFormattedName(d.old) }}
+          </li>
+        </ul>
       </li>
     </ul>
   </p>
@@ -86,6 +104,11 @@
         <a :href="t.url">
           {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
         </a>
+        <ul v-if="deprecations.find(d => d.url === t.url)">
+          <li v-for="d in deprecations.filter(d => d.url === t.url)" :key="d.new">
+            Deprecated by {{ getFormattedName(d.new) }}
+          </li>
+        </ul>
       </li>
     </ul>
   </p>
@@ -96,6 +119,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/Spinner.vue'
 import $rdf from 'ext-rdflib'
+import TaxaManager from '@/TaxaManager'
 
 function dwc (localName: string) {
   return $rdf.sym('http://rs.tdwg.org/dwc/terms/' + localName)
@@ -126,6 +150,15 @@ function truncate () {
   }
 }
 
+type SparqlJson = {
+  head: {
+    vars: string[];
+  };
+  results: {
+    bindings: { [key: string]: { type: string; value: string } }[];
+  };
+}
+
 type Treat = {
   url: string;
   creators?: string;
@@ -143,11 +176,15 @@ export default class TaxonReport extends Vue {
       loading: boolean;
     }
 
-  title = ''
-  ranks: any[] | never[] = []
+  @Prop() taxamanager!: TaxaManager;
 
-  deprecations = []
-  deprecates = []
+  treats: {url: string; deprecates: string[]}[] = []
+  ranks: string[] = []
+
+  loading = true
+
+  deprecations: { url: string; new: string }[] = []
+  deprecates: { url: string; old: string }[] = []
 
   preferedNameBy: {
     creators: string[];
@@ -169,8 +206,20 @@ export default class TaxonReport extends Vue {
     const ranks = await Promise.all(['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'].map(async r => this.taxon.out(dwc(r)).each((f: any) => f.value).then((fs: any) => fs.join(', '))))
     this.ranks = ranks */
 
-    this.title = this.getFormattedName(this.taxon.url)
-    // if (!this.names[this.taxon.value]) {
+    const details: SparqlJson = await this.taxamanager.getTaxonDetails(this.taxon.url)
+    details.results.bindings.forEach(b => {
+      console.log(b)
+      this.ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'].map(r => b[r] ? b[r].value : '')
+      if (b.dprtreat && b.new) {
+        const i = this.deprecations.findIndex(d => d.url === b.dprtreat.value && d.new === b.new.value)
+        if (i === -1) this.deprecations.push({ url: b.dprtreat.value, new: b.new.value })
+      }
+      if (b.dprxtreat && b.old) {
+        const i = this.deprecates.findIndex(d => d.url === b.dprxtreat.value && d.old === b.old.value)
+        if (i === -1) this.deprecates.push({ url: b.dprxtreat.value, old: b.old.value })
+      }
+    })
+    this.loading = false
     this.$emit('taxonRendered', this.taxon)
   }
 

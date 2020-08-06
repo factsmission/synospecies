@@ -81,4 +81,31 @@ SELECT DISTINCT ?tc WHERE {
 }`
     return this._sparqlEndpoint.getSparqlResultSet(query).then(json => json)
   }
+
+  getTaxonDetails (tc) {
+    const query = `PREFIX treat: <http://plazi.org/vocab/treatment#>
+    PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    SELECT DISTINCT * WHERE {
+      <${tc}> dwc:rank ?rank;
+              dwc:phylum ?phylum;
+              dwc:kingdom ?kingdom;
+              dwc:class ?class;
+              dwc:family ?family;
+              dwc:order ?order;
+              dwc:genus ?genus.
+      OPTIONAL {
+        <${tc}> dwc:species ?species;
+      }
+      OPTIONAL {
+        ?dprtreat treat:deprecates <${tc}>;
+                  (treat:augmentsTaxonConcept|treat:definesTaxonConcept) ?new.
+      }
+      OPTIONAL {
+        ?dprxtreat (treat:augmentsTaxonConcept|treat:definesTaxonConcept) <${tc}>;
+                   treat:deprecates ?old.
+      }
+    }`
+    return this._sparqlEndpoint.getSparqlResultSet(query).then(json => json)
+  }
 }

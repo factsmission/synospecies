@@ -277,8 +277,11 @@ body.fullscreen-on {
 }
 
 pre,
+pre *,
 code,
-.CodeMirror {
+code *,
+.CodeMirror,
+.CodeMirror * {
     font-family: 'Fira Code', monospace;
 }
 
