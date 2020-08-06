@@ -208,7 +208,6 @@ export default class TaxonReport extends Vue {
 
     const details: SparqlJson = await this.taxamanager.getTaxonDetails(this.taxon.url)
     details.results.bindings.forEach(b => {
-      console.log(b)
       this.ranks = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'].map(r => b[r] ? b[r].value : '')
       if (b.dprtreat && b.new) {
         const i = this.deprecations.findIndex(d => d.url === b.dprtreat.value && d.new === b.new.value)
