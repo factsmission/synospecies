@@ -7,7 +7,7 @@
   <hr>
   <h2>All synonyms</h2>
   This query returns all synonyms of 
-  <code>&lt;http://taxon-concept.plazi.org/id/Animalia/Munida_Man_1888></code>.
+  <code>&lt;http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905></code>.
   It uses a transitive property path to get the taxa (Taxon-Concepts) 
   augmented or defined by a treatmented that deprecates this taxon or that are
   deprecated by a treatement that defines or deprecates this taxon.
@@ -15,7 +15,7 @@
     <pre>
 PREFIX treat: &lt;http://plazi.org/vocab/treatment#>
 SELECT DISTINCT * WHERE {
-  &lt;http://taxon-concept.plazi.org/id/Animalia/Munida_Man_1888> ((^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept))|((^treat:augmentsTaxonConcept|^treat:definesTaxonConcept)/treat:deprecates))* ?tc .
+  &lt;http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept))|((^treat:augmentsTaxonConcept|^treat:definesTaxonConcept)/treat:deprecates))* ?tc .
 }
     </pre>
   </query-editor>
