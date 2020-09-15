@@ -1,5 +1,5 @@
 <template>
-<div :class="'card' + (deprecates.length > 0 ? ' deprecates ' : ' ') + (taxon.dpr.length > 0 ? 'deprecated' : '')">
+<div :class="'card' + (deprecates.length > 0 && 0 === taxon.dpr.length ? ' deprecates ' : ' ') + (taxon.dpr.length > 0 ? 'deprecated' : '')">
   <hgroup>
      <h2 class="card_header">{{ getFormattedName(taxon.url) }}</h2>
     <h3
