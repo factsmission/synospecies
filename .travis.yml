@@ -1,7 +1,7 @@
 sudo: false
 language: node_js
 node_js:
-  - "10.13"
+  - "12.15"
 env:
   - CXX=g++-5
 addons:
