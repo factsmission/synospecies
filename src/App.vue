@@ -230,7 +230,7 @@ a img {
     }
   }
 }
-.router-link-active {
+.router-link-exact-active {
   background-color: #f3f3f3;
 }
 .plazi-header > .container {
