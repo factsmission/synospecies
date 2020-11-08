@@ -133,6 +133,22 @@ export default class Classic extends Vue {
     })
   }
 
+  getHorizontalData (genus: string, species: string) {
+    this.taxamanager.getTaxonConcepts(genus, species).then((j: SparqlJson) => {
+      if (j.results.bindings.length !== 0) {
+        const res = j.results.bindings
+          .filter(t => !this.taxa.find(ta => t.tc.value === ta.url))
+          .map(t => {
+            return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true }
+          })
+        this.taxa = this.taxa.concat(res)
+        res.forEach((taxon) => {
+          this.taxamanager.getSynonymsWithTreatments(taxon.url).then(this.processSynonymsWithTreatments)
+        })
+      }
+    })
+  }
+
   processSynonymsWithTreatments (j: SparqlJson) {
     j.results.bindings.forEach(b => {
       let index = this.taxa.findIndex(t => t.url === b.tc.value)
@@ -255,6 +271,15 @@ export default class Classic extends Vue {
         return 1
       }
       return 0
+    })
+
+    this.taxa.forEach((taxon) => {
+      try {
+        const nameSection = taxon.url.substring(taxon.url.lastIndexOf('/') + 1)
+        const genus = nameSection.substring(0, nameSection.indexOf('_'))
+        const species = nameSection.substring(nameSection.indexOf('_') + 1, nameSection.indexOf('_', nameSection.indexOf('_') + 1))
+        this.getHorizontalData(genus, species)
+      } catch (error) {}
     })
 
     this.years.forEach(y => {
