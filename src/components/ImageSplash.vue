@@ -35,7 +35,7 @@ export default class ImageSplash extends Vue {
   splash () {
     this.images = []
     this.taxa.forEach((taxon) => {
-      this.taxamanager.getImages(taxon.value).then((images: Image[]) => {
+      this.taxamanager.getImages(taxon.url).then((images: Image[]) => {
         this.images = this.images.concat(images)
         this.images = this.images.filter((item, index) => this.images.findIndex(i => i.url === item.url) === index)
       })
