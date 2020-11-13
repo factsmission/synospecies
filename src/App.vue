@@ -147,9 +147,12 @@ hr {
   width: 100%;
 }
 table {
-  margin: 0 -0.5rem;
-  width: calc(100% + 1rem);
+  margin: 0;
+  width: 100%;
   border-collapse: collapse;
+}
+th {
+  color: rgba(0,0,0,0.7);
 }
 table tr th,
 table tr td {
@@ -157,18 +160,11 @@ table tr td {
   border-top: 1px solid #00000033;
   padding: 0.5rem;
 }
-table tr:last-child th,
-table tr:last-child td {
+table tr:nth-child(2) td {
   border-bottom: 1px solid #00000033;
 }
 table a {
   word-break: break-all;
-}
-.card table:first-child tr:first-child td {
-  border-top: none;
-}
-.card table:last-child tr:last-child td {
-  border-bottom: none;
 }
 a,
 a:visited {

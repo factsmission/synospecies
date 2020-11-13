@@ -24,7 +24,7 @@
         <th>Genus</th>
         <th>Species</th>
       </tr>
-      <tr>
+      <tr v-if="!loading">
         <td
           v-for="r in ranks"
           :key="r"
@@ -32,11 +32,8 @@
           {{ r }}
         </td>
       </tr>
-      <tr>
-        <td
-          colspan="7"
-          v-if="loading"
-        >
+      <tr v-if="loading">
+        <td colspan="7">
           <spinner />
         </td>
       </tr>
