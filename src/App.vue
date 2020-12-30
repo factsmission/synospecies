@@ -79,7 +79,7 @@ main.container {
   max-width: 100%;
   max-width: calc(100vw - 32px);
   margin: 0 auto;
-  padding: 32px;
+  padding: 16px 32px 0;
   border-radius: 8px;
 }
 * {
@@ -103,13 +103,11 @@ main.container {
   margin-right: -16px;
 }
 hr {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin: 0;
   border: 0;
   border-top: 1px solid #00000033;
 }
 .section {
-  border-bottom: 1px solid #00000033;
   margin: 12px 0;
 }
 .section:empty {

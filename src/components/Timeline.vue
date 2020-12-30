@@ -253,7 +253,7 @@ html {
   display: flex;
   flex-direction: row;
   width: 100%;
-  padding: .8rem 0;
+  padding: .8rem 0 .4rem;
 
   &>*:last-child {
     padding-right: .8rem;
