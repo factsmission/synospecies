@@ -67,7 +67,9 @@ html {
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
+}
+#app {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -103,7 +105,7 @@ main.container {
   margin-right: -16px;
 }
 hr {
-  margin: 0;
+  margin: 0.4rem 0;
   border: 0;
   border-top: 1px solid #00000033;
 }

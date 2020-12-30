@@ -2,7 +2,7 @@
 <div>
   <h1>SynoSpecies</h1>
   <form id="search-form">
-    <span>Input Genus and species here:</span>
+    <label for="combinedfield">Input Genus and species here:</label>
     <input type="text" id="combinedfield" placeholder="Sadayoshia acroporae" />
     <button @click.prevent="onClick" id="lookup">Look up</button>
   </form>
@@ -320,4 +320,37 @@ export default class Classic extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+h1 {
+  padding: 0 0.8rem;
+}
+#search-form {
+  padding: 0 0.8rem 0.5rem;
+
+  input,
+  button {
+    line-height: 1.8rem;
+    border-radius: 0.2rem;
+    margin-left: 0.8rem;
+    padding: 0 0.4rem;
+    font-size: 1rem;
+  }
+
+  input {
+    border: 1px solid grey;
+    width: 290px;
+  }
+
+  button {
+    background: #476100;
+    border: 1px solid #476100;
+    color: #fff;
+  }
+
+  button:hover,
+  button:focus,
+  button:active {
+    background: #81951d;
+    border: 1px solid #81951d;
+  }
+}
 </style>
