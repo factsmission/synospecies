@@ -56,7 +56,7 @@ export default class App extends Vue {}
 </script>
 
 <style lang="scss">
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,800,800italic|Oswald:700&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,800,800italic|Oswald:500&display=swap");
 * {
   box-sizing: border-box;
 }
@@ -93,9 +93,6 @@ main.container {
 }
 .container h1,
 .container h1 * {
-  margin: 0 0 16px;
-  font-family: Oswald, Arial, Helvetica, sans-serif;
-  font-weight: normal;
   color: #727272;
 }
 .image {
@@ -118,11 +115,6 @@ hr {
 .section:empty {
   display: none;
 }
-.section.card_header {
-  font-family: Oswald, Arial, Helvetica, sans-serif;
-  font-weight: 700;
-  margin: 0 0 16px 0;
-}
 .section.card_body {
   margin: 0;
   width: 100%;
@@ -136,11 +128,14 @@ hr {
 .card:empty {
   display: none;
 }
+.container h1,
+.container h1 *,
+.section.card_header,
 .card .card_header,
 .card .card_header>* {
   font-family: Oswald, Arial, Helvetica, sans-serif;
-  font-weight: 700;
-  margin: 0 0 16px 0;
+  font-weight: normal;
+  margin: -8px 0 16px 0;
 }
 .card .card_body {
   margin: 0;
@@ -157,11 +152,22 @@ th {
 table tr th,
 table tr td {
   text-align: center;
-  border-top: 1px solid #00000033;
+  // border-top: 1px solid #00000033;
   padding: 0.5rem;
 }
-table tr:nth-child(2) td {
-  border-bottom: 1px solid #00000033;
+tr:nth-child(even) {
+  // background-color: #ffffff0f;
+}
+tr:nth-child(odd) {
+  background-color: #0000000f;
+  & *:first-child {
+    border-top-left-radius: 0.2rem;
+    border-bottom-left-radius: 0.2rem;
+  }
+  & *:last-child {
+    border-top-right-radius: 0.2rem;
+    border-bottom-right-radius: 0.2rem;
+  }
 }
 table a {
   word-break: break-all;

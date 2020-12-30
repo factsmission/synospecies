@@ -3,20 +3,77 @@
 <div class="card" v-if="taxa && years" aria-hidden="true">
   <div class="timeline">
     <div class="labels">
-      <button class="label" @click.prevent="fullscreen()">
-        <svg v-if="isFullscreen" viewBox="0 0 24 24">
-          <path fill="currentcolor" d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>
-        </svg>
-        <svg v-else viewBox="0 0 24 24">
-          <path fill="currentcolor" d="M10,21V19H6.41L10.91,14.5L9.5,13.09L5,17.59V14H3V21H10M14.5,10.91L19,6.41V10H21V3H14V5H17.59L13.09,9.5L14.5,10.91Z"/>
-        </svg>
-      </button>
+      <div class="row">
+        <button class="label" @click.prevent="fullscreen()">
+          <svg v-if="isFullscreen" viewBox="0 0 24 24">
+            <path fill="currentcolor" d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>
+          </svg>
+          <svg v-else viewBox="0 0 24 24">
+            <path fill="currentcolor" d="M10,21V19H6.41L10.91,14.5L9.5,13.09L5,17.59V14H3V21H10M14.5,10.91L19,6.41V10H21V3H14V5H17.59L13.09,9.5L14.5,10.91Z"/>
+          </svg>
+        </button>
+        <button class="label legend" @click.prevent="legendOpen = !legendOpen">
+          <svg viewBox="0 0 24 24">
+            <path v-if="legendOpen" fill="currentColor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z" />
+            <path v-else fill="currentColor" d="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
+          </svg>
+          <div :hidden="!legendOpen" class="card">
+            <div class="top">
+              Explanation:
+              <br>
+              <div class="small">
+                Each vertical bar represents and links to one treatment.
+              </div>
+            </div>
+            <div class="treatments">
+              <div class="treatment">
+                <div class="label">
+                  <svg class="green" viewBox="0 0 24 24">
+                    <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                  </svg>
+                </div><!--
+                <div class="label">
+                  <svg class="green" viewBox="0 0 24 24">
+                    <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+                  </svg>
+                </div>
+                --><div class="label">
+                  <svg class="blue" viewBox="0 0 24 24">
+                    <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                  </svg>
+                </div>
+                <div class="label">
+                  <svg class="red" viewBox="0 0 24 24">
+                    <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+                  </svg>
+                </div>
+                <div class="label"/>
+              </div>
+              <div class="labels">
+                <div class="label">
+                  T. defines this taxon
+                </div><!--
+                <div class="label">
+                  Assumed defining treatment
+                </div>
+                --><div class="label">
+                  T. augments this taxon
+                </div>
+                <div class="label">
+                  T. deprecates this taxon
+                </div>
+                <div class="label">
+                  T. ignores this taxon
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+      </div>
       <div class="label" v-for="taxon in taxa" :key="taxon.url" >
         {{ getFormattedName(taxon.url) }}
         <spinner v-if="taxon.loading"/>
       </div>
-    </div>
-    <div class="sep">
     </div>
     <div class="scroll-x">
       <div v-for="year in years" :class="year === 'sep' ? 'sep' : 'year'">
@@ -47,32 +104,6 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="label">
-    <svg class="green" viewBox="0 0 24 24">
-      <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-    </svg>
-    Defining treatment
-  </div>
-  <!--<div class="label">
-    <svg class="green" viewBox="0 0 24 24">
-      <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
-    </svg>
-    Assumed defining treatment
-  </div>-->
-  <div class="label">
-    <svg class="blue" viewBox="0 0 24 24">
-      <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-    </svg>
-    Augmenting treatment
-    <br>
-  </div>
-  <div class="label">
-    <svg class="red" viewBox="0 0 24 24">
-      <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
-    </svg>
-    Deprecating treatment
-    <br>
   </div>
 </div>
 </template>
@@ -112,6 +143,7 @@ export default class Timeline extends Vue {
   @Prop() years!: ({ year: number; treatments: { data: ('def'|'ass'|'aug'|'dpr'|false)[]; url?: string }[] }|'sep')[];
 
   isFullscreen = false;
+  legendOpen = false;
 
   getFormattedName (uri: string) {
     const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
@@ -206,6 +238,10 @@ html {
   font-size: 25px;
 }
 
+.card {
+  padding: 0 !important;
+}
+
 .timeline {
   display: flex;
   flex-direction: row;
@@ -217,11 +253,77 @@ html {
   display: flex;
   flex-direction: row;
   width: 100%;
+  padding: .8rem 0;
+
+  &>*:last-child {
+    padding-right: .8rem;
+  }
+}
+
+.row {
+  display: flex;
+}
+
+.legend {
+  margin-left: 0.8rem;
+  position: relative;
+
+  .card {
+    // display: flex;
+    // height: 1.8rem;
+    line-height: 1.8rem;
+    position: absolute;
+    top: 34px;
+    left: -1px;
+    margin: 0;
+    background: white;
+    border: 1px solid grey;
+    border-radius: 0.2rem;
+    box-shadow: 2px 4px 9px -4px #212121;
+    z-index: 900;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .top {
+    text-align: left;
+    margin-left: 3rem;
+    width: 22ch;
+  }
+  .small {
+    white-space: normal;
+    font-size: 0.8rem;
+    line-height: normal;
+  }
+
+  .label {
+    background: none !important;
+  }
+
+  .label:nth-child(6n+2),
+  .label:nth-child(6n+4){
+    background-color: #0000000f !important;
+  }
+
+  .labels {
+    margin-top: 0.8rem;
+    width: 22ch;
+    padding: 0;
+    border-right: none;
+  }
+
+  svg {
+    height: 1em;
+    vertical-align: top;
+    //margin: 0 0.4rem 0 0.8rem;
+  }
 }
 
 @media (max-width: 140ch) {
   .timeline {
-    overflow-x: auto;
+    // overflow-x: auto;
   }
 
   .scroll-x {
@@ -254,8 +356,12 @@ html {
 
 .labels {
   font-size: 1rem;
-  margin: 0 .8rem .8rem 0;
-  padding: 0;
+  margin: 0;
+  padding: .8rem;
+  border-right: 1px solid #ccc;
+  background-color: white;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
 
   .label {
     display: flex;
@@ -284,10 +390,6 @@ html {
   line-height: 1.8rem;
   margin: 0;
   padding: 0 .4rem;
-
-  &:last-child {
-    padding-right: 0;
-  }
 }
 
 .label {
@@ -299,6 +401,8 @@ html {
 }
 
 button.label {
+  background: #ffffff;
+  border-radius: .2rem;
   display: block;
   font: inherit;
   border: 1px solid grey;
