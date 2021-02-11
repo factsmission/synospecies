@@ -56,7 +56,7 @@ export default class App extends Vue {}
 </script>
 
 <style lang="scss">
-@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,800,800italic|Oswald:500&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300&family=Open+Sans:ital,wght@0,400;0,600;0,800;1,400;1,600;1,800&family=Oswald:wght@500&display=swap');
 * {
   box-sizing: border-box;
 }
