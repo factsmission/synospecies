@@ -20,7 +20,7 @@ import Selector from '@/components/Selector'
   components: { Selector }
 })
 export default class About extends Vue {
-  allEndpoints = ['https://trifid-lindas.test.cluster.ldbar.ch/query', 'https://treatment.ld.plazi.org/sparql']
+  allEndpoints = ['https://lindas.admin.ch/query', 'https://trifid-lindas.test.cluster.ldbar.ch/query', 'https://treatment.ld.plazi.org/sparql']
 
   endpoint = config.endpoint();
 
