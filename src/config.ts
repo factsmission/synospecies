@@ -3,7 +3,7 @@ export const endpoint = function () {
   return localValue || 'https://lindas.admin.ch/query' // 'https://treatment.ld.plazi.org/sparql'
 }
 export const justifications = function () {
-  const localValue = JSON.parse(localStorage.getItem('justify-synospecies') || 'true')
+  const localValue = JSON.parse(localStorage.getItem('justify-synospecies') || 'false')
   return localValue
 }
 export default {
