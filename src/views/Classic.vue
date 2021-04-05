@@ -45,7 +45,7 @@ import VernacularViewer from '@/VernacularViewer'
 import TaxaManager from '@/TaxaManager'
 import TaxonReports from '@/components/TaxonReports.vue'
 import Taxomplete from 'taxomplete'
-import config from '@/config.ts'
+import config from '@/config'
 
 type SparqlJson = {
   head: {
@@ -65,6 +65,15 @@ type Treat = {
   url: string;
   creators?: string;
   year?: number;
+}
+
+function getFormattedName (uri: string) {
+  const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
+  const lastSeparator = nameSection.lastIndexOf('_')
+  return nameSection.substring(0, lastSeparator)
+    .replace(new RegExp('_', 'g'), ' ') +
+    ', ' +
+    nameSection.substring(lastSeparator + 1)
 }
 
 @Component({
@@ -88,6 +97,7 @@ export default class Classic extends Vue {
     aug: Treat[];
     dpr: Treat[];
     loading: boolean;
+    justification?: string[];
   }[] = []
 
   years: (TLYear | 'sep')[] = [];
@@ -123,10 +133,10 @@ export default class Classic extends Vue {
       } else {
         window.location.hash = this.current.genus + '+' + this.current.species
         this.taxa = j.results.bindings.map(t => {
-          return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true }
+          return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true, justification: ['Has queried genus & species'] }
         })
         this.taxa.forEach((taxon) => {
-          this.taxamanager.getSynonymsWithTreatments(taxon.url).then(this.processSynonymsWithTreatments)
+          this.taxamanager.getSynonymsWithTreatments(taxon.url).then((j: SparqlJson) => this.processSynonymsWithTreatments(j, taxon.url))
         })
         this.message = ''
       }
@@ -139,21 +149,28 @@ export default class Classic extends Vue {
         const res = j.results.bindings
           .filter(t => !this.taxa.find(ta => t.tc.value === ta.url))
           .map(t => {
-            return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true }
+            return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true, justification: ['Has same genus & species as another synonym'] }
           })
         this.taxa = this.taxa.concat(res)
         res.forEach((taxon) => {
-          this.taxamanager.getSynonymsWithTreatments(taxon.url).then(this.processSynonymsWithTreatments)
+          this.taxamanager.getSynonymsWithTreatments(taxon.url).then((j: SparqlJson) => this.processSynonymsWithTreatments(j, taxon.url))
         })
       }
     })
   }
 
-  processSynonymsWithTreatments (j: SparqlJson) {
+  processSynonymsWithTreatments (j: SparqlJson, previous: string) {
     j.results.bindings.forEach(b => {
+      const justification = `Found to be a synonym for <a href="${previous}">${getFormattedName(previous)}</a>`
       let index = this.taxa.findIndex(t => t.url === b.tc.value)
       if (index === -1) {
-        index = this.taxa.push({ url: b.tc.value, def: [], aug: [], dpr: [], loading: false }) - 1
+        index = this.taxa.push({ url: b.tc.value, def: [], aug: [], dpr: [], loading: false, justification: [justification] }) - 1
+      } else if (this.taxa[index].url !== previous) {
+        const tt = this.taxa[index]
+        tt.justification = tt.justification || []
+        if (!tt.justification.find(j => j === justification)) {
+          tt.justification.push(justification)
+        }
       }
 
       // Defining Treatments
