@@ -202,7 +202,7 @@ export default class TaxonReport extends Vue {
 
   loading = true
 
-  justifications = justifications;
+  justifications = justifications();
 
   deprecations: { url: string; new: string }[] = []
   deprecates: { url: string; old: string }[] = []
