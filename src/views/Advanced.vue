@@ -20,6 +20,26 @@ SELECT DISTINCT * WHERE {
     </pre>
   </query-editor>
     <hr>
+  <h2>Find homonyms</h2>
+  Find binomens that exist both as Animalia as well as Plantae
+  <query-editor>
+    <pre>
+SELECT DISTINCT *
+WHERE {
+  ?s1 a &lt;http://filteredpush.org/ontologies/oa/dwcFP#TaxonName>;
+  &lt;http://rs.tdwg.org/dwc/terms/kingdom> "Plantae";
+  &lt;http://rs.tdwg.org/dwc/terms/genus> ?gn;
+  &lt;http://rs.tdwg.org/dwc/terms/species> ?sp;
+  &lt;http://rs.tdwg.org/dwc/terms/rank> "species".
+  ?s2 a &lt;http://filteredpush.org/ontologies/oa/dwcFP#TaxonName>;
+  &lt;http://rs.tdwg.org/dwc/terms/kingdom> "Animalia";
+  &lt;http://rs.tdwg.org/dwc/terms/genus> ?gn;
+  &lt;http://rs.tdwg.org/dwc/terms/species> ?sp;
+  &lt;http://rs.tdwg.org/dwc/terms/rank> "species".
+}
+    </pre>
+  </query-editor>
+    <hr>
   <h2>Largest graphs</h2>
   This query returns the 10 largest graphs on the SPARQL endpoint.
   <query-editor>
