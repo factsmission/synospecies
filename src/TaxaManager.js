@@ -48,6 +48,54 @@ GROUP BY ?tc ?aug ?augd ?def ?defd ?dpr ?dprd`
     return this._sparqlEndpoint.getSparqlResultSet(query).then(json => json)
   }
 
+  getSynonymGraph (taxon) {
+    const query =
+`PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX treat: <http://plazi.org/vocab/treatment#>
+CONSTRUCT {
+    ?aug treat:augmentsTaxonConcept ?tc ;
+         dc:creator ?augc ;
+         treat:publishedIn ?augp .
+    ?augp dc:date ?augd .
+    ?def treat:augmentsTaxonConcept ?tc ;
+         dc:creator ?defc ;
+         treat:publishedIn ?defp .
+    ?defp dc:date ?defd .
+    ?dpr treat:augmentsTaxonConcept ?tc ;
+         dc:creator ?dprc ;
+         treat:publishedIn ?dprp .
+    ?dprp dc:date ?dprd .
+} WHERE {
+  <${taxon}> ((^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept))|
+    ((^treat:augmentsTaxonConcept|^treat:definesTaxonConcept)/treat:deprecates))* ?tc .
+  OPTIONAL {
+    ?aug treat:augmentsTaxonConcept ?tc;
+         dc:creator ?augc.
+    OPTIONAL {
+      ?aug treat:publishedIn ?augp.
+      ?augp dc:date ?augd.
+    }
+  }
+  OPTIONAL {
+    ?def treat:definesTaxonConcept ?tc;
+         dc:creator ?defc.
+    OPTIONAL {
+      ?def treat:publishedIn ?defp.
+      ?defp dc:date ?defd.
+    }
+  }
+  OPTIONAL {
+    ?dpr treat:deprecates ?tc;
+          dc:creator ?dprc.
+    OPTIONAL {
+      ?dpr treat:publishedIn ?dprp.
+      ?dprp dc:date ?dprd.
+    }
+  }
+}`
+    return this._sparqlEndpoint.getSparqlRDF(query).then(body => body)
+  }
+
   getImages (taxon) {
     const query = 'PREFIX treat: <http://plazi.org/vocab/treatment#>\n' +
                 'PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>\n' +

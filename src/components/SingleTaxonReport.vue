@@ -85,8 +85,10 @@
           </li>
         </ul>
       </p>
-      <p v-if="taxon.justification && justifications" class="just">
+      <p v-if="justifications" class="just">
         <span v-for="j in taxon.justification" :key="j" v-html="j" />
+        <br><button @click="loadGraph">Get justification graph</button>
+        <br><pre>{{ graph }}</pre>
       </p>
     </div>
     <div class="vert">
@@ -241,6 +243,11 @@ export default class TaxonReport extends Vue {
     })
     this.loading = false
     this.$emit('taxonRendered', this.taxon)
+  }
+
+  graph: any = '...';
+  loadGraph () {
+    this.taxamanager.getSynonymGraph().then((g: any) => { this.graph = g })
   }
 
   mounted () {
