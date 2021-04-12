@@ -40,6 +40,19 @@ WHERE {
     </pre>
   </query-editor>
     <hr>
+  <h2>Find kingdoms</h2>
+  Find all kingdoms and one sample taxon-name from within each.
+  <query-editor>
+    <pre>
+SELECT DISTINCT ?k (SAMPLE(?s1) as ?s)
+WHERE {
+  ?s1 a &lt;http://filteredpush.org/ontologies/oa/dwcFP#TaxonName>;
+  &lt;http://rs.tdwg.org/dwc/terms/kingdom> ?k.
+}
+GROUP BY ?k
+    </pre>
+  </query-editor>
+    <hr>
   <h2>Largest graphs</h2>
   This query returns the 10 largest graphs on the SPARQL endpoint.
   <query-editor>
