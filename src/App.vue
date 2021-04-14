@@ -31,7 +31,8 @@
     <div class="plazi-footer">
       <div class="container">
         Synospecies is created and maintained by
-        <a href="https://factsmission.com">FactsMission</a> and uses the
+        <a href="https://factsmission.com">FactsMission</a>,
+        is powerdes by <a href="https://allegrograph.com/products/allegrograph/">Franz Inc. Allegro Graph</a> and uses the
         taxonomic treatment data provided by
         <a href="http://plazi.org/">Plazi</a>.
       </div>
