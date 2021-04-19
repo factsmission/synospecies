@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Classic from '@/views/Classic.vue'
 import About from '@/views/About.vue'
 import Settings from '@/views/Settings.vue'
+import SynonymGrouper from '@/views/SynonymGrouper.vue'
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,11 @@ const routes = [
     path: '/settings',
     name: 'settings',
     component: Settings
+  },
+  {
+    path: '/syg',
+    name: 'SynonymGrouper',
+    component: SynonymGrouper
   },
   {
     path: '/advanced',
