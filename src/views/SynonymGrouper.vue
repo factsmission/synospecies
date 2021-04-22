@@ -14,7 +14,7 @@
           <td><a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a></td>
           <td>
             <ul>
-              <li v-for="j in js.justifications" :key="j.toString()">{{ shorten(j.toString(), true) }}</li>
+              <li v-for="j in js.justifications.values()" :key="j.toString()">{{ shorten(j.toString(), true) }}</li>
             </ul>
             <!-- {{ Array.from(js.justifications.values()) }} -->
           </td>
