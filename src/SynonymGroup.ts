@@ -26,36 +26,10 @@ type SparqlJson = {
   };
 }
 
-export class SynonymGroup {
-  /**
-   * Maps from taxonConceptUris to their synonyms
-   */
-  private justifiedSynonyms: Map<string, JustifiedSynonym> = new Map()
-
-  constructor (public sparqlEndpoint: SparqlEndpoint, taxonName: string) {
-    (async () => {
-      const justifiedSynsToExpand: JustifiedSynonym[] = await this.getStartingPoints(taxonName)
-      justifiedSynsToExpand.forEach(justsyn => this.justifiedSynonyms.set(justsyn.taxonConceptUri, justsyn))
-      const expandedTaxonConcepts: string[] = []
-      while (justifiedSynsToExpand.length > 0) {
-        const taxonConcept = justifiedSynsToExpand.pop()!
-        const newSynonyms = await this.lookUpRound(taxonConcept)
-        expandedTaxonConcepts.push(taxonConcept.taxonConceptUri)
-        newSynonyms.forEach(justsyn => {
-          if (this.justifiedSynonyms.has(justsyn.taxonConceptUri)) {
-            justsyn.justifications.forEach(jsj => this.justifiedSynonyms.get(justsyn.taxonConceptUri)!.justifications.add(jsj))
-          } else {
-            this.justifiedSynonyms.set(justsyn.taxonConceptUri, justsyn)
-          }
-          if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
-            justifiedSynsToExpand.push(justsyn)
-          }
-        })
-      }
-    })()
-  }
-
-  getStartingPoints (taxonName: string): Promise<JustifiedSynonym[]> {
+export async function SynonymGroupBuilder(public sparqlEndpoint: SparqlEndpoint, taxonName: string) {
+  function getStartingPoints(taxonName: string): Promise<JustifiedSynonym[]> {
+    /** Maps from taxonConceptUris to their synonyms */
+    const justifiedSynonyms: Map<string, JustifiedSynonym> = new Map()
     const [genus, species, subspecies] = taxonName.split(' ')
     const query = `PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
 PREFIX treat: <http://plazi.org/vocab/treatment#>
@@ -72,14 +46,14 @@ SELECT DISTINCT ?tn ?tc WHERE {
       }))
   }
 
-  synonymFinders = [
-    function getLexicalMatches (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
+  const synonymFinders = [
+    function getLexicalMatches(taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
       return Promise.resolve([])
     },
     /* Get the Synonyms deprecating {taxon} */
     (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> => {
       const query =
-`PREFIX dc: <http://purl.org/dc/elements/1.1/>
+        `PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX treat: <http://plazi.org/vocab/treatment#>
 SELECT DISTINCT
 ?tc ?tn ?treat ?date (group_concat(DISTINCT ?creator;separator="; ") as ?creators)
@@ -107,17 +81,45 @@ GROUP BY ?tc ?tn ?treat ?date`
         }
       }).filter(v => !!v))
     },
-    async function getThoseDeprecating (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
+    async function getThoseDeprecating(taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
       return []
     }
   ]
 
-  lookUpRound (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
+  function lookUpRound(taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
     const foundGroupsP = this.synonymFinders.map(finder => finder(taxon))
     return Promise.all(foundGroupsP).then(foundGroups => foundGroups.reduce((a, b) => a.concat(b), []))
   }
+  const justifiedSynsToExpand: JustifiedSynonym[] = await this.getStartingPoints(taxonName)
+  justifiedSynsToExpand.forEach(justsyn => this.justifiedSynonyms.set(justsyn.taxonConceptUri, justsyn))
+  debugger
+  const expandedTaxonConcepts: string[] = []
+  while (justifiedSynsToExpand.length > 0) {
+    const taxonConcept = justifiedSynsToExpand.pop()!
+    const newSynonyms = await this.lookUpRound(taxonConcept)
+    expandedTaxonConcepts.push(taxonConcept.taxonConceptUri)
+    newSynonyms.forEach(justsyn => {
+      if (this.justifiedSynonyms.has(justsyn.taxonConceptUri)) {
+        justsyn.justifications.forEach(jsj => this.justifiedSynonyms.get(justsyn.taxonConceptUri)!.justifications.add(jsj))
+      } else {
+        this.justifiedSynonyms.set(justsyn.taxonConceptUri, justsyn)
+      }
+      if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
+        justifiedSynsToExpand.push(justsyn)
+      }
+    })
+  }
+}
 
-  getAllSynonyms (): JustifiedSynonym[] {
+export class SynonymGroup {
+
+
+  constructor(public justifiedSynonyms: Map<string, JustifiedSynonym>) {
+  }
+
+
+
+  getAllSynonyms(): JustifiedSynonym[] {
     return Array.from(this.justifiedSynonyms.values())
   }
 }
