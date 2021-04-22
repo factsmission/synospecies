@@ -51,7 +51,7 @@ SELECT DISTINCT ?tn ?tc WHERE {
     function getLexicalMatches (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
       return Promise.resolve([])
     },
-    /* Get the Synonyms deprecating {taxon} */
+    /** Get the Synonyms deprecating {taxon} */
     (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> => {
       const query =
         `PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -82,8 +82,36 @@ GROUP BY ?tc ?tn ?treat ?date`
         }
       }).filter(v => !!v))
     },
-    async function getThoseDeprecating (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
-      return []
+    /** Get the Synonyms deprecated by {taxon} */
+    (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> => {
+      const query =
+        `PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX treat: <http://plazi.org/vocab/treatment#>
+SELECT DISTINCT
+?tc ?tn ?treat ?date (group_concat(DISTINCT ?creator;separator="; ") as ?creators)
+WHERE {
+  ?treat (treat:augmentsTaxonConcept|treat:definesTaxonConcept) <${taxon.taxonConceptUri}> ;
+         treat:deprecates ?tc ;
+         dc:creator ?creator .
+  ?tc <http://plazi.org/vocab/treatment#hasTaxonName> ?tn .
+  OPTIONAL {
+    ?treat treat:publishedIn ?publ .
+    ?publ dc:date ?date .
+  }
+}
+GROUP BY ?tc ?tn ?treat ?date`
+      return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => json.results.bindings.map(t => {
+        if (!t.tc) return undefined
+        return {
+          taxonConceptUri: t.tc.value,
+          taxonNameUri: t.tn.value,
+          justifications: new Set([{
+            toString: () => `${taxon.taxonConceptUri} is deprecated by ${t.tc.value} according to ${t.treat.value}`,
+            precedingSynonym: taxon,
+            treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
+          }])
+        }
+      }).filter(v => !!v))
     }
   ]
 
