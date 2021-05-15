@@ -38,7 +38,9 @@ export default class SynonymGrouper extends Vue {
   sg?: SynonymGroup;
 
   shorten (uri: string, bracket?: boolean) {
-    const temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri
+    let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri
+    const index = ~temp.indexOf(']') ? temp.indexOf(']') + 2 : 0
+    temp = temp.substring(index)
     return temp.replace(/http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\//g, '').replace(/\/|_/g, ' ')
   }
 
@@ -58,8 +60,8 @@ export default class SynonymGrouper extends Vue {
 
 <style lang="scss" scoped>
 table tr {
-  th:last-child,
-  td:last-child {
+  th,
+  td {
     text-align: left;
   }
 

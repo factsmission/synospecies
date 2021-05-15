@@ -1,4 +1,5 @@
 import type SparqlEndpoint from '@retog/sparql-client'
+import { justifications } from './config'
 
 interface Justification {
   toString: () => string;
@@ -11,10 +12,65 @@ interface TreatmentJustification extends Justification {
 
 type LexicalJustification = Justification
 
+type anyJustification = (TreatmentJustification|LexicalJustification)
+
+export class JustificationSet implements Set<anyJustification> {
+  private contents: anyJustification[] = []
+
+  get size () {
+    return this.contents.length
+  }
+
+  add (value: anyJustification) {
+    if (this.contents.findIndex(c => c.toString() === value.toString()) === -1) {
+      this.contents.push(value)
+    }
+    return this
+  }
+
+  constructor (iterable?: Iterable<anyJustification>) {
+    if (iterable) {
+      for (const el of iterable) {
+        this.add(el)
+      }
+    }
+    return this
+  }
+
+  clear () {
+    this.contents = []
+  }
+
+  delete (value: anyJustification) {
+    return false
+  }
+
+  has (value: anyJustification) {
+    return false
+  }
+
+  forEach (cb: (val: anyJustification, key: anyJustification, set: this) => void) {
+    this.contents.forEach(v => cb(v, v, this))
+  }
+
+  [Symbol.toStringTag] = '';
+  [Symbol.iterator] = this.contents[Symbol.iterator]
+
+  values () {
+    return this.contents.values()
+  }
+
+  keys () {
+    return this.contents.values()
+  }
+
+  entries = ((Array.from(this.contents.values()).map(v => [v, v])) as [anyJustification, anyJustification][]).values
+}
+
 export type JustifiedSynonym = {
   taxonConceptUri: string
   taxonNameUri: string
-  justifications: Set<(Justification)>
+  justifications: JustificationSet
 }
 
 type SparqlJson = {
@@ -43,7 +99,7 @@ SELECT DISTINCT ?tn ?tc WHERE {
 }`
     return sparqlEndpoint.getSparqlResultSet(query)
       .then((json: SparqlJson) => json.results.bindings.map(t => {
-        return { taxonConceptUri: t.tc.value, taxonNameUri: t.tn.value, justifications: new Set([`Matches "${genus}${species ? ' ' + species : ''}${subspecies ? ' ' + subspecies : ''}"`]) }
+        return { taxonConceptUri: t.tc.value, taxonNameUri: t.tn.value, justifications: new JustificationSet([`matches "${genus}${species ? ' ' + species : ''}${subspecies ? ' ' + subspecies : ''}"`]) }
       }))
   }
 
@@ -74,7 +130,7 @@ GROUP BY ?tc ?tn ?treat ?date`
         return {
           taxonConceptUri: t.tc.value,
           taxonNameUri: t.tn.value,
-          justifications: new Set([{
+          justifications: new JustificationSet([{
             toString: () => `${t.tc.value} deprecates ${taxon.taxonConceptUri} according to ${t.treat.value}`,
             precedingSynonym: taxon,
             treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
@@ -105,8 +161,8 @@ GROUP BY ?tc ?tn ?treat ?date`
         return {
           taxonConceptUri: t.tc.value,
           taxonNameUri: t.tn.value,
-          justifications: new Set([{
-            toString: () => `${taxon.taxonConceptUri} is deprecated by ${t.tc.value} according to ${t.treat.value}`,
+          justifications: new JustificationSet([{
+            toString: () => `${t.tc.value} deprecated by ${taxon.taxonConceptUri} according to ${t.treat.value}`,
             precedingSynonym: taxon,
             treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
           }])
