@@ -196,25 +196,31 @@ GROUP BY ?tc ?tn ?treat ?date`
     return Promise.all(foundGroupsP).then(foundGroups => foundGroups.reduce((a, b) => a.concat(b), []))
   }
 
-  const justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
+  let justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
   justifiedSynsToExpand.forEach(justsyn => justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1))
   const expandedTaxonConcepts: string[] = []
   while (justifiedSynsToExpand.length > 0) {
-    const taxonConcept = justifiedSynsToExpand.pop()!
-    const newSynonyms = await lookUpRound(taxonConcept)
-    expandedTaxonConcepts.push(taxonConcept.taxonConceptUri)
-    newSynonyms.forEach(justsyn => {
-      if (justifiedSynonyms.has(justsyn.taxonConceptUri)) {
-        justsyn.justifications.forEach(jsj => {
-          justifiedArray[justifiedSynonyms.get(justsyn.taxonConceptUri)!].justifications.add(jsj)
-        })
-      } else {
-        justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
-      }
-      if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
-        justifiedSynsToExpand.push(justsyn)
-      }
-    })
+    const promises = justifiedSynsToExpand.map((j, index) => lookUpRound(j).then(newSynonyms => {
+      expandedTaxonConcepts.push(j.taxonConceptUri)
+      newSynonyms.forEach(justsyn => {
+        if (justifiedSynonyms.has(justsyn.taxonConceptUri)) {
+          justsyn.justifications.forEach(jsj => {
+            justifiedArray[justifiedSynonyms.get(justsyn.taxonConceptUri)!].justifications.add(jsj)
+          })
+        } else {
+          justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
+        }
+        if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
+          justifiedSynsToExpand.push(justsyn)
+        }
+      })
+      console.log('finished', index)
+      return true
+    }))
+    justifiedSynsToExpand = []
+    console.log('cleared')
+    await Promise.all(promises)
+    console.log('awaited')
   }
 
   return new SynonymGroup(justifiedArray)
