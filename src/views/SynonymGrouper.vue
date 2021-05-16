@@ -3,6 +3,7 @@
     <h1>SynonymGrouper</h1>
     <input type="text" v-model="input" @keyup.enter=updateSG>
     <button @click="updateSG">Go</button>
+    <code>{{ message }}</code>
     <table>
         <tr>
           <th>Taxon Name URI</th>
@@ -36,6 +37,7 @@ export default class SynonymGrouper extends Vue {
   input = 'Sadayoshia acroporae'
   result: JustifiedSynonym[] = []
   sg?: SynonymGroup;
+  message = ''
 
   shorten (uri: string, bracket?: boolean) {
     let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri
@@ -46,9 +48,11 @@ export default class SynonymGrouper extends Vue {
 
   updateSG () {
     this.result = []
-    SynonymGroupBuilder(this.endpoint, this.input).then(sg => {
-      this.sg = sg
-      this.result = sg.getAllSynonyms()
+    this.message = ' loading'
+    SynonymGroupBuilder(this.endpoint, this.input, this.result).then(sg => {
+      this.message = ' loaded'
+      // this.sg = sg
+      // this.result = sg.getAllSynonyms()
     })
   }
 

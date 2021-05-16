@@ -82,9 +82,9 @@ type SparqlJson = {
   };
 }
 
-export async function SynonymGroupBuilder (sparqlEndpoint: SparqlEndpoint, taxonName: string): Promise<SynonymGroup> {
+export async function SynonymGroupBuilder (sparqlEndpoint: SparqlEndpoint, taxonName: string, justifiedArray: JustifiedSynonym[] = []): Promise<SynonymGroup> {
   /** Maps from taxonConceptUris to their synonyms */
-  const justifiedSynonyms: Map<string, JustifiedSynonym> = new Map()
+  const justifiedSynonyms: Map<string, number> = new Map()
 
   function getStartingPoints (taxonName: string): Promise<JustifiedSynonym[]> {
     const [genus, species, subspecies] = taxonName.split(' ')
@@ -104,8 +104,28 @@ SELECT DISTINCT ?tn ?tc WHERE {
   }
 
   const synonymFinders = [
-    function getLexicalMatches (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
-      return Promise.resolve([])
+    /** Get the Synonyms having the same {taxon-concept} */
+    (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> => {
+      const query =
+        `PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX treat: <http://plazi.org/vocab/treatment#>
+SELECT DISTINCT
+?tc
+WHERE {
+  ?tc treat:hasTaxonName <${taxon.taxonNameUri}> .
+  FILTER (?tc != <${taxon.taxonConceptUri}>)
+}`
+      return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => json.results.bindings.map(t => {
+        if (!t.tc) return undefined
+        return {
+          taxonConceptUri: t.tc.value,
+          taxonNameUri: taxon.taxonNameUri,
+          justifications: new JustificationSet([{
+            toString: () => `${t.tc.value} has taxon name ${taxon.taxonNameUri}`,
+            precedingSynonym: taxon
+          }])
+        }
+      }).filter(v => !!v))
     },
     /** Get the Synonyms deprecating {taxon} */
     (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> => {
@@ -177,7 +197,7 @@ GROUP BY ?tc ?tn ?treat ?date`
   }
 
   const justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
-  justifiedSynsToExpand.forEach(justsyn => justifiedSynonyms.set(justsyn.taxonConceptUri, justsyn))
+  justifiedSynsToExpand.forEach(justsyn => justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1))
   const expandedTaxonConcepts: string[] = []
   while (justifiedSynsToExpand.length > 0) {
     const taxonConcept = justifiedSynsToExpand.pop()!
@@ -185,9 +205,11 @@ GROUP BY ?tc ?tn ?treat ?date`
     expandedTaxonConcepts.push(taxonConcept.taxonConceptUri)
     newSynonyms.forEach(justsyn => {
       if (justifiedSynonyms.has(justsyn.taxonConceptUri)) {
-        justsyn.justifications.forEach(jsj => justifiedSynonyms.get(justsyn.taxonConceptUri)!.justifications.add(jsj))
+        justsyn.justifications.forEach(jsj => {
+          justifiedArray[justifiedSynonyms.get(justsyn.taxonConceptUri)!].justifications.add(jsj)
+        })
       } else {
-        justifiedSynonyms.set(justsyn.taxonConceptUri, justsyn)
+        justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
       }
       if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
         justifiedSynsToExpand.push(justsyn)
@@ -195,15 +217,15 @@ GROUP BY ?tc ?tn ?treat ?date`
     })
   }
 
-  return new SynonymGroup(justifiedSynonyms)
+  return new SynonymGroup(justifiedArray)
 }
 
 export class SynonymGroup {
-  constructor (public justifiedSynonyms: Map<string, JustifiedSynonym>) {
+  constructor (public justifiedSynonyms: JustifiedSynonym[]) {
     this.justifiedSynonyms = justifiedSynonyms
   }
 
   getAllSynonyms (): JustifiedSynonym[] {
-    return Array.from(this.justifiedSynonyms.values())
+    return this.justifiedSynonyms
   }
 }
