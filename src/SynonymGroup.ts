@@ -223,7 +223,7 @@ GROUP BY ?tc ?tn ?treat ?date`
       return true
     }))
     justifiedSynsToExpand = []
-    await Promise.all(promises)
+    await Promise.allSettled(promises)
   }
 
   return new SynonymGroup(justifiedArray)
