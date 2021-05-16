@@ -200,27 +200,30 @@ GROUP BY ?tc ?tn ?treat ?date`
   justifiedSynsToExpand.forEach(justsyn => justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1))
   const expandedTaxonConcepts: string[] = []
   while (justifiedSynsToExpand.length > 0) {
+    const foundThisRound: string[] = []
     const promises = justifiedSynsToExpand.map((j, index) => lookUpRound(j).then(newSynonyms => {
-      expandedTaxonConcepts.push(j.taxonConceptUri)
       newSynonyms.forEach(justsyn => {
+        // Check whether we know about this synonym already
         if (justifiedSynonyms.has(justsyn.taxonConceptUri)) {
-          justsyn.justifications.forEach(jsj => {
-            justifiedArray[justifiedSynonyms.get(justsyn.taxonConceptUri)!].justifications.add(jsj)
-          })
+          // Check if we found that synonym in this round
+          if (~foundThisRound.indexOf(justsyn.taxonConceptUri)) {
+            justsyn.justifications.forEach(jsj => {
+              justifiedArray[justifiedSynonyms.get(justsyn.taxonConceptUri)!].justifications.add(jsj)
+            })
+          }
         } else {
           justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
         }
         if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
           justifiedSynsToExpand.push(justsyn)
+          foundThisRound.push(justsyn.taxonConceptUri)
         }
       })
-      console.log('finished', index)
+      expandedTaxonConcepts.push(j.taxonConceptUri)
       return true
     }))
     justifiedSynsToExpand = []
-    console.log('cleared')
     await Promise.all(promises)
-    console.log('awaited')
   }
 
   return new SynonymGroup(justifiedArray)
