@@ -15,7 +15,7 @@
           <td><a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a></td>
           <td>
             <ul>
-              <li v-for="j in js.justifications.values()" :key="j.toString()">{{ shorten(j.toString(), true) }}</li>
+              <li v-for="j in js.justifications.values()" :key="j.toString()">{{ asProse(j) }}</li>
             </ul>
             <!-- {{ Array.from(js.justifications.values()) }} -->
           </td>
@@ -26,8 +26,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { SynonymGroupBuilder } from '@/SynonymGroup'
-import type { JustifiedSynonym, SynonymGroup } from '@/SynonymGroup'
+import { JustificationSet, SynonymGroupBuilder } from '@/SynonymGroup'
+import type { JustifiedSynonym, SynonymGroup, Justification } from '@/SynonymGroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 
@@ -38,6 +38,13 @@ export default class SynonymGrouper extends Vue {
   result: JustifiedSynonym[] = []
   sg?: SynonymGroup;
   message = ''
+
+  asProse (j: Justification): string {
+    const predececessor: (t: JustifiedSynonym) => string = (t) => {
+      return `${this.shorten(t.taxonConceptUri)} in turn ${this.asProse([...t.justifications.values()][0])}`
+    }
+    return `${this.shorten(j.toString(), true)}, ${j.precedingSynonym ? predececessor(j.precedingSynonym) : 'which is the searched term.'}`
+  }
 
   shorten (uri: string, bracket?: boolean) {
     let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri

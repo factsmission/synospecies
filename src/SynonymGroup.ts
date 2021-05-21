@@ -1,7 +1,7 @@
 import type SparqlEndpoint from '@retog/sparql-client'
 import { justifications } from './config'
 
-interface Justification {
+export interface Justification {
   toString: () => string;
   precedingSynonym?: JustifiedSynonym; // eslint-disable-line no-use-before-define
 }
