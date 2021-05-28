@@ -41,7 +41,7 @@ export default class SynonymGrouper extends Vue {
 
   asProse (j: Justification): string {
     const predececessor: (t: JustifiedSynonym) => string = (t) => {
-      return `${this.shorten(t.taxonConceptUri)} in turn ${this.asProse([...t.justifications.values()][0])}`
+      return `[${this.shorten(t.taxonConceptUri)}] in turn ${this.asProse([...t.justifications.values()][0])}`
     }
     return `${this.shorten(j.toString(), true)}, ${j.precedingSynonym ? predececessor(j.precedingSynonym) : 'which is the searched term.'}`
   }
