@@ -98,7 +98,6 @@ export default class Classic extends Vue {
     aug: Treat[];
     dpr: Treat[];
     loading: boolean;
-    justification?: string[];
   }[] = []
 
   years: (TLYear | 'sep')[] = [];
@@ -134,7 +133,7 @@ export default class Classic extends Vue {
       } else {
         window.location.hash = this.current.genus + '+' + this.current.species
         this.taxa = j.results.bindings.map(t => {
-          return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true, justification: ['Has queried genus & species'] }
+          return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true }
         })
         this.taxa.forEach((taxon) => {
           this.taxamanager.getSynonymsWithTreatments(taxon.url).then((j: SparqlJson) => this.processSynonymsWithTreatments(j, taxon.url))
@@ -150,7 +149,7 @@ export default class Classic extends Vue {
         const res = j.results.bindings
           .filter(t => !this.taxa.find(ta => t.tc.value === ta.url))
           .map(t => {
-            return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true, justification: ['Has same genus & species as another synonym'] }
+            return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true }
           })
         this.taxa = this.taxa.concat(res)
         res.forEach((taxon) => {
@@ -160,18 +159,11 @@ export default class Classic extends Vue {
     })
   }
 
-  processSynonymsWithTreatments (j: SparqlJson, previous: string) {
+  processSynonymsWithTreatments (j: SparqlJson) {
     j.results.bindings.forEach(b => {
-      const justification = `Found to be a synonym for <a href="${previous}">${getFormattedName(previous)}</a>`
       let index = this.taxa.findIndex(t => t.url === b.tc.value)
       if (index === -1) {
-        index = this.taxa.push({ url: b.tc.value, def: [], aug: [], dpr: [], loading: false, justification: [justification] }) - 1
-      } else if (this.taxa[index].url !== previous) {
-        const tt = this.taxa[index]
-        tt.justification = tt.justification || []
-        if (!tt.justification.find(j => j === justification)) {
-          tt.justification.push(justification)
-        }
+        index = this.taxa.push({ url: b.tc.value, def: [], aug: [], dpr: [], loading: false }) - 1
       }
 
       // Defining Treatments
