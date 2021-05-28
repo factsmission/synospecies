@@ -1,5 +1,4 @@
 import type SparqlEndpoint from '@retog/sparql-client'
-import { justifications } from './config'
 
 export interface Justification {
   toString: () => string;

@@ -136,7 +136,7 @@ export default class Classic extends Vue {
           return { url: t.tc.value, def: [], aug: [], dpr: [], loading: true }
         })
         this.taxa.forEach((taxon) => {
-          this.taxamanager.getSynonymsWithTreatments(taxon.url).then((j: SparqlJson) => this.processSynonymsWithTreatments(j, taxon.url))
+          this.taxamanager.getSynonymsWithTreatments(taxon.url).then((j: SparqlJson) => this.processSynonymsWithTreatments(j))
         })
         this.message = ''
       }
@@ -153,7 +153,7 @@ export default class Classic extends Vue {
           })
         this.taxa = this.taxa.concat(res)
         res.forEach((taxon) => {
-          this.taxamanager.getSynonymsWithTreatments(taxon.url).then((j: SparqlJson) => this.processSynonymsWithTreatments(j, taxon.url))
+          this.taxamanager.getSynonymsWithTreatments(taxon.url).then((j: SparqlJson) => this.processSynonymsWithTreatments(j))
         })
       }
     })
