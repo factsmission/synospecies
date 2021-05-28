@@ -1,5 +1,6 @@
 <template>
 <div>
+  <i id="betabtn"><router-link to="/syg">view beta</router-link></i>
   <h1>SynoSpecies</h1>
   <form id="search-form">
     <label for="combinedfield">Input Genus and species here:</label>
@@ -339,6 +340,11 @@ export default class Classic extends Vue {
 <style scoped lang="scss">
 h1 {
   padding: 0 0.8rem;
+}
+#betabtn {
+  float: right;
+  margin: 0.2em;
+  font-size: small;
 }
 #search-form {
   padding: 0 0.8rem 0.5rem;

@@ -1,7 +1,8 @@
 <template>
   <div>
-    <h1>SynonymGrouper</h1>
-    <input type="text" v-model="input" @keyup.enter=updateSG>
+    <h1>SynoSpecies</h1>
+    <div class="card notice"><b>Beta:</b> This is under development. Looks and behavior will change.</div>
+    <input type="text" v-model="input" @keyup.enter="updateSG">
     <button @click="updateSG">Go</button>
     <code>{{ message }}</code>
     <table>
