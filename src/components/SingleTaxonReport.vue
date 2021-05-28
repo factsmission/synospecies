@@ -85,11 +85,6 @@
           </li>
         </ul>
       </p>
-      <p v-if="justifications" class="just">
-        <span v-for="j in taxon.justification" :key="j" v-html="j" />
-        <br><button @click="loadGraph">Get justification graph</button>
-        <br><pre>{{ graph }}</pre>
-      </p>
     </div>
     <div class="vert">
       <table class="nobold">
@@ -139,7 +134,6 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/Spinner.vue'
 import $rdf from 'ext-rdflib'
 import TaxaManager from '@/TaxaManager'
-import { justifications } from '@/config'
 
 function dwc (localName: string) {
   return $rdf.sym('http://rs.tdwg.org/dwc/terms/' + localName)
@@ -194,7 +188,6 @@ export default class TaxonReport extends Vue {
       aug: Treat[];
       dpr: Treat[];
       loading: boolean;
-      justification?: string[];
     }
 
   @Prop() taxamanager!: TaxaManager;
@@ -203,8 +196,6 @@ export default class TaxonReport extends Vue {
   ranks: string[] = []
 
   loading = true
-
-  justifications = justifications();
 
   deprecations: { url: string; new: string }[] = []
   deprecates: { url: string; old: string }[] = []

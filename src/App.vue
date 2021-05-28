@@ -124,13 +124,12 @@ hr {
   border: 1px solid #00000033;
   border-radius: 8px;
   padding: 16px;
-  margin: 12px;
+  margin: 12px 0;
 }
 .card:empty {
   display: none;
 }
 .container h1,
-.container h1 *,
 .section.card_header,
 .card .card_header,
 .card .card_header>* {
@@ -142,6 +141,12 @@ hr {
   margin: 0;
   width: 100%;
 }
+
+.notice {
+  background-color: #ffecb3;
+  color: #634b03;
+}
+
 table {
   margin: 0;
   width: 100%;
