@@ -10,7 +10,7 @@
     </div>
     <div v-if="loading" class="card"><spinner class="center"/></div>
     <div v-else class="card" style="line-height: 1rem;">
-      took {{ time }}s
+      {{ result.length }} results, took {{ time }}s
     </div>
     <div class="card" v-for="js in result" :key="js.taxonConceptUri">
       <h2>

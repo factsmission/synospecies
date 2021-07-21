@@ -112,7 +112,12 @@ SELECT DISTINCT ?tn ?tc WHERE {
 }`
     return sparqlEndpoint.getSparqlResultSet(query)
       .then((json: SparqlJson) => json.results.bindings.map(t => {
-        return { taxonConceptUri: t.tc.value, taxonNameUri: t.tn.value, justifications: new JustificationSet([`matches "${genus}${species ? ' ' + species : ''}${subspecies ? ' ' + subspecies : ''}"`]) }
+        return {
+          taxonConceptUri: t.tc.value,
+          taxonNameUri: t.tn.value,
+          justifications: new JustificationSet([`matches "${genus}${species ? ' ' + species : ''}${subspecies ? ' ' + subspecies : ''}"`]),
+          treatments: { def: [], aug: [], dpr: [] }
+        }
       }))
   }
 
@@ -213,7 +218,6 @@ GROUP BY ?tc ?tn ?treat ?date`
   }
 
   function getTreatments (uri: string): Promise<Treatments> {
-    console.log('»', uri)
     const treat = 'http://plazi.org/vocab/treatment#'
     const query =
 `PREFIX treat: <${treat}>
@@ -258,15 +262,15 @@ GROUP BY ?treat ?how ?date`
   }
 
   let justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
-  justifiedSynsToExpand.forEach(async justsyn => {
-    justsyn.treatments = await getTreatments(justsyn.taxonConceptUri)
+  await justifiedSynsToExpand.forEach(justsyn => {
+    getTreatments(justsyn.taxonConceptUri).then(t => (justsyn.treatments = t))
     justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
   })
   const expandedTaxonConcepts: string[] = []
   while (justifiedSynsToExpand.length > 0) {
     const foundThisRound: string[] = []
     const promises = justifiedSynsToExpand.map((j, index) => lookUpRound(j).then(newSynonyms => {
-      newSynonyms.forEach(async justsyn => {
+      newSynonyms.forEach(justsyn => {
         // Check whether we know about this synonym already
         if (justifiedSynonyms.has(justsyn.taxonConceptUri)) {
           // Check if we found that synonym in this round
@@ -276,7 +280,7 @@ GROUP BY ?treat ?how ?date`
             })
           }
         } else {
-          justsyn.treatments = await getTreatments(justsyn.taxonConceptUri)
+          getTreatments(justsyn.taxonConceptUri).then(t => (justsyn.treatments = t))
           justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
         }
         if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
