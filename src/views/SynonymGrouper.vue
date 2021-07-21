@@ -9,15 +9,14 @@
       <label><input type="checkbox" v-model="openT">Expand all Treatments</label>
     </div>
     <div v-if="loading" class="card"><spinner class="center"/></div>
-    <div v-else class="card split">
-      <b>Taxon Name URI</b>
-      <b>Taxon Concept URI</b>
+    <div v-else class="card" style="line-height: 1rem;">
+      took {{ time }}s
     </div>
     <div class="card" v-for="js in result" :key="js.taxonConceptUri">
-      <div class="split">
-        <a :href="js.taxonNameUri">{{ shorten(js.taxonNameUri) }}</a>
+      <h2>
         <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
-      </div>
+      </h2>
+      <a :href="js.taxonNameUri">{{ shorten(js.taxonNameUri) }}</a>
       <details :open="openJ">
         <summary>
           Justifications
@@ -60,7 +59,8 @@ export default class SynonymGrouper extends Vue {
   sg?: SynonymGroup;
   loading = false
   openJ = false
-  openT = true
+  openT = false
+  time = '-'
 
   shorten (uri: string, bracket?: boolean) {
     let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri
@@ -72,8 +72,10 @@ export default class SynonymGrouper extends Vue {
   updateSG () {
     this.result = []
     this.loading = true
+    const t0 = performance.now()
     SynonymGroupBuilder(this.endpoint, this.input, this.result).then(sg => {
       this.loading = false
+      this.time = ((performance.now() - t0) / 1000).toFixed(2)
       // this.sg = sg
       // this.result = sg.getAllSynonyms()
     })
@@ -106,5 +108,11 @@ table tr {
   td {
     text-align: left;
   }
+}
+
+.card h2 {
+  margin: -0.25rem 0 0.25rem;
+  font-weight: 600;
+  font-size: 1.25rem;
 }
 </style>
