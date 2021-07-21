@@ -5,9 +5,10 @@
     <div class="flex-row">
       <input type="text" v-model="input" @keyup.enter="updateSG">
       <button @click="updateSG">Go</button>
-      <label><input type="checkbox" v-model="openAll">Expand All</label>
+      <label><input type="checkbox" v-model="openJ">Expand all Justifications</label>
+      <label><input type="checkbox" v-model="openT">Expand all Treatments</label>
     </div>
-    <div v-if="loading" class="card">loading...</div>
+    <div v-if="loading" class="card"><spinner class="center"/></div>
     <div v-else class="card split">
       <b>Taxon Name URI</b>
       <b>Taxon Concept URI</b>
@@ -17,9 +18,19 @@
         <a :href="js.taxonNameUri">{{ shorten(js.taxonNameUri) }}</a>
         <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
       </div>
-      <details :open="openAll">
-        <summary>Justifications</summary>
+      <details :open="openJ">
+        <summary>
+          Justifications
+          ( {{ js.justifications.size }} )
+        </summary>
         <justification-view :js="js"/>
+      </details>
+      <details :open="openT">
+        <summary>
+          Treatments
+          ( {{ js.treatments ? `${js.treatments.def.length} / ${js.treatments.aug.length} / ${js.treatments.dpr.length}` : '0 / 0 / 0' }} )
+        </summary>
+        <treatments-view :js="js"/>
       </details>
     </div>
   </div>
@@ -32,10 +43,14 @@ import type { JustifiedSynonym, SynonymGroup } from '@/SynonymGroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
+import TreatmentsView from '@/components/TreatmentsView.vue'
+import Spinner from '@/components/Spinner.vue'
 
 @Component({
   components: {
-    JustificationView
+    JustificationView,
+    TreatmentsView,
+    Spinner
   }
 })
 export default class SynonymGrouper extends Vue {
@@ -43,8 +58,9 @@ export default class SynonymGrouper extends Vue {
   input = 'Sadayoshia acroporae'
   result: JustifiedSynonym[] = []
   sg?: SynonymGroup;
-  loading = ''
-  openAll = false
+  loading = false
+  openJ = false
+  openT = false
 
   shorten (uri: string, bracket?: boolean) {
     let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri
@@ -73,11 +89,16 @@ export default class SynonymGrouper extends Vue {
 .split {
   display: flex;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 3fr 4fr;
 }
 
 .flex-row>input {
   flex: auto;
+}
+
+.center {
+  display: block;
+  margin: 0 auto;
 }
 
 table tr {

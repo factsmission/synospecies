@@ -1,4 +1,5 @@
 import type SparqlEndpoint from '@retog/sparql-client'
+import { TextMarkerOptions } from 'codemirror'
 
 export interface Justification {
   toString: () => string;
@@ -66,10 +67,23 @@ export class JustificationSet implements Set<anyJustification> {
   entries = ((Array.from(this.contents.values()).map(v => [v, v])) as [anyJustification, anyJustification][]).values
 }
 
+type Treatment = {
+  url: string
+  date?: number
+  creators?: string
+}
+
+type Treatments = {
+  def: Treatment[]
+  aug: Treatment[]
+  dpr: Treatment[]
+}
+
 export type JustifiedSynonym = {
   taxonConceptUri: string
   taxonNameUri: string
   justifications: JustificationSet
+  treatments?: Treatments
 }
 
 type SparqlJson = {
@@ -195,13 +209,57 @@ GROUP BY ?tc ?tn ?treat ?date`
     return Promise.all(foundGroupsP).then(foundGroups => foundGroups.reduce((a, b) => a.concat(b), []))
   }
 
+  function getTreatments (uri: string): Promise<Treatments> {
+    const treat = 'http://plazi.org/vocab/treatment#'
+    const query =
+`PREFIX treat: <${treat}>
+SELECT DISTINCT ?treat ?how ?date (group_concat(DISTINCT ?c;separator="; ") as ?creators)
+WHERE {
+  ?treat (treat:definesTaxonConcept|treat:augmentsTaxonConcept|treat:deprecates) <${uri}> ;
+          ?how <${uri}> ;
+          dc:creator ?c .
+  OPTIONAL {
+    ?treat treat:publishedIn ?pub .
+    ?pub dc:date ?date .
+  }
+}
+GROUP BY ?treat ?how ?date`
+    const result: Treatments = {
+      def: [],
+      aug: [],
+      dpr: []
+    }
+    return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => {
+      json.results.bindings.forEach(t => {
+        if (!t.treat) return
+        const treatment = {
+          url: t.treat.value,
+          date: parseInt(t.date?.value, 10),
+          creators: t.creators.value
+        }
+        switch (t.how.value) {
+          case treat + 'definesTaxonConcept':
+            result.def.push(treatment)
+            break
+          case treat + 'augmentsTaxonConcept':
+            result.aug.push(treatment)
+            break
+          case treat + 'deprecates':
+            result.dpr.push(treatment)
+            break
+        }
+      })
+      return result
+    })
+  }
+
   let justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
   justifiedSynsToExpand.forEach(justsyn => justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1))
   const expandedTaxonConcepts: string[] = []
   while (justifiedSynsToExpand.length > 0) {
     const foundThisRound: string[] = []
     const promises = justifiedSynsToExpand.map((j, index) => lookUpRound(j).then(newSynonyms => {
-      newSynonyms.forEach(justsyn => {
+      newSynonyms.forEach(async justsyn => {
         // Check whether we know about this synonym already
         if (justifiedSynonyms.has(justsyn.taxonConceptUri)) {
           // Check if we found that synonym in this round
@@ -211,6 +269,7 @@ GROUP BY ?tc ?tn ?treat ?date`
             })
           }
         } else {
+          justsyn.treatments = await getTreatments(justsyn.taxonConceptUri)
           justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
         }
         if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
