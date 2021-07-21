@@ -73,7 +73,7 @@ type Treatment = {
   creators?: string
 }
 
-type Treatments = {
+export type Treatments = {
   def: Treatment[]
   aug: Treatment[]
   dpr: Treatment[]
@@ -83,7 +83,7 @@ export type JustifiedSynonym = {
   taxonConceptUri: string
   taxonNameUri: string
   justifications: JustificationSet
-  treatments?: Treatments
+  treatments: Treatments
 }
 
 type SparqlJson = {
@@ -136,7 +136,8 @@ WHERE {
           justifications: new JustificationSet([{
             toString: () => `${t.tc.value} has taxon name ${taxon.taxonNameUri}`,
             precedingSynonym: taxon
-          }])
+          }]),
+          treatments: { def: [], aug: [], dpr: [] }
         }
       }).filter(v => !!v))
     },
@@ -167,7 +168,8 @@ GROUP BY ?tc ?tn ?treat ?date`
             toString: () => `${t.tc.value} deprecates ${taxon.taxonConceptUri} according to ${t.treat.value}`,
             precedingSynonym: taxon,
             treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
-          }])
+          }]),
+          treatments: { def: [], aug: [], dpr: [] }
         }
       }).filter(v => !!v))
     },
@@ -198,7 +200,8 @@ GROUP BY ?tc ?tn ?treat ?date`
             toString: () => `${t.tc.value} deprecated by ${taxon.taxonConceptUri} according to ${t.treat.value}`,
             precedingSynonym: taxon,
             treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
-          }])
+          }]),
+          treatments: { def: [], aug: [], dpr: [] }
         }
       }).filter(v => !!v))
     }
@@ -210,6 +213,7 @@ GROUP BY ?tc ?tn ?treat ?date`
   }
 
   function getTreatments (uri: string): Promise<Treatments> {
+    console.log('»', uri)
     const treat = 'http://plazi.org/vocab/treatment#'
     const query =
 `PREFIX treat: <${treat}>
@@ -254,7 +258,10 @@ GROUP BY ?treat ?how ?date`
   }
 
   let justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
-  justifiedSynsToExpand.forEach(justsyn => justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1))
+  justifiedSynsToExpand.forEach(async justsyn => {
+    justsyn.treatments = await getTreatments(justsyn.taxonConceptUri)
+    justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
+  })
   const expandedTaxonConcepts: string[] = []
   while (justifiedSynsToExpand.length > 0) {
     const foundThisRound: string[] = []

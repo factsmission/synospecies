@@ -60,7 +60,7 @@ export default class SynonymGrouper extends Vue {
   sg?: SynonymGroup;
   loading = false
   openJ = false
-  openT = false
+  openT = true
 
   shorten (uri: string, bracket?: boolean) {
     let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri

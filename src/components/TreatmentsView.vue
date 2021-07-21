@@ -1,5 +1,5 @@
 <template>
-  <div v-if="js.treatments">
+  <div>
     <ul>
       <li>
         Defining Treatments:
@@ -75,7 +75,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import type { JustifiedSynonym } from '@/SynonymGroup'
 
 @Component
