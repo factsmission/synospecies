@@ -70,6 +70,12 @@
           </div>
         </button>
       </div>
+      <!-- NEW -->
+      <div class="label" v-for="taxon in result" :key="taxon.url" >
+        {{ getFormattedName(taxon.taxonConceptUri) }}
+        <spinner v-if="taxon.loading"/>
+      </div>
+      <!-- OLD -->
       <div class="label" v-for="taxon in taxa" :key="taxon.url" >
         {{ getFormattedName(taxon.url) }}
         <spinner v-if="taxon.loading"/>
@@ -77,7 +83,7 @@
     </div>
     <div class="scroll-x">
       <div v-for="year in years" :class="year === 'sep' ? 'sep' : 'year'">
-        <div class="label center" v-if="year !== 'sep'"> {{ year.year === -1 ? 'Year Unknown' : year.year }} </div>
+        <div class="label center" v-if="year !== 'sep'"> {{ year.year === -1 ? '—' : year.year }} </div>
         <div class="treatments" v-if="year !== 'sep'">
           <a
             class="treatment"
@@ -110,8 +116,9 @@
 
 <script lang="ts">
 /* eslint-disable comma-dangle */
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/Spinner.vue'
+import type { JustifiedSynonym, Treatment } from '@/SynonymGroup'
 
 // Required as typescript doesn't know about these nonstandard functions
 declare global {
@@ -128,19 +135,106 @@ declare global {
   }
 }
 
+type TT = ('def'|'ass'|'aug'|'dpr')
+
+type Year = {
+  year: number;
+  treatments: {
+    data: (TT|false)[]
+    url?: string
+    creators?: string
+  }[]
+}
+
 @Component({
   components: { Spinner }
 })
 export default class Timeline extends Vue {
-  @Prop() taxa!: {
-    url: string;
+  @Prop({ default: () => [] }) taxa!: {
+    url?: string;
     def: any[];
     aug: any[];
     dpr: any[];
     loading: boolean;
-  }[]
+  }[] // OLD
 
-  @Prop() years!: ({ year: number; treatments: { data: ('def'|'ass'|'aug'|'dpr'|false)[]; url?: string }[] }|'sep')[];
+  @PropSync('years', { default: () => [] }) internal!: (Year|'sep')[];
+
+  @Prop({ default: () => [] }) result!: JustifiedSynonym[]
+
+  @Watch('result', { deep: true })
+  updateYears () {
+    this.internal = []
+    console.log(this.internal)
+    const addTreatment = (index: number, t: Treatment, type: TT) => {
+      const date = t.date ?? -1
+      const yearIndex = this.internal.findIndex(y => y !== 'sep' && y.year === date)
+      if (~yearIndex) {
+        // This year already exists
+        const year = this.internal[yearIndex] as Year
+        const treatmentIndex = year.treatments.findIndex(y => y.url === t.url)
+        if (~treatmentIndex) {
+          // This treatment already exists
+          // year.treatments[treatmentIndex].data.splice(index, 1, type)
+          Vue.set(year.treatments[treatmentIndex].data, index, type)
+        } else {
+          // Add treatment to year
+          const data: (TT|false)[] = []
+          data.length = this.result.length
+          data[index] = type
+          year.treatments.push({
+            creators: t.creators,
+            url: t.url,
+            data
+          })
+        }
+      } else {
+        // Add year
+        const data: (TT|false)[] = []
+        data.length = this.result.length
+        data[index] = type
+        this.internal.push({
+          year: date,
+          treatments: [{
+            creators: t.creators,
+            url: t.url,
+            data
+          }]
+        })
+      }
+    }
+
+    this.result.forEach((v, i) => {
+      v.treatments.def.forEach(t => addTreatment(i, t, 'def'))
+      v.treatments.aug.forEach(t => addTreatment(i, t, 'aug'))
+      v.treatments.dpr.forEach(t => addTreatment(i, t, 'dpr'))
+    });
+
+    // Sort
+
+    (this.internal as Year[]).sort((a, b) => {
+      if (a.year < b.year) {
+        return -1
+      }
+      if (a.year > b.year) {
+        return 1
+      }
+      return 0
+    })
+
+    // Fill
+
+    this.internal.forEach(y => {
+      if (y === 'sep') { return }
+      y.treatments.forEach(t => {
+        t.data = t.data.concat(Array(this.result.length - t.data.length).fill(false))
+      })
+    })
+  }
+
+  mounted () {
+    this.updateYears()
+  }
 
   isFullscreen = false;
   legendOpen = false;

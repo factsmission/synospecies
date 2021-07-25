@@ -5,15 +5,18 @@
     <div class="flex-row">
       <label for="combinedfield">Input Genus and species here:</label>
       <input type="text" v-model="input" id="combinedfield" placeholder="Sadayoshia acroporae" />
-      <!--<input type="text" @keyup.enter="updateSG">-->
       <button @click="updateSG">Go</button>
       <label><input type="checkbox" v-model="openJ">Expand all Justifications</label>
       <label><input type="checkbox" v-model="openT">Expand all Treatments</label>
     </div>
     <div v-if="loading" class="card"><spinner class="center"/></div>
-    <div v-else class="card" style="line-height: 1rem;">
+    <div v-else-if="result.length" class="card" style="line-height: 1rem;">
       {{ result.length }} results, took {{ time }}s
     </div>
+    <timeline
+      v-if="result.length > 0"
+      :result="result"
+    />
     <div class="card" v-for="js in result" :key="js.taxonConceptUri">
       <h2>
         <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
@@ -45,6 +48,7 @@ import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
+import Timeline from '@/components/Timeline.vue'
 import Spinner from '@/components/Spinner.vue'
 import Taxomplete from 'taxomplete'
 
@@ -52,13 +56,14 @@ import Taxomplete from 'taxomplete'
   components: {
     JustificationView,
     TreatmentsView,
+    Timeline,
     Spinner
   }
 })
 export default class SynonymGrouper extends Vue {
   endpoint = new SparqlEndpoint(config.endpoint())
   taxomplete!: Taxomplete
-  input = 'Sadayoshia acroporae'
+  input = ''
   result: JustifiedSynonym[] = []
   sg?: SynonymGroup
   loading = false
@@ -74,6 +79,7 @@ export default class SynonymGrouper extends Vue {
   }
 
   updateSG () {
+    if (!this.input) this.input = 'Sadayoshia acroporae'
     this.result = []
     this.loading = true
     const t0 = performance.now()
@@ -94,9 +100,8 @@ export default class SynonymGrouper extends Vue {
     }
     if (!this.input && window.location.hash) {
       this.input = window.location.hash.substring(1).replace('+', ' ')
-      this.taxomplete.lookup()
+      this.updateSG()
     }
-    this.updateSG()
   }
 }
 </script>

@@ -67,7 +67,7 @@ export class JustificationSet implements Set<anyJustification> {
   entries = ((Array.from(this.contents.values()).map(v => [v, v])) as [anyJustification, anyJustification][]).values
 }
 
-type Treatment = {
+export type Treatment = {
   url: string
   date?: number
   creators?: string
