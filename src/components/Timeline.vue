@@ -437,8 +437,6 @@ html {
 
 .scroll-x {
   overflow-x: auto;
-  min-width: 140px;
-  flex: 1 .5 auto;
   display: flex;
   flex-direction: row;
   padding: .8rem 0 .4rem;
@@ -509,12 +507,20 @@ html {
 }
 
 @media (max-width: 140ch) {
+  .scroll-x {
+    min-width: 140px;
+    max-width: 65%;
+    flex: 1 1 auto;
+  }
+
   .timeline > .labels {
     min-width: 35%;
-    flex: 1 1 auto;
+    flex: 1 0.5 auto;
 
     & > .scroll-opt {
       overflow-x: auto;
+      padding: 0 .8rem .8rem .8rem;
+      margin: 0 -.8rem -.8rem -.8rem;
     }
   }
 }
