@@ -123,6 +123,8 @@
         v-for="year in years"
         :class="year === 'sep' ? 'sep' : 'year'"
         @click="year.exp = !year.exp"
+        @keyup.enter.prevent="year.exp = !year.exp"
+        tabindex="0"
       >
         <div class="label center" v-if="year !== 'sep'">
           {{ year.year }}
@@ -152,10 +154,7 @@
           </a>
         </div>
         <div class="treatments compacted" v-else-if="!year.exp">
-          <a
-            class="treatment"
-            title="Click to expand"
-          >
+          <a class="treatment" :title="`Click to expand ${year.treatments.length} treatments`">
             <div class="label" v-for="dot in aggregate(year)">
               {{dot[0] > 1 ? dot[0] : ''}}
               <svg v-if="dot[1] === 'def'" class="green" viewBox="0 0 24 24">
@@ -276,8 +275,6 @@ export default class Timeline extends Vue {
         })
       }
     }
-
-    addTreatment(0, { date: 2012, url: 'example.org' }, 'aug')
 
     this.result.forEach((v, i) => {
       v.treatments.def.forEach(t => addTreatment(i, t, 'def'))
@@ -620,6 +617,7 @@ button.label {
   display: block;
   text-align: center;
   padding: 0;
+  cursor: pointer;
 }
 
 .blue {

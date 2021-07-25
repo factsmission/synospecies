@@ -84,6 +84,7 @@ export type JustifiedSynonym = {
   taxonNameUri: string
   justifications: JustificationSet
   treatments: Treatments
+  loading: boolean
 }
 
 type SparqlJson = {
@@ -116,7 +117,8 @@ SELECT DISTINCT ?tn ?tc WHERE {
           taxonConceptUri: t.tc.value,
           taxonNameUri: t.tn.value,
           justifications: new JustificationSet([`matches "${genus}${species ? ' ' + species : ''}${subspecies ? ' ' + subspecies : ''}"`]),
-          treatments: { def: [], aug: [], dpr: [] }
+          treatments: { def: [], aug: [], dpr: [] },
+          loading: true
         }
       }))
   }
@@ -142,7 +144,8 @@ WHERE {
             toString: () => `${t.tc.value} has taxon name ${taxon.taxonNameUri}`,
             precedingSynonym: taxon
           }]),
-          treatments: { def: [], aug: [], dpr: [] }
+          treatments: { def: [], aug: [], dpr: [] },
+          loading: true
         }
       }).filter(v => !!v))
     },
@@ -174,7 +177,8 @@ GROUP BY ?tc ?tn ?treat ?date`
             precedingSynonym: taxon,
             treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
           }]),
-          treatments: { def: [], aug: [], dpr: [] }
+          treatments: { def: [], aug: [], dpr: [] },
+          loading: true
         }
       }).filter(v => !!v))
     },
@@ -206,7 +210,8 @@ GROUP BY ?tc ?tn ?treat ?date`
             precedingSynonym: taxon,
             treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
           }]),
-          treatments: { def: [], aug: [], dpr: [] }
+          treatments: { def: [], aug: [], dpr: [] },
+          loading: true
         }
       }).filter(v => !!v))
     }
@@ -263,7 +268,10 @@ GROUP BY ?treat ?how ?date`
 
   let justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
   await justifiedSynsToExpand.forEach(justsyn => {
-    getTreatments(justsyn.taxonConceptUri).then(t => (justsyn.treatments = t))
+    getTreatments(justsyn.taxonConceptUri).then(t => {
+      justsyn.treatments = t
+      justsyn.loading = false
+    })
     justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
   })
   const expandedTaxonConcepts: string[] = []
@@ -280,7 +288,10 @@ GROUP BY ?treat ?how ?date`
             })
           }
         } else {
-          getTreatments(justsyn.taxonConceptUri).then(t => (justsyn.treatments = t))
+          getTreatments(justsyn.taxonConceptUri).then(t => {
+            justsyn.treatments = t
+            justsyn.loading = false
+          })
           justifiedSynonyms.set(justsyn.taxonConceptUri, justifiedArray.push(justsyn) - 1)
         }
         if (!~expandedTaxonConcepts.indexOf(justsyn.taxonConceptUri)) {
