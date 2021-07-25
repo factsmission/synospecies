@@ -3,7 +3,9 @@
     <h1>SynoSpecies</h1>
     <div class="card notice"><b>Beta:</b> This is under development. Looks and behavior will change.</div>
     <div class="flex-row">
-      <input type="text" v-model="input" @keyup.enter="updateSG">
+      <label for="combinedfield">Input Genus and species here:</label>
+      <input type="text" v-model="input" id="combinedfield" placeholder="Sadayoshia acroporae" />
+      <!--<input type="text" @keyup.enter="updateSG">-->
       <button @click="updateSG">Go</button>
       <label><input type="checkbox" v-model="openJ">Expand all Justifications</label>
       <label><input type="checkbox" v-model="openT">Expand all Treatments</label>
@@ -44,6 +46,7 @@ import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
 import Spinner from '@/components/Spinner.vue'
+import Taxomplete from 'taxomplete'
 
 @Component({
   components: {
@@ -54,9 +57,10 @@ import Spinner from '@/components/Spinner.vue'
 })
 export default class SynonymGrouper extends Vue {
   endpoint = new SparqlEndpoint(config.endpoint())
+  taxomplete!: Taxomplete
   input = 'Sadayoshia acroporae'
   result: JustifiedSynonym[] = []
-  sg?: SynonymGroup;
+  sg?: SynonymGroup
   loading = false
   openJ = false
   openT = false
@@ -82,6 +86,16 @@ export default class SynonymGrouper extends Vue {
   }
 
   mounted () {
+    const input = document.getElementById('combinedfield') as HTMLInputElement
+    this.taxomplete = new Taxomplete(input, this.endpoint)
+    this.taxomplete.action = (val: string) => {
+      this.input = val
+      this.updateSG()
+    }
+    if (!this.input && window.location.hash) {
+      this.input = window.location.hash.substring(1).replace('+', ' ')
+      this.taxomplete.lookup()
+    }
     this.updateSG()
   }
 }
