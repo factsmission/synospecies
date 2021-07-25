@@ -4,7 +4,7 @@
     <div class="card notice"><b>Beta:</b> This is under development. Looks and behavior will change.</div>
     <div class="flex-row">
       <label for="combinedfield">Input Genus and species here:</label>
-      <input type="text" v-model="input" id="combinedfield" placeholder="Sadayoshia acroporae" />
+      <input type="text" v-model="input" id="combinedfield" placeholder="Sadayoshia acamar" />
       <button @click="updateSG">Go</button>
       <label><input type="checkbox" v-model="openJ">Expand all Justifications</label>
       <label><input type="checkbox" v-model="openT">Expand all Treatments</label>
@@ -79,7 +79,7 @@ export default class SynonymGrouper extends Vue {
   }
 
   updateSG () {
-    if (!this.input) this.input = 'Sadayoshia acroporae'
+    if (!this.input) this.input = 'Sadayoshia acamar'
     this.result = []
     this.loading = true
     const t0 = performance.now()

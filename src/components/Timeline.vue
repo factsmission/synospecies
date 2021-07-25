@@ -22,7 +22,7 @@
               Explanation:
               <br>
               <div class="small">
-                Each vertical bar represents and links to one treatment.
+                Each yellow vertical bar represents and links to one treatment.
               </div>
             </div>
             <div class="treatments">
@@ -67,24 +67,67 @@
                 </div>
               </div>
             </div>
+            <div class="top">
+              <div class="small">
+                If there are multiple treatments in one year, they are combined into one gray bar. Clicking on the year will expand it.
+              </div>
+            </div>
+            <div class="treatments compacted">
+              <div class="treatment">
+                <div class="label">
+                  <svg class="blue" viewBox="0 0 24 24">
+                    <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                  </svg>
+                </div><div class="label">
+                  2
+                  <svg class="blue" viewBox="0 0 24 24">
+                    <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                  </svg>
+                </div>
+                <div class="label">
+                  2
+                  <svg class="gray" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,10.5A1.5,1.5 0 0,0 10.5,12A1.5,1.5 0 0,0 12,13.5A1.5,1.5 0 0,0 13.5,12A1.5,1.5 0 0,0 12,10.5M6.5,10.5A1.5,1.5 0 0,0 5,12A1.5,1.5 0 0,0 6.5,13.5A1.5,1.5 0 0,0 8,12A1.5,1.5 0 0,0 6.5,10.5M17.5,10.5A1.5,1.5 0 0,0 16,12A1.5,1.5 0 0,0 17.5,13.5A1.5,1.5 0 0,0 19,12A1.5,1.5 0 0,0 17.5,10.5Z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="labels">
+                <div class="label">
+                  As above
+                </div><div class="label">
+                  2 t.s augmenting this taxon
+                </div>
+                <div class="label">
+                  2 differing t.s
+                </div>
+              </div>
+            </div>
           </div>
         </button>
       </div>
-      <!-- NEW -->
-      <div class="label" v-for="taxon in result" :key="taxon.url" >
-        {{ getFormattedName(taxon.taxonConceptUri) }}
-        <spinner v-if="taxon.loading"/>
-      </div>
-      <!-- OLD -->
-      <div class="label" v-for="taxon in taxa" :key="taxon.url" >
-        {{ getFormattedName(taxon.url) }}
-        <spinner v-if="taxon.loading"/>
+      <div class="scroll-opt">
+        <!-- NEW -->
+        <div class="label" v-for="taxon in result" :key="taxon.url" >
+          {{ getFormattedName(taxon.taxonConceptUri) }}
+          <spinner v-if="taxon.loading"/>
+        </div>
+        <!-- OLD -->
+        <div class="label" v-for="taxon in taxa" :key="taxon.url" >
+          {{ getFormattedName(taxon.url) }}
+          <spinner v-if="taxon.loading"/>
+        </div>
       </div>
     </div>
     <div class="scroll-x">
-      <div v-for="year in years" :class="year === 'sep' ? 'sep' : 'year'">
-        <div class="label center" v-if="year !== 'sep'"> {{ year.year === -1 ? '—' : year.year }} </div>
-        <div class="treatments" v-if="year !== 'sep'">
+      <div
+        v-for="year in years"
+        :class="year === 'sep' ? 'sep' : 'year'"
+        @click="year.exp = !year.exp"
+      >
+        <div class="label center" v-if="year !== 'sep'">
+          {{ year.year }}
+        </div>
+        <div class="treatments" v-if="year !== 'sep' && (year.exp || year.treatments.length === 1)">
           <a
             class="treatment"
             v-for="treatment in year.treatments"
@@ -104,6 +147,31 @@
               </svg>
               <svg v-else-if="dot === 'dpr'" class="red" viewBox="0 0 24 24">
                 <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+              </svg>
+            </div>
+          </a>
+        </div>
+        <div class="treatments compacted" v-else-if="!year.exp">
+          <a
+            class="treatment"
+            title="Click to expand"
+          >
+            <div class="label" v-for="dot in aggregate(year)">
+              {{dot[0] > 1 ? dot[0] : ''}}
+              <svg v-if="dot[1] === 'def'" class="green" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+              </svg>
+              <svg v-else-if="dot[1] === 'ass'" class="green" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
+              </svg>
+              <svg v-else-if="dot[1] === 'aug'" class="blue" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+              </svg>
+              <svg v-else-if="dot[1] === 'dpr'" class="red" viewBox="0 0 24 24">
+                <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+              </svg>
+              <svg v-else-if="dot[0] > 0" class="gray" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,10.5A1.5,1.5 0 0,0 10.5,12A1.5,1.5 0 0,0 12,13.5A1.5,1.5 0 0,0 13.5,12A1.5,1.5 0 0,0 12,10.5M6.5,10.5A1.5,1.5 0 0,0 5,12A1.5,1.5 0 0,0 6.5,13.5A1.5,1.5 0 0,0 8,12A1.5,1.5 0 0,0 6.5,10.5M17.5,10.5A1.5,1.5 0 0,0 16,12A1.5,1.5 0 0,0 17.5,13.5A1.5,1.5 0 0,0 19,12A1.5,1.5 0 0,0 17.5,10.5Z" />
               </svg>
             </div>
           </a>
@@ -139,6 +207,7 @@ type TT = ('def'|'ass'|'aug'|'dpr')
 
 type Year = {
   year: number;
+  exp: boolean;
   treatments: {
     data: (TT|false)[]
     url?: string
@@ -164,8 +233,11 @@ export default class Timeline extends Vue {
 
   @Watch('result', { deep: true })
   updateYears () {
-    this.internal = []
-    console.log(this.internal)
+    if (this.result.length === 0) {
+      // empty results => reset
+      this.internal = []
+      return
+    }
     const addTreatment = (index: number, t: Treatment, type: TT) => {
       const date = t.date ?? -1
       const yearIndex = this.internal.findIndex(y => y !== 'sep' && y.year === date)
@@ -195,6 +267,7 @@ export default class Timeline extends Vue {
         data[index] = type
         this.internal.push({
           year: date,
+          exp: false,
           treatments: [{
             creators: t.creators,
             url: t.url,
@@ -203,6 +276,8 @@ export default class Timeline extends Vue {
         })
       }
     }
+
+    addTreatment(0, { date: 2012, url: 'example.org' }, 'aug')
 
     this.result.forEach((v, i) => {
       v.treatments.def.forEach(t => addTreatment(i, t, 'def'))
@@ -238,6 +313,24 @@ export default class Timeline extends Vue {
 
   isFullscreen = false;
   legendOpen = false;
+
+  aggregate (year: Year) {
+    const length = this.result.length || this.taxa.length
+    const result: (TT|false)[][] = []
+    for (let i = 0; i < length; i++) {
+      result[i] = year.treatments.map(a => {
+        return a.data[i]
+      })
+    }
+    return result.map(a => {
+      const def = a.filter(d => d === 'def').length
+      const ass = a.filter(d => d === 'ass').length
+      const aug = a.filter(d => d === 'aug').length
+      const dpr = a.filter(d => d === 'dpr').length
+      if (+!!def + +!!ass + +!!aug + +!!dpr > 1) return [a.filter(d => d).length, 'multiple']
+      else return [a.filter(d => d).length, a.filter(d => d)[0]]
+    })
+  }
 
   getFormattedName (uri: string) {
     const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
@@ -344,9 +437,10 @@ html {
 
 .scroll-x {
   overflow-x: auto;
+  min-width: 140px;
+  flex: 1 .5 auto;
   display: flex;
   flex-direction: row;
-  width: 100%;
   padding: .8rem 0 .4rem;
 
   &>*:last-child {
@@ -363,8 +457,6 @@ html {
   position: relative;
 
   .card {
-    // display: flex;
-    // height: 1.8rem;
     line-height: 1.8rem;
     position: absolute;
     top: 34px;
@@ -375,6 +467,7 @@ html {
     border-radius: 0.2rem;
     box-shadow: 2px 4px 9px -4px #212121;
     z-index: 900;
+    width: min-content;
 
     &[hidden] {
       display: none;
@@ -384,8 +477,8 @@ html {
   .top {
     text-align: left;
     margin-left: 3rem;
-    width: 22ch;
   }
+
   .small {
     white-space: normal;
     font-size: 0.8rem;
@@ -403,9 +496,9 @@ html {
 
   .labels {
     margin-top: 0.8rem;
-    width: 22ch;
     padding: 0;
     border-right: none;
+    flex: auto;
   }
 
   svg {
@@ -416,13 +509,13 @@ html {
 }
 
 @media (max-width: 140ch) {
-  .timeline {
-    // overflow-x: auto;
-  }
+  .timeline > .labels {
+    min-width: 35%;
+    flex: 1 1 auto;
 
-  .scroll-x {
-    overflow-x: initial;
-    width: initial;
+    & > .scroll-opt {
+      overflow-x: auto;
+    }
   }
 }
 
@@ -438,6 +531,10 @@ html {
   background-color: beige;
   border-radius: .4rem;
 
+  .label {
+    justify-content: center;
+  }
+
   .label:nth-child(6n+2),
   .label:nth-child(6n+4){
     background-color: #0000000f;
@@ -448,6 +545,10 @@ html {
   }
 }
 
+.compacted .treatment {
+  background-color: #0000000f;
+}
+
 .labels {
   font-size: 1rem;
   margin: 0;
@@ -456,20 +557,15 @@ html {
   background-color: white;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
+  overflow: visible;
 
-  .label {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  // Offset by 1 because of the empty label on top for spacing
-  .label:nth-child(6n+3),
-  .label:nth-child(6n+5){
+  .label:nth-child(6n+2),
+  .label:nth-child(6n+4){
     background-color: #0000000f;
     border-radius: .2rem;
   }
 
-  .label:nth-child(6n+1) {
+  .label:nth-child(6n) {
     background: #0000001f;
     border-radius: .2rem;
   }
@@ -491,7 +587,8 @@ html {
   line-height: 1.8rem;
   padding: 0 .4rem;
   white-space: nowrap;
-
+  display: flex;
+  justify-content: space-between;
 }
 
 button.label {
@@ -514,6 +611,7 @@ button.label {
 }
 
 .center {
+  display: block;
   text-align: center;
   padding: 0;
 }
@@ -528,5 +626,9 @@ button.label {
 
 .red {
   color: #e53935;
+}
+
+.gray {
+  color: #666666;
 }
 </style>
