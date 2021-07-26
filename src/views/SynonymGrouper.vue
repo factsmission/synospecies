@@ -29,13 +29,7 @@
         </summary>
         <justification-view :js="js"/>
       </details>
-      <details :open="openT">
-        <summary>
-          Treatments
-          ( {{ js.treatments ? `${js.treatments.def.length} / ${js.treatments.aug.length} / ${js.treatments.dpr.length}` : '0 / 0 / 0' }} )
-        </summary>
-        <treatments-view :js="js"/>
-      </details>
+      <treatments-view :js="js" :open="openT"/>
     </div>
   </div>
 </template>
