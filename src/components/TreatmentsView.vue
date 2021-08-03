@@ -1,5 +1,5 @@
 <template>
-  <details :open="openT">
+  <details>
     <summary>
       Treatments
       (<svg v-for="n in js.treatments.def.length" :key="n + 'def'" class="green" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import type { JustifiedSynonym } from '@/SynonymGroup'
 
 @Component
-export default class JustifcationView extends Vue {
+export default class TreatmentView extends Vue {
   @Prop() js!: JustifiedSynonym;
 }
 </script>

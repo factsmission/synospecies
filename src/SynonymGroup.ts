@@ -96,19 +96,22 @@ type SparqlJson = {
   };
 }
 
-export async function SynonymGroupBuilder (sparqlEndpoint: SparqlEndpoint, taxonName: string, justifiedArray: JustifiedSynonym[] = []): Promise<SynonymGroup> {
+export async function SynonymGroupBuilder (sparqlEndpoint: SparqlEndpoint, taxonName: string, justifiedArray: JustifiedSynonym[] = [], ignoreRank = false): Promise<SynonymGroup> {
   /** Maps from taxonConceptUris to their synonyms */
   const justifiedSynonyms: Map<string, number> = new Map()
 
   function getStartingPoints (taxonName: string): Promise<JustifiedSynonym[]> {
     const [genus, species, subspecies] = taxonName.split(' ')
+    // subspecies could also be variety
+    // ignoreRank has no effect when there is a 'subspecies', as this is assumed to be the lowest rank & should thus not be able to return results in another rank
     const query = `PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
 PREFIX treat: <http://plazi.org/vocab/treatment#>
 SELECT DISTINCT ?tn ?tc WHERE {
   ?tc dwc:genus "${genus}";
       treat:hasTaxonName ?tn;
       ${species ? `dwc:species "${species}";` : ''}
-      ${subspecies ? `dwc:subspecies "${subspecies}";` : ''}
+      ${subspecies ? `(dwc:subspecies|dwc:variety) "${subspecies}";` : ''}
+      ${ignoreRank || !!subspecies ? '' : `dwc:rank "${species ? 'species' : 'genus'}";`}
       a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept>.
 }`
     return sparqlEndpoint.getSparqlResultSet(query)
@@ -226,6 +229,7 @@ GROUP BY ?tc ?tn ?treat ?date`
     const treat = 'http://plazi.org/vocab/treatment#'
     const query =
 `PREFIX treat: <${treat}>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
 SELECT DISTINCT ?treat ?how ?date (group_concat(DISTINCT ?c;separator="; ") as ?creators)
 WHERE {
   ?treat (treat:definesTaxonConcept|treat:augmentsTaxonConcept|treat:deprecates) <${uri}> ;
