@@ -24,6 +24,19 @@
       </div>
     </nav>
 
+    <div class="container">
+      <div class="card notice" style="font-size: larger;">
+        <b>SynoSpecies is experiencing Problems:</b>
+        <hr>
+        Due to a sudden change in the underlying data’s ontologies,
+        SynoSpecies is currently unable to work as intended.
+        <br>
+        Please be patient as we try to resolve the issue.
+        <hr>
+        See also: <a href="https://github.com/plazi/ontologies">https://github.com/plazi/ontologies</a>
+      </div>
+    </div>
+
     <main class="container">
       <router-view/>
     </main>
