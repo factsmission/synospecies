@@ -26,6 +26,7 @@ const routes = [
   {
     path: '/syg',
     name: 'SynonymGrouper',
+    props: (route: any) => ({ s: route.query.s }),
     component: SynonymGrouper
   },
   {

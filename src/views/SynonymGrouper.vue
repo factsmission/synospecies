@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { SynonymGroupBuilder } from '@/SynonymGroup'
 import type { JustifiedSynonym, SynonymGroup } from '@/SynonymGroup'
 import config from '@/config'
@@ -83,6 +83,7 @@ import Taxomplete from 'taxomplete'
   }
 })
 export default class SynonymGrouper extends Vue {
+  @Prop() s?: string
   endpoint = new SparqlEndpoint(config.endpoint())
   taxomplete!: Taxomplete
   input = ''
@@ -116,6 +117,7 @@ export default class SynonymGrouper extends Vue {
     })
   }
 
+  @Watch('s')
   mounted () {
     const input = document.getElementById('combinedfield') as HTMLInputElement
     this.taxomplete = new Taxomplete(input, this.endpoint)
@@ -123,8 +125,8 @@ export default class SynonymGrouper extends Vue {
       this.input = val
       this.updateSG()
     }
-    if (!this.input && window.location.hash) {
-      this.input = window.location.hash.substring(1).replace('+', ' ')
+    if (this.s) {
+      this.input = this.s ?? ''
       this.updateSG()
     }
   }
