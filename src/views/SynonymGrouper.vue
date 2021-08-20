@@ -24,10 +24,10 @@
           <div v-if="loading">
             Loading
             <spinner/>
-            ({{ result.length }} result(s) so far)
+            ({{ jsArray.length }} result(s) so far)
           </div>
           <div v-else-if="result.length">
-            {{ result.length }} result(s), took {{ time }}s
+            {{ jsArray.length }} result(s), took {{ time }}s
           </div>
         </div>
         <div class="dropdown" :data-open="tunerOpen">
@@ -42,22 +42,24 @@
       </div>
     </div>
     <timeline
-      v-if="result.length > 0"
-      :result="result"
+      v-if="jsArray.length > 0"
+      :result="jsArray"
     />
-    <div class="card" v-for="js in result" :key="js.taxonConceptUri">
-      <h2>
-        <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
-      </h2>
-      <a :href="js.taxonNameUri">{{ shorten(js.taxonNameUri) }}</a>
-      <details :open="openJ">
-        <summary>
-          Justifications
-          ( {{ js.justifications.size }} )
-        </summary>
-        <justification-view :js="js"/>
-      </details>
-      <treatments-view :js="js" :open="openT"/>
+    <div v-for="taxonName in result" :key="taxonName[0]">
+      <span class="muted">{{ kingdom(taxonName[0]) }}</span> {{ shorten(taxonName[0]) }}
+      <div :class="js.treatments.dpr.length ? 'card deprecated' : 'card'" v-for="js in taxonName[1]" :key="js.taxonConceptUri">
+        <h2>
+          <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
+        </h2>
+        <details :open="openJ">
+          <summary>
+            Justifications
+            ( {{ js.justifications.size }} )
+          </summary>
+          <justification-view :js="js"/>
+        </details>
+        <treatments-view :js="js" :open="openT"/>
+      </div>
     </div>
   </div>
 </template>
@@ -88,8 +90,8 @@ export default class SynonymGrouper extends Vue {
   taxomplete!: Taxomplete
   input = ''
   ignoreRank = false
-  result: JustifiedSynonym[] = []
-  sg?: SynonymGroup
+  jsArray: JustifiedSynonym[] = []
+  result: Map<string, JustifiedSynonym[]> = new Map()
   loading = false
   settingsOpen = false
   tunerOpen = false
@@ -97,24 +99,35 @@ export default class SynonymGrouper extends Vue {
   openT = false
   time = '-'
 
+  kingdom (uri: string) {
+    return (uri.match(/http:\/\/taxon-name\.plazi\.org\/id\/([^/]*)\//) || [])[1]
+  }
+
   shorten (uri: string, bracket?: boolean) {
     let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri
     const index = ~temp.indexOf(']') ? temp.indexOf(']') + 2 : 0
     temp = temp.substring(index)
-    return temp.replace(/http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\//g, '').replace(/\/|_/g, ' ')
+    return temp.replace(/http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^/]*\//g, '').replace(/\/|_/g, ' ')
   }
 
-  updateSG () {
+  async updateSG () {
     if (!this.input) this.input = 'Sadayoshia acamar'
-    this.result = []
+    this.jsArray = []
+    this.result = new Map()
     this.loading = true
     const t0 = performance.now()
-    SynonymGroupBuilder(this.endpoint, this.input, this.result, this.ignoreRank).then(sg => {
-      this.loading = false
-      this.time = ((performance.now() - t0) / 1000).toFixed(2)
-      // this.sg = sg
-      // this.result = sg.getAllSynonyms()
-    })
+    const syg = SynonymGroupBuilder(this.endpoint, this.input, this.ignoreRank)
+    for await (const js of { [Symbol.asyncIterator]: () => syg }) {
+      console.log('«', js)
+      this.jsArray.push(js)
+      if (this.result.has(js.taxonNameUri)) {
+        this.result.get(js.taxonNameUri)!.push(js)
+      } else {
+        this.result.set(js.taxonNameUri, [js])
+      }
+    }
+    this.loading = false
+    this.time = ((performance.now() - t0) / 1000).toFixed(2)
   }
 
   @Watch('s')
@@ -245,5 +258,19 @@ table tr {
   margin: -0.25rem 0 0.25rem;
   font-weight: 600;
   font-size: 1.25rem;
+}
+
+.deprecated {
+  background: repeating-linear-gradient(
+  -55deg,
+  #f3c6c1,
+  #f3c6c1 1px,
+  #fbe9e7 1px,
+  #fbe9e7 .25rem
+  );
+}
+
+.muted {
+  color: gray;
 }
 </style>
