@@ -2,7 +2,7 @@
   <details>
     <summary>
       Treatments
-      (<svg v-for="n in js.treatments.def.length" :key="n + 'def'" class="green" viewBox="0 0 24 24">
+      (<spinner v-if="js.loading"/><svg v-for="n in js.treatments.def.length" :key="n + 'def'" class="green" viewBox="0 0 24 24">
         <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
       </svg>
       <svg v-for="n in js.treatments.aug.length" :key="n + 'aug'" class="blue" viewBox="0 0 24 24">
@@ -82,8 +82,11 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import type { JustifiedSynonym } from '@/SynonymGroup'
+import Spinner from '@/components/Spinner.vue'
 
-@Component
+@Component({
+  components: { Spinner }
+})
 export default class TreatmentView extends Vue {
   @Prop() js!: JustifiedSynonym;
 }
