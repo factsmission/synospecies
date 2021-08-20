@@ -14,7 +14,7 @@
             <svg role="presentation" viewBox="0 0 24 24"><path fill="currentcolor" :d="$icons.mdiCogOutline"></path></svg>
           </button>
           <div>
-            <label><input type="checkbox" v-model="ignoreRank">Ignore Rank</label>
+            <label><input type="checkbox" v-model="ignoreRank">Include Subtaxa</label>
           </div>
         </div>
       </div>
