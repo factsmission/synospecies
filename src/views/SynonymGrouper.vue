@@ -45,20 +45,14 @@
       v-if="result.length > 0"
       :result="result"
     />
-    <div class="card" v-for="js in result" :key="js.taxonConceptUri">
-      <h2>
-        <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
-      </h2>
-      <a :href="js.taxonNameUri">{{ shorten(js.taxonNameUri) }}</a>
-      <details :open="openJ">
-        <summary>
-          Justifications
-          ( {{ js.justifications.size }} )
-        </summary>
-        <justification-view :js="js"/>
-      </details>
-      <treatments-view :js="js" :open="openT"/>
-    </div>
+    <single-synonym
+      class="card"
+      v-for="js in result"
+      :key="js.taxonConceptUri"
+      :js="js"
+      :openT="openT"
+      :openJ="openJ"
+    />
   </div>
 </template>
 
@@ -68,16 +62,14 @@ import { SynonymGroupBuilder } from '@/SynonymGroup'
 import type { JustifiedSynonym, SynonymGroup } from '@/SynonymGroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
-import JustificationView from '@/components/JustificationView.vue'
-import TreatmentsView from '@/components/TreatmentsView.vue'
+import SingleSynonym from '@/components/SingleSynonym.vue'
 import Timeline from '@/components/Timeline.vue'
 import Spinner from '@/components/Spinner.vue'
 import Taxomplete from 'taxomplete'
 
 @Component({
   components: {
-    JustificationView,
-    TreatmentsView,
+    SingleSynonym,
     Timeline,
     Spinner
   }
@@ -96,13 +88,6 @@ export default class SynonymGrouper extends Vue {
   openJ = false
   openT = false
   time = '-'
-
-  shorten (uri: string, bracket?: boolean) {
-    let temp = bracket ? uri.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `[${g}]`) : uri
-    const index = ~temp.indexOf(']') ? temp.indexOf(']') + 2 : 0
-    temp = temp.substring(index)
-    return temp.replace(/http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\//g, '').replace(/\/|_/g, ' ')
-  }
 
   updateSG () {
     if (!this.input) this.input = 'Sadayoshia acamar'
