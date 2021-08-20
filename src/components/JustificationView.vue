@@ -21,7 +21,7 @@ export default class JustifcationView extends Vue {
     const predececessor: (t: JustifiedSynonym) => string[] = (t) => {
       return this.prosaify([...t.justifications.values()][0])
     }
-    return [this.linkify(j.toString())].concat(j.precedingSynonym ? predececessor(j.precedingSynonym) : 'which is the searched term.')
+    return [this.linkify(j.toString())].concat(j.precedingSynonym ? predececessor(j.precedingSynonym) : [])
   }
 
   linkify (str: string): string {
