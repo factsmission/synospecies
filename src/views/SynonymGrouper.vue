@@ -26,7 +26,7 @@
             <spinner/>
             ({{ jsArray.length }} result(s) so far)
           </div>
-          <div v-else-if="result.length">
+          <div v-else-if="time">
             {{ jsArray.length }} result(s), took {{ time }}s
           </div>
         </div>
@@ -66,8 +66,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { SynonymGroupBuilder } from '@/SynonymGroup'
-import type { JustifiedSynonym, SynonymGroup } from '@/SynonymGroup'
+import { SynonymGroup, JustifiedSynonym } from '@/SynonymGroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
@@ -97,7 +96,8 @@ export default class SynonymGrouper extends Vue {
   tunerOpen = false
   openJ = false
   openT = false
-  time = '-'
+  time = ''
+  syg: SynonymGroup|null = null
 
   kingdom (uri: string) {
     return (uri.match(/http:\/\/taxon-name\.plazi\.org\/id\/([^/]*)\//) || [])[1]
@@ -115,10 +115,12 @@ export default class SynonymGrouper extends Vue {
     this.jsArray = []
     this.result = new Map()
     this.loading = true
+    if (this.syg) {
+      this.syg.abort()
+    }
+    this.syg = new SynonymGroup(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
-    const syg = SynonymGroupBuilder(this.endpoint, this.input, this.ignoreRank)
-    for await (const js of { [Symbol.asyncIterator]: () => syg }) {
-      console.log('«', js)
+    for await (const js of this.syg) {
       this.jsArray.push(js)
       if (this.result.has(js.taxonNameUri)) {
         this.result.get(js.taxonNameUri)!.push(js)
