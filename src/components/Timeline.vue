@@ -185,7 +185,7 @@
 /* eslint-disable comma-dangle */
 import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/Spinner.vue'
-import type { JustifiedSynonym, Treatment } from '@/SynonymGroup'
+import type { SyncJustifiedSynonym, Treatment } from '@/SynonymGroup'
 
 // Required as typescript doesn't know about these nonstandard functions
 declare global {
@@ -228,7 +228,7 @@ export default class Timeline extends Vue {
 
   @PropSync('years', { default: () => [] }) internal!: (Year|'sep')[];
 
-  @Prop({ default: () => [] }) result!: JustifiedSynonym[]
+  @Prop({ default: () => [] }) result!: SyncJustifiedSynonym[]
 
   @Watch('result', { deep: true })
   updateYears () {

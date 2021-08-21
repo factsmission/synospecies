@@ -81,7 +81,7 @@ export class JustificationSet implements AsyncIterable<anyJustification> {
         return new Promise<IteratorResult<anyJustification>>((resolve, reject) => {
           const _ = () => {
             if (this.isAborted) {
-              reject(new Error('SynyonymGroup has been aborted'))
+              reject(new Error('JustificationSet has been aborted'))
             } else if (returnedSoFar < this.contents.length) {
               resolve({ value: this.contents[returnedSoFar++] })
             } else if (this.isFinished) {
@@ -107,10 +107,78 @@ export type Treatment = {
   creators?: string
 }
 
-export type Treatments = {
-  def: Treatment[]
-  aug: Treatment[]
-  dpr: Treatment[]
+class TreatmentSet implements AsyncIterable<Treatment> {
+  private monitor = new EventTarget()
+  contents: Treatment[] = []
+  isFinished = false
+  isAborted = false
+
+  constructor (iterable?: Iterable<Treatment>) {
+    if (iterable) {
+      for (const el of iterable) {
+        this.add(el)
+      }
+    }
+    return this
+  }
+
+  get size () {
+    return new Promise<number>((resolve, reject) => {
+      if (this.isAborted) {
+        reject(new Error('JustificationSet has been aborted'))
+      } else if (this.isFinished) {
+        resolve(this.contents.length)
+      } else {
+        const listener = () => {
+          if (this.isFinished) {
+            this.monitor.removeEventListener('updated', listener)
+            resolve(this.contents.length)
+          }
+        }
+        this.monitor.addEventListener('updated', listener)
+      }
+    })
+  }
+
+  add (value: Treatment) {
+    if (this.contents.findIndex(c => c.toString() === value.toString()) === -1) {
+      this.contents.push(value)
+      this.monitor.dispatchEvent(new CustomEvent('updated'))
+    }
+    return this
+  }
+
+  [Symbol.asyncIterator] () {
+    let returnedSoFar = 0
+    return {
+      next: () => {
+        return new Promise<IteratorResult<Treatment>>((resolve, reject) => {
+          const _ = () => {
+            if (this.isAborted) {
+              reject(new Error('TreatmentSet has been aborted'))
+            } else if (returnedSoFar < this.contents.length) {
+              resolve({ value: this.contents[returnedSoFar++] })
+            } else if (this.isFinished) {
+              resolve({ done: true, value: true })
+            } else {
+              const listener = () => {
+                this.monitor.removeEventListener('updated', listener)
+                _()
+              }
+              this.monitor.addEventListener('updated', listener)
+            }
+          }
+          _()
+        })
+      }
+    }
+  }
+}
+
+type Treatments = {
+  def: TreatmentSet
+  aug: TreatmentSet
+  dpr: TreatmentSet
 }
 
 // internally unused — possibly useful for external wrappers
@@ -133,7 +201,7 @@ export type SyncJustifiedSynonym = {
   taxonConceptUri: string
   taxonNameUri: string
   justifications: anyJustification[]
-  treatments: Treatments
+  treatments: SyncTreatments
   loading: boolean
 }
 
@@ -306,9 +374,9 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
     }
     GROUP BY ?treat ?how ?date`
         const result: Treatments = {
-          def: [],
-          aug: [],
-          dpr: []
+          def: new TreatmentSet(),
+          aug: new TreatmentSet(),
+          dpr: new TreatmentSet()
         }
         return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => {
           json.results.bindings.forEach(t => {
@@ -320,13 +388,13 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
             }
             switch (t.how.value) {
               case treat + 'definesTaxonConcept':
-                result.def.push(treatment)
+                result.def.add(treatment)
                 break
               case treat + 'augmentsTaxonConcept':
-                result.aug.push(treatment)
+                result.aug.add(treatment)
                 break
               case treat + 'deprecates':
-                result.dpr.push(treatment)
+                result.dpr.add(treatment)
                 break
             }
           })
@@ -359,6 +427,9 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
             } else {
               getTreatments(justsyn.taxonConceptUri).then(t => {
                 justsyn.treatments = t
+                justsyn.treatments.def.isFinished = true
+                justsyn.treatments.aug.isFinished = true
+                justsyn.treatments.dpr.isFinished = true
                 justsyn.justifications.isFinished = true
                 justsyn.loading = false
               })

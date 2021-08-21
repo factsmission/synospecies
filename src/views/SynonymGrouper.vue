@@ -121,7 +121,7 @@ export default class SynonymGrouper extends Vue {
     const t0 = performance.now()
     for await (const { taxonConceptUri, taxonNameUri, justifications, treatments, loading } of this.syg) {
       const justs: anyJustification[] = []
-      const treats: SyncTreatments = treatments // { def: [], aug: [], dpr: [] }
+      const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
       const js = { taxonConceptUri, taxonNameUri, justifications: justs, treatments: treats, loading }
       this.jsArray.push(js)
       if (this.result.has(taxonNameUri)) {
@@ -131,6 +131,15 @@ export default class SynonymGrouper extends Vue {
       }
       for await (const just of justifications) {
         justs.push(just)
+      }
+      for await (const treat of treatments.def) {
+        treats.def.push(treat)
+      }
+      for await (const treat of treatments.aug) {
+        treats.aug.push(treat)
+      }
+      for await (const treat of treatments.aug) {
+        treats.aug.push(treat)
       }
     }
     this.loading = false
