@@ -2,7 +2,7 @@ import type SparqlEndpoint from '@retog/sparql-client'
 import { TextMarkerOptions } from 'codemirror'
 import { nextTick } from 'vue/types/umd'
 
-export interface Justification {
+interface Justification {
   toString: () => string;
   precedingSynonym?: JustifiedSynonym; // eslint-disable-line no-use-before-define
 }
@@ -13,21 +13,14 @@ interface TreatmentJustification extends Justification {
 
 type LexicalJustification = Justification
 
-type anyJustification = (TreatmentJustification|LexicalJustification)
+export type anyJustification = (TreatmentJustification|LexicalJustification)
 
-export class JustificationSet implements Set<anyJustification> {
-  private contents: anyJustification[] = []
-
-  get size () {
-    return this.contents.length
-  }
-
-  add (value: anyJustification) {
-    if (this.contents.findIndex(c => c.toString() === value.toString()) === -1) {
-      this.contents.push(value)
-    }
-    return this
-  }
+export class JustificationSet implements AsyncIterable<anyJustification> {
+  private monitor = new EventTarget()
+  contents: anyJustification[] = []
+  isFinished = false
+  isAborted = false
+  entries = ((Array.from(this.contents.values()).map(v => [v, v])) as [anyJustification, anyJustification][]).values
 
   constructor (iterable?: Iterable<anyJustification>) {
     if (iterable) {
@@ -38,34 +31,74 @@ export class JustificationSet implements Set<anyJustification> {
     return this
   }
 
-  clear () {
-    this.contents = []
+  get size () {
+    return new Promise<number>((resolve, reject) => {
+      if (this.isAborted) {
+        reject(new Error('JustificationSet has been aborted'))
+      } else if (this.isFinished) {
+        resolve(this.contents.length)
+      } else {
+        const listener = () => {
+          if (this.isFinished) {
+            this.monitor.removeEventListener('updated', listener)
+            resolve(this.contents.length)
+          }
+        }
+        this.monitor.addEventListener('updated', listener)
+      }
+    })
   }
 
-  delete (value: anyJustification) {
-    return false
+  add (value: anyJustification) {
+    if (this.contents.findIndex(c => c.toString() === value.toString()) === -1) {
+      this.contents.push(value)
+      this.monitor.dispatchEvent(new CustomEvent('updated'))
+    }
+    return this
   }
 
-  has (value: anyJustification) {
-    return false
+  forEachCurrent (cb: (val: anyJustification) => void) {
+    this.contents.forEach(cb)
   }
 
-  forEach (cb: (val: anyJustification, key: anyJustification, set: this) => void) {
-    this.contents.forEach(v => cb(v, v, this))
+  first (): anyJustification {
+    return new Promise<anyJustification>(resolve => {
+      if (this.contents[0]) {
+        resolve(this.contents[0])
+      } else {
+        this.monitor.addEventListener('update', () => {
+          resolve(this.contents[0])
+        })
+      }
+    })
   }
 
   [Symbol.toStringTag] = '';
-  [Symbol.iterator] = this.contents[Symbol.iterator]
-
-  values () {
-    return this.contents.values()
+  [Symbol.asyncIterator] () {
+    let returnedSoFar = 0
+    return {
+      next: () => {
+        return new Promise<IteratorResult<anyJustification>>((resolve, reject) => {
+          const _ = () => {
+            if (this.isAborted) {
+              reject(new Error('SynyonymGroup has been aborted'))
+            } else if (returnedSoFar < this.contents.length) {
+              resolve({ value: this.contents[returnedSoFar++] })
+            } else if (this.isFinished) {
+              resolve({ done: true, value: true })
+            } else {
+              const listener = () => {
+                this.monitor.removeEventListener('updated', listener)
+                _()
+              }
+              this.monitor.addEventListener('updated', listener)
+            }
+          }
+          _()
+        })
+      }
+    }
   }
-
-  keys () {
-    return this.contents.values()
-  }
-
-  entries = ((Array.from(this.contents.values()).map(v => [v, v])) as [anyJustification, anyJustification][]).values
 }
 
 export type Treatment = {
@@ -80,10 +113,26 @@ export type Treatments = {
   dpr: Treatment[]
 }
 
+// internally unused — possibly useful for external wrappers
+export type SyncTreatments = {
+  def: Treatment[]
+  aug: Treatment[]
+  dpr: Treatment[]
+}
+
 export type JustifiedSynonym = {
   taxonConceptUri: string
   taxonNameUri: string
   justifications: JustificationSet
+  treatments: Treatments
+  loading: boolean
+}
+
+// internally unused — possibly useful for external wrappers
+export type SyncJustifiedSynonym = {
+  taxonConceptUri: string
+  taxonNameUri: string
+  justifications: anyJustification[]
   treatments: Treatments
   loading: boolean
 }
@@ -303,13 +352,14 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
             if (justifiedSynonyms.has(justsyn.taxonConceptUri)) {
               // Check if we found that synonym in this round
               if (~foundThisRound.indexOf(justsyn.taxonConceptUri)) {
-                justsyn.justifications.forEach(jsj => {
+                justsyn.justifications.forEachCurrent(jsj => {
                   this.justifiedArray[justifiedSynonyms.get(justsyn.taxonConceptUri)!].justifications.add(jsj)
                 })
               }
             } else {
               getTreatments(justsyn.taxonConceptUri).then(t => {
                 justsyn.treatments = t
+                justsyn.justifications.isFinished = true
                 justsyn.loading = false
               })
               justifiedSynonyms.set(justsyn.taxonConceptUri, this.justifiedArray.push(justsyn) - 1)

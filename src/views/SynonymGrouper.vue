@@ -31,7 +31,7 @@
           </div>
         </div>
         <div class="dropdown" :data-open="tunerOpen">
-          <button class="icon" @click="tunerOpen = !tunerOpen" aria-label="Search Settings" :disabled="!result.length">
+          <button class="icon" @click="tunerOpen = !tunerOpen" aria-label="Search Settings" :disabled="!time && !loading">
             <svg role="presentation" viewBox="0 0 24 24"><path fill="currentcolor" :d="$icons.mdiTune"></path></svg>
           </button>
           <div>
@@ -53,8 +53,7 @@
         </h2>
         <details :open="openJ">
           <summary>
-            Justifications
-            ( {{ js.justifications.size }} )
+            {{ js.justifications.length === 1 ? 'Justification' : `Justifications (${js.justifications.length})` }}
           </summary>
           <justification-view :js="js"/>
         </details>
@@ -66,7 +65,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { SynonymGroup, JustifiedSynonym } from '@/SynonymGroup'
+import { anyJustification, SyncJustifiedSynonym, SyncTreatments, SynonymGroup } from '@/SynonymGroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
@@ -89,8 +88,8 @@ export default class SynonymGrouper extends Vue {
   taxomplete!: Taxomplete
   input = ''
   ignoreRank = false
-  jsArray: JustifiedSynonym[] = []
-  result: Map<string, JustifiedSynonym[]> = new Map()
+  jsArray: SyncJustifiedSynonym[] = []
+  result: Map<string, SyncJustifiedSynonym[]> = new Map()
   loading = false
   settingsOpen = false
   tunerOpen = false
@@ -120,12 +119,18 @@ export default class SynonymGrouper extends Vue {
     }
     this.syg = new SynonymGroup(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
-    for await (const js of this.syg) {
+    for await (const { taxonConceptUri, taxonNameUri, justifications, treatments, loading } of this.syg) {
+      const justs: anyJustification[] = []
+      const treats: SyncTreatments = treatments // { def: [], aug: [], dpr: [] }
+      const js = { taxonConceptUri, taxonNameUri, justifications: justs, treatments: treats, loading }
       this.jsArray.push(js)
-      if (this.result.has(js.taxonNameUri)) {
-        this.result.get(js.taxonNameUri)!.push(js)
+      if (this.result.has(taxonNameUri)) {
+        this.result.get(taxonNameUri)!.push(js)
       } else {
-        this.result.set(js.taxonNameUri, [js])
+        this.result.set(taxonNameUri, [js])
+      }
+      for await (const just of justifications) {
+        justs.push(just)
       }
     }
     this.loading = false
