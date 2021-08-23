@@ -7,13 +7,25 @@ interface Justification {
   precedingSynonym?: JustifiedSynonym; // eslint-disable-line no-use-before-define
 }
 
+export type Treatment = {
+  url: string
+  date?: number
+  creators?: string
+}
+
 interface TreatmentJustification extends Justification {
-  treatment: { uri: string; creators: string; date?: string };
+  treatment: Treatment;
 }
 
 type LexicalJustification = Justification
 
 export type anyJustification = (TreatmentJustification|LexicalJustification)
+
+export type anySyncJustification = {
+  toString: () => string;
+  precedingSynonym?: JustifiedSynonym; // eslint-disable-line no-use-before-define
+  treatment?: Treatment;
+}
 
 export class JustificationSet implements AsyncIterable<anyJustification> {
   private monitor = new EventTarget()
@@ -61,7 +73,7 @@ export class JustificationSet implements AsyncIterable<anyJustification> {
     this.contents.forEach(cb)
   }
 
-  first (): anyJustification {
+  first () {
     return new Promise<anyJustification>(resolve => {
       if (this.contents[0]) {
         resolve(this.contents[0])
@@ -99,12 +111,6 @@ export class JustificationSet implements AsyncIterable<anyJustification> {
       }
     }
   }
-}
-
-export type Treatment = {
-  url: string
-  date?: number
-  creators?: string
 }
 
 class TreatmentSet implements AsyncIterable<Treatment> {
@@ -200,7 +206,7 @@ export type JustifiedSynonym = {
 export type SyncJustifiedSynonym = {
   taxonConceptUri: string
   taxonNameUri: string
-  justifications: anyJustification[]
+  justifications: anySyncJustification[]
   treatments: SyncTreatments
   loading: boolean
 }
@@ -246,6 +252,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
           ${ignoreRank || !!subspecies ? '' : `dwc:rank "${species ? 'species' : 'genus'}";`}
           a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonConcept>.
     }`
+        // console.info('%cREQ', 'background: red; font-weight: bold; color: white;', `getStartingPoints('${taxonName}')`)
         return sparqlEndpoint.getSparqlResultSet(query)
           .then((json: SparqlJson) => json.results.bindings.map(t => {
             return {
@@ -270,6 +277,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
       ?tc treat:hasTaxonName <${taxon.taxonNameUri}> .
       FILTER (?tc != <${taxon.taxonConceptUri}>)
     }`
+          // console.info('%cREQ', 'background: red; font-weight: bold; color: white;', `synonymFinder[0]( ${taxon.taxonConceptUri} )`)
           return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => json.results.bindings.map(t => {
             if (!t.tc) return undefined
             return {
@@ -302,6 +310,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
       }
     }
     GROUP BY ?tc ?tn ?treat ?date`
+          // console.info('%cREQ', 'background: red; font-weight: bold; color: white;', `synonymFinder[1]( ${taxon.taxonConceptUri} )`)
           return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => json.results.bindings.map(t => {
             if (!t.tc) return undefined
             return {
@@ -310,7 +319,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
               justifications: new JustificationSet([{
                 toString: () => `${t.tc.value} deprecates ${taxon.taxonConceptUri} according to ${t.treat.value}`,
                 precedingSynonym: taxon,
-                treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
+                treatment: { url: t.treat.value, creators: t.creators.value, date: t.date ? parseInt(t.date.value, 10) : undefined }
               }]),
               treatments: { def: [], aug: [], dpr: [] },
               loading: true
@@ -335,6 +344,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
       }
     }
     GROUP BY ?tc ?tn ?treat ?date`
+          // console.info('%cREQ', 'background: red; font-weight: bold; color: white;', `synonymFinder[2]( ${taxon.taxonConceptUri} )`)
           return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => json.results.bindings.map(t => {
             if (!t.tc) return undefined
             return {
@@ -343,7 +353,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
               justifications: new JustificationSet([{
                 toString: () => `${t.tc.value} deprecated by ${taxon.taxonConceptUri} according to ${t.treat.value}`,
                 precedingSynonym: taxon,
-                treatment: { uri: t.treat.value, creators: t.creators.value, date: t.date?.value }
+                treatment: { url: t.treat.value, creators: t.creators.value, date: t.date ? parseInt(t.date.value, 10) : undefined }
               }]),
               treatments: { def: [], aug: [], dpr: [] },
               loading: true
@@ -352,9 +362,12 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
         }
       ]
 
-      function lookUpRound (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
+      async function lookUpRound (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
+        await new Promise(resolve => setTimeout(resolve, 3000)) // 3 sec
+        // console.log('%cSYG', 'background: blue; font-weight: bold; color: white;', `lookupRound( ${taxon.taxonConceptUri} )`)
         const foundGroupsP = synonymFinders.map(finder => finder(taxon))
-        return Promise.all(foundGroupsP).then(foundGroups => foundGroups.reduce((a, b) => a.concat(b), []))
+        const foundGroups = await Promise.all(foundGroupsP)
+        return foundGroups.reduce((a, b) => a.concat(b), [])
       }
 
       function getTreatments (uri: string): Promise<Treatments> {
@@ -373,6 +386,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
       }
     }
     GROUP BY ?treat ?how ?date`
+        // console.info('%cREQ', 'background: red; font-weight: bold; color: white;', `getTreatments('${uri}')`)
         const result: Treatments = {
           def: new TreatmentSet(),
           aug: new TreatmentSet(),

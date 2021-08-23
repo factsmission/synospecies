@@ -1,8 +1,8 @@
 <template>
   <div>
     <ul>
-      <li v-for="j in js.justifications.values()" :key="j.toString()">
-        <span class="just" v-for="i in prosaify(j)" :key="i.toString()" v-html="i"/>
+      <li v-for="j in justifications" :key="j.toString()">
+        <span class="just" v-for="i in j" :key="i.toString()" v-html="i"/>
       </li>
     </ul>
     <!--{{ Array.from(js.justifications.values()) }}-->
@@ -11,22 +11,31 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import type { JustifiedSynonym, Justification } from '@/SynonymGroup'
+import type { SyncJustifiedSynonym, anySyncJustification, anyJustification, JustifiedSynonym } from '@/SynonymGroup'
 
 @Component
 export default class JustifcationView extends Vue {
-  @Prop() js!: JustifiedSynonym;
+  @Prop() js!: SyncJustifiedSynonym;
 
-  prosaify (j: Justification): string[] {
-    const predececessor: (t: JustifiedSynonym) => string[] = (t) => {
-      return this.prosaify([...t.justifications.values()][0])
+  justifications: string[][] = []
+
+  async prosaify (j: anySyncJustification|anyJustification): Promise<string[]> {
+    const predececessor = async (t: SyncJustifiedSynonym|JustifiedSynonym) => {
+      if ('values' in t.justifications) {
+        return this.prosaify(t.justifications[0])
+      }
+      return this.prosaify(await t.justifications.first())
     }
-    return [this.linkify(j.toString())].concat(j.precedingSynonym ? predececessor(j.precedingSynonym) : [])
+    return [this.linkify(j.toString())].concat(j.precedingSynonym ? await predececessor(j.precedingSynonym) : [])
   }
 
   linkify (str: string): string {
     const shorten = (s: string) => s.replace(/http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/([^/]*\/)?/g, '').replace(/\/|_/g, ' ')
     return str.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `<a href="${g}">${shorten(g)}</a>`)
+  }
+
+  async mounted () {
+    this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaify(j)))
   }
 }
 </script>

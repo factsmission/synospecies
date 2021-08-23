@@ -129,18 +129,20 @@ export default class SynonymGrouper extends Vue {
       } else {
         this.result.set(taxonNameUri, [js])
       }
-      for await (const just of justifications) {
-        justs.push(just)
-      }
-      for await (const treat of treatments.def) {
-        treats.def.push(treat)
-      }
-      for await (const treat of treatments.aug) {
-        treats.aug.push(treat)
-      }
-      for await (const treat of treatments.aug) {
-        treats.aug.push(treat)
-      }
+      (async () => {
+        for await (const just of justifications) {
+          justs.push(just)
+        }
+        for await (const treat of treatments.def) {
+          treats.def.push(treat)
+        }
+        for await (const treat of treatments.aug) {
+          treats.aug.push(treat)
+        }
+        for await (const treat of treatments.aug) {
+          treats.aug.push(treat)
+        }
+      })()
     }
     this.loading = false
     this.time = ((performance.now() - t0) / 1000).toFixed(2)

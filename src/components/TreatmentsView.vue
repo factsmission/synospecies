@@ -81,14 +81,14 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { JustifiedSynonym } from '@/SynonymGroup'
+import type { SyncJustifiedSynonym } from '@/SynonymGroup'
 import Spinner from '@/components/Spinner.vue'
 
 @Component({
   components: { Spinner }
 })
 export default class TreatmentView extends Vue {
-  @Prop() js!: JustifiedSynonym;
+  @Prop() js!: SyncJustifiedSynonym;
 }
 </script>
 
