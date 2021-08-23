@@ -160,6 +160,7 @@ class TreatmentSet implements AsyncIterable<Treatment> {
       next: () => {
         return new Promise<IteratorResult<Treatment>>((resolve, reject) => {
           const _ = () => {
+            console.log(this.isFinished, this.contents.length)
             if (this.isAborted) {
               reject(new Error('TreatmentSet has been aborted'))
             } else if (returnedSoFar < this.contents.length) {
@@ -229,6 +230,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
   constructor (sparqlEndpoint: SparqlEndpoint, taxonName: string, ignoreRank = false) {
     /** Maps from taxonConceptUris to their synonyms */
     const justifiedSynonyms: Map<string, number> = new Map()
+    const expandedTaxonNames: Set<string> = new Set()
 
     const resolver = (value: JustifiedSynonym|true) => {
       if (value === true) {
@@ -259,14 +261,18 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
               taxonConceptUri: t.tc.value,
               taxonNameUri: t.tn.value,
               justifications: new JustificationSet([`matches "${genus}${species ? ' ' + species : ''}${subspecies ? ' ' + subspecies : ''}"`]),
-              treatments: { def: [], aug: [], dpr: [] },
+              treatments: {
+                def: new TreatmentSet(),
+                aug: new TreatmentSet(),
+                dpr: new TreatmentSet()
+              },
               loading: true
             }
           }))
       }
 
       const synonymFinders = [
-        /** Get the Synonyms having the same {taxon-concept} */
+        /** Get the Synonyms having the same {taxon-name} */
         (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> => {
           const query =
             `PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -278,6 +284,11 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
       FILTER (?tc != <${taxon.taxonConceptUri}>)
     }`
           // console.info('%cREQ', 'background: red; font-weight: bold; color: white;', `synonymFinder[0]( ${taxon.taxonConceptUri} )`)
+          // Check wether we already expanded this taxon name horizontally - otherwise add
+          if (expandedTaxonNames.has(taxon.taxonNameUri)) {
+            return Promise.resolve([])
+          }
+          expandedTaxonNames.add(taxon.taxonNameUri)
           return sparqlEndpoint.getSparqlResultSet(query).then((json: SparqlJson) => json.results.bindings.map(t => {
             if (!t.tc) return undefined
             return {
@@ -287,7 +298,11 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
                 toString: () => `${t.tc.value} has taxon name ${taxon.taxonNameUri}`,
                 precedingSynonym: taxon
               }]),
-              treatments: { def: [], aug: [], dpr: [] },
+              treatments: {
+                def: new TreatmentSet(),
+                aug: new TreatmentSet(),
+                dpr: new TreatmentSet()
+              },
               loading: true
             }
           }).filter(v => !!v))
@@ -321,7 +336,11 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
                 precedingSynonym: taxon,
                 treatment: { url: t.treat.value, creators: t.creators.value, date: t.date ? parseInt(t.date.value, 10) : undefined }
               }]),
-              treatments: { def: [], aug: [], dpr: [] },
+              treatments: {
+                def: new TreatmentSet(),
+                aug: new TreatmentSet(),
+                dpr: new TreatmentSet()
+              },
               loading: true
             }
           }).filter(v => !!v))
@@ -355,7 +374,11 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
                 precedingSynonym: taxon,
                 treatment: { url: t.treat.value, creators: t.creators.value, date: t.date ? parseInt(t.date.value, 10) : undefined }
               }]),
-              treatments: { def: [], aug: [], dpr: [] },
+              treatments: {
+                def: new TreatmentSet(),
+                aug: new TreatmentSet(),
+                dpr: new TreatmentSet()
+              },
               loading: true
             }
           }).filter(v => !!v))

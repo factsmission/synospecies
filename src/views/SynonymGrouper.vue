@@ -129,20 +129,35 @@ export default class SynonymGrouper extends Vue {
       } else {
         this.result.set(taxonNameUri, [js])
       }
-      (async () => {
-        for await (const just of justifications) {
-          justs.push(just)
-        }
-        for await (const treat of treatments.def) {
-          treats.def.push(treat)
-        }
-        for await (const treat of treatments.aug) {
-          treats.aug.push(treat)
-        }
-        for await (const treat of treatments.aug) {
-          treats.aug.push(treat)
-        }
-      })()
+      await Promise.allSettled([
+        (async () => {
+          for await (const just of justifications) {
+            justs.push(just)
+          }
+          console.log(taxonConceptUri.slice(-10), 'JUST done')
+        })(),
+        (async () => {
+          for await (const treat of treatments.def) {
+            console.log(taxonConceptUri.slice(-10), 'def', treat)
+            treats.def.push(treat)
+          }
+          console.log(taxonConceptUri.slice(-10), 'DEF  done')
+        })(),
+        (async () => {
+          for await (const treat of treatments.aug) {
+            console.log(taxonConceptUri.slice(-10), 'aug', treat)
+            treats.aug.push(treat)
+          }
+          console.log(taxonConceptUri.slice(-10), 'AUG  done')
+        })(),
+        (async () => {
+          for await (const treat of treatments.dpr) {
+            console.log(taxonConceptUri.slice(-10), 'dpr', treat)
+            treats.dpr.push(treat)
+          }
+          console.log(taxonConceptUri.slice(-10), 'DPR  done')
+        })()
+      ])
     }
     this.loading = false
     this.time = ((performance.now() - t0) / 1000).toFixed(2)
