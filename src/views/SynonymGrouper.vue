@@ -121,7 +121,7 @@ export default class SynonymGrouper extends Vue {
     const t0 = performance.now()
     const promises: Promise<any>[] = []
     for await (const { taxonConceptUri, taxonNameUri, justifications, treatments, loading } of this.syg) {
-      console.group(taxonConceptUri.slice(-10))
+      console.groupCollapsed(taxonConceptUri.slice(-10))
       const justs: anyJustification[] = []
       const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
       const js = { taxonConceptUri, taxonNameUri, justifications: justs, treatments: treats, loading }
@@ -132,13 +132,10 @@ export default class SynonymGrouper extends Vue {
       } else {
         this.result.set(taxonNameUri, [js])
       }
-      console.log(justs) // justs is reactive!
-      console.log(this.jsArray[this.jsArray.length - 1].justifications === justs, this.result.get(taxonNameUri)?.[(this.result.get(taxonNameUri)?.length || 0) - 1].justifications === justs)
       promises.push(
         (async () => {
           for await (const just of justifications) {
             justs.push(just)
-            this.$forceUpdate()
           }
           console.log(taxonConceptUri.slice(-10), 'JUST done')
         })())

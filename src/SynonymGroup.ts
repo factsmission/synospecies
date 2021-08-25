@@ -1,3 +1,4 @@
+import { mdiContentSaveAllOutline } from '@mdi/js'
 import type SparqlEndpoint from '@retog/sparql-client'
 import { TextMarkerOptions } from 'codemirror'
 import { nextTick } from 'vue/types/umd'
@@ -69,6 +70,12 @@ export class JustificationSet implements AsyncIterable<anyJustification> {
     return this
   }
 
+  finish () {
+    console.info('%cJustificationSet finished', 'color: #69F0AE;')
+    this.isFinished = true
+    this.monitor.dispatchEvent(new CustomEvent('updated'))
+  }
+
   forEachCurrent (cb: (val: anyJustification) => void) {
     this.contents.forEach(cb)
   }
@@ -87,6 +94,7 @@ export class JustificationSet implements AsyncIterable<anyJustification> {
 
   [Symbol.toStringTag] = '';
   [Symbol.asyncIterator] () {
+    this.monitor.addEventListener('updated', () => console.log('ARA'))
     let returnedSoFar = 0
     return {
       next: () => {
@@ -100,6 +108,7 @@ export class JustificationSet implements AsyncIterable<anyJustification> {
               resolve({ done: true, value: true })
             } else {
               const listener = () => {
+                console.log('ahgfd')
                 this.monitor.removeEventListener('updated', listener)
                 _()
               }
@@ -155,18 +164,25 @@ class TreatmentSet implements AsyncIterable<Treatment> {
     return this
   }
 
+  finish () {
+    console.info('%cTreatmentSet finished', 'color: #B9F6CA;')
+    this.isFinished = true
+    this.monitor.dispatchEvent(new CustomEvent('updated'))
+  }
+
   [Symbol.asyncIterator] () {
     let returnedSoFar = 0
     return {
       next: () => {
         return new Promise<IteratorResult<Treatment>>((resolve, reject) => {
           const _ = () => {
-            console.log(this.isFinished, returnedSoFar, '<', this.contents.length)
+            console.log(this.isFinished, this.isAborted, returnedSoFar, '<', this.contents.length)
             if (this.isAborted) {
               reject(new Error('TreatmentSet has been aborted'))
             } else if (returnedSoFar < this.contents.length) {
               resolve({ value: this.contents[returnedSoFar++] })
             } else if (this.isFinished) {
+              console.info('%cTreatmentSet finished 22', 'color: #B9F6CA;')
               resolve({ done: true, value: true })
             } else {
               const listener = () => {
@@ -236,6 +252,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
 
     const resolver = (value: JustifiedSynonym|true) => {
       if (value === true) {
+        console.info('%cSynogroup finished', 'color: #00E676;')
         this.isFinished = true
       }
       this.monitor.dispatchEvent(new CustomEvent('updated'))
@@ -388,7 +405,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
       ]
 
       async function lookUpRound (taxon: JustifiedSynonym): Promise<JustifiedSynonym[]> {
-        await new Promise(resolve => setTimeout(resolve, 3000)) // 3 sec
+        // await new Promise(resolve => setTimeout(resolve, 3000)) // 3 sec
         // console.log('%cSYG', 'background: blue; font-weight: bold; color: white;', `lookupRound( ${taxon.taxonConceptUri} )`)
         const foundGroupsP = synonymFinders.map(finder => finder(taxon))
         const foundGroups = await Promise.all(foundGroupsP)
@@ -441,12 +458,20 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
         })
       }
 
-      let justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
-      await justifiedSynsToExpand.forEach(justsyn => {
+      const finish = (justsyn: JustifiedSynonym) => {
+        justsyn.justifications.finish()
         getTreatments(justsyn.taxonConceptUri).then(t => {
           justsyn.treatments = t
+          justsyn.treatments.def.finish()
+          justsyn.treatments.aug.finish()
+          justsyn.treatments.dpr.finish()
           justsyn.loading = false
         })
+      }
+
+      let justifiedSynsToExpand: JustifiedSynonym[] = await getStartingPoints(taxonName)
+      await justifiedSynsToExpand.forEach(justsyn => {
+        finish(justsyn)
         justifiedSynonyms.set(justsyn.taxonConceptUri, this.justifiedArray.push(justsyn) - 1)
         resolver(justsyn)
       })
@@ -464,14 +489,7 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
                 })
               }
             } else {
-              getTreatments(justsyn.taxonConceptUri).then(t => {
-                justsyn.treatments = t
-                justsyn.treatments.def.isFinished = true
-                justsyn.treatments.aug.isFinished = true
-                justsyn.treatments.dpr.isFinished = true
-                justsyn.justifications.isFinished = true
-                justsyn.loading = false
-              })
+              finish(justsyn)
               justifiedSynonyms.set(justsyn.taxonConceptUri, this.justifiedArray.push(justsyn) - 1)
               resolver(justsyn)
             }
@@ -486,7 +504,6 @@ export class SynonymGroup implements AsyncIterable<JustifiedSynonym> {
         justifiedSynsToExpand = []
         await Promise.allSettled(promises)
       }
-
       resolver(true)
     }
 
