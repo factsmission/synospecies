@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import type { SyncJustifiedSynonym, anySyncJustification, anyJustification, JustifiedSynonym } from '@/SynonymGroup'
 
 @Component
@@ -36,8 +36,9 @@ export default class JustifcationView extends Vue {
     return str.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `<a href="${g}">${shorten(g)}</a>`)
   }
 
-  async mounted () {
-    this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaifyInitial(j)))
+  @Watch('js.justifications')
+  eeh () {
+    (async () => (this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaifyInitial(j)))))()
   }
 }
 </script>

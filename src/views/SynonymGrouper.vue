@@ -126,18 +126,19 @@ export default class SynonymGrouper extends Vue {
       const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
       const js = { taxonConceptUri, taxonNameUri, justifications: justs, treatments: treats, loading }
       this.jsArray.push(js)
-      if (this.result.has(taxonNameUri)) {
-        this.result.get(taxonNameUri)!.push(js)
+      const resultArr = this.result.get(taxonNameUri)
+      if (resultArr) {
+        resultArr.push(js)
       } else {
         this.result.set(taxonNameUri, [js])
       }
+      console.log(justs) // justs is reactive!
+      console.log(this.jsArray[this.jsArray.length - 1].justifications === justs, this.result.get(taxonNameUri)?.[(this.result.get(taxonNameUri)?.length || 0) - 1].justifications === justs)
       promises.push(
         (async () => {
-          console.log('AAA')
           for await (const just of justifications) {
-            console.log(taxonConceptUri.slice(-10), 'just', just)
             justs.push(just)
-            console.log(this.jsArray.map(v => v.justifications[v.justifications.length - 1]))
+            this.$forceUpdate()
           }
           console.log(taxonConceptUri.slice(-10), 'JUST done')
         })())
