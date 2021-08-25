@@ -19,14 +19,16 @@ export default class JustifcationView extends Vue {
 
   justifications: string[][] = []
 
-  async prosaify (j: anySyncJustification|anyJustification): Promise<string[]> {
-    const predececessor = async (t: SyncJustifiedSynonym|JustifiedSynonym) => {
-      if ('values' in t.justifications) {
-        return this.prosaify(t.justifications[0])
-      }
-      return this.prosaify(await t.justifications.first())
-    }
-    return [this.linkify(j.toString())].concat(j.precedingSynonym ? await predececessor(j.precedingSynonym) : [])
+  async predecessor (t: JustifiedSynonym) {
+    return this.prosaify(await t.justifications.first())
+  }
+
+  async prosaify (j: anyJustification): Promise<string[]> {
+    return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
+  }
+
+  async prosaifyInitial (j: anySyncJustification) {
+    return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
   }
 
   linkify (str: string): string {
@@ -35,7 +37,7 @@ export default class JustifcationView extends Vue {
   }
 
   async mounted () {
-    this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaify(j)))
+    this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaifyInitial(j)))
   }
 }
 </script>

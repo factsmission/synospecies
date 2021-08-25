@@ -119,7 +119,9 @@ export default class SynonymGrouper extends Vue {
     }
     this.syg = new SynonymGroup(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
+    const promises: Promise<any>[] = []
     for await (const { taxonConceptUri, taxonNameUri, justifications, treatments, loading } of this.syg) {
+      console.group(taxonConceptUri.slice(-10))
       const justs: anyJustification[] = []
       const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
       const js = { taxonConceptUri, taxonNameUri, justifications: justs, treatments: treats, loading }
@@ -129,36 +131,46 @@ export default class SynonymGrouper extends Vue {
       } else {
         this.result.set(taxonNameUri, [js])
       }
-      await Promise.allSettled([
+      promises.push(
         (async () => {
+          console.log('AAA')
           for await (const just of justifications) {
+            console.log(taxonConceptUri.slice(-10), 'just', just)
             justs.push(just)
+            console.log(this.jsArray.map(v => v.justifications[v.justifications.length - 1]))
           }
           console.log(taxonConceptUri.slice(-10), 'JUST done')
-        })(),
+        })())
+      promises.push(
         (async () => {
+          console.log('BBB')
           for await (const treat of treatments.def) {
             console.log(taxonConceptUri.slice(-10), 'def', treat)
             treats.def.push(treat)
           }
           console.log(taxonConceptUri.slice(-10), 'DEF  done')
-        })(),
+        })())
+      promises.push(
         (async () => {
+          console.log('CCC')
           for await (const treat of treatments.aug) {
             console.log(taxonConceptUri.slice(-10), 'aug', treat)
             treats.aug.push(treat)
           }
           console.log(taxonConceptUri.slice(-10), 'AUG  done')
-        })(),
+        })())
+      promises.push(
         (async () => {
+          console.log('DDD')
           for await (const treat of treatments.dpr) {
             console.log(taxonConceptUri.slice(-10), 'dpr', treat)
             treats.dpr.push(treat)
           }
           console.log(taxonConceptUri.slice(-10), 'DPR  done')
-        })()
-      ])
+        })())
+      console.groupEnd()
     }
+    await Promise.allSettled(promises)
     this.loading = false
     this.time = ((performance.now() - t0) / 1000).toFixed(2)
   }

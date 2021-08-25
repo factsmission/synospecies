@@ -147,7 +147,8 @@ class TreatmentSet implements AsyncIterable<Treatment> {
   }
 
   add (value: Treatment) {
-    if (this.contents.findIndex(c => c.toString() === value.toString()) === -1) {
+    if (this.contents.findIndex(c => c.url === value.url) === -1) {
+      console.log('added!')
       this.contents.push(value)
       this.monitor.dispatchEvent(new CustomEvent('updated'))
     }
@@ -160,7 +161,7 @@ class TreatmentSet implements AsyncIterable<Treatment> {
       next: () => {
         return new Promise<IteratorResult<Treatment>>((resolve, reject) => {
           const _ = () => {
-            console.log(this.isFinished, this.contents.length)
+            console.log(this.isFinished, returnedSoFar, '<', this.contents.length)
             if (this.isAborted) {
               reject(new Error('TreatmentSet has been aborted'))
             } else if (returnedSoFar < this.contents.length) {
@@ -169,6 +170,7 @@ class TreatmentSet implements AsyncIterable<Treatment> {
               resolve({ done: true, value: true })
             } else {
               const listener = () => {
+                console.log('listener!')
                 this.monitor.removeEventListener('updated', listener)
                 _()
               }
