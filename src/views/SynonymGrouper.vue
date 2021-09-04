@@ -74,6 +74,17 @@ import Timeline from '@/components/Timeline.vue'
 import Spinner from '@/components/Spinner.vue'
 import Taxomplete from 'taxomplete'
 
+type sparqlEndpoint = {
+  getSparqlResultSet: (query: string, fetchOptions?: any) => Promise<{
+  head: {
+    vars: string[];
+  };
+  results: {
+    bindings: { [key: string]: { type: string; value: string } }[];
+  };
+}>
+}
+
 @Component({
   components: {
     JustificationView,
@@ -84,7 +95,7 @@ import Taxomplete from 'taxomplete'
 })
 export default class SynonymGrouper extends Vue {
   @Prop() s?: string
-  endpoint = new SparqlEndpoint(config.endpoint())
+  endpoint = new SparqlEndpoint(config.endpoint()) as sparqlEndpoint
   taxomplete!: Taxomplete
   input = ''
   ignoreRank = false

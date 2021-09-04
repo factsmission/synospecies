@@ -185,7 +185,7 @@
 /* eslint-disable comma-dangle */
 import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/Spinner.vue'
-import type { SyncJustifiedSynonym, Treatment } from '@/SynonymGroup'
+import type { SyncJustifiedSynonym, Treatment } from '@factsmission/synogroup'
 
 // Required as typescript doesn't know about these nonstandard functions
 declare global {

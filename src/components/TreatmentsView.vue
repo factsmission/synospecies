@@ -81,7 +81,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { SyncJustifiedSynonym } from '@/SynonymGroup'
+import type { SyncJustifiedSynonym } from '@factsmission/synogroup'
 import Spinner from '@/components/Spinner.vue'
 
 @Component({
