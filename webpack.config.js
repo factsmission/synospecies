@@ -86,7 +86,8 @@ module.exports = {
     'node-fetch': 'fetch',
     xmldom: 'window',
     '@nleanba/ndjs': 'window',
-    mustache: 'Mustache'
+    mustache: 'Mustache',
+    '@factsmission/synogroup': 'SynonymGroup',
   },
   optimization: {
     minimize: true

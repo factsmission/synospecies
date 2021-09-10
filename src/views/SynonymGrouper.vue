@@ -65,7 +65,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { anyJustification, SyncJustifiedSynonym, SyncTreatments, SynonymGroup } from '@factsmission/synogroup'
+import type { anyJustification, SyncJustifiedSynonym, SyncTreatments } from '@factsmission/synogroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
