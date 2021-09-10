@@ -65,7 +65,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { anyJustification, SyncJustifiedSynonym, SyncTreatments, SynonymGroup } from '@factsmission/synogroup'
+import type { anyJustification, SyncJustifiedSynonym, SyncTreatments, SynonymGroup as syg } from '@factsmission/synogroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
@@ -107,7 +107,7 @@ export default class SynonymGrouper extends Vue {
   openJ = false
   openT = false
   time = ''
-  syg: SynonymGroup|null = null
+  syg: syg|null = null
 
   kingdom (uri: string) {
     return (uri.match(/http:\/\/taxon-name\.plazi\.org\/id\/([^/]*)\//) || [])[1]
@@ -171,18 +171,14 @@ export default class SynonymGrouper extends Vue {
       promises.push(
         (async () => {
           await Promise.allSettled(jsPromises)
-          console.groupCollapsed(`%c${taxonConceptUri.slice(taxonConceptUri.lastIndexOf('/'))} done`, 'color: salmon;')
-          console.log(...promises)
-          console.log(promises)
-          console.groupEnd()
-          js.loading = false
+          console.log(`%c${taxonConceptUri.slice(taxonConceptUri.lastIndexOf('/'))} done`, 'color: gold;') // eslint-disable-line no-console
           return taxonConceptUri
         })()
       )
-      console.groupEnd()
     }
+    console.log('awaiting now') // eslint-disable-line no-console
     await Promise.allSettled(promises)
-    console.log('%call settled', 'color: red;')
+    console.log('%call settled', 'color: green; font-weight: bold;') // eslint-disable-line no-console
     this.loading = false
     this.time = ((performance.now() - t0) / 1000).toFixed(2)
   }
