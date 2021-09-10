@@ -65,7 +65,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { anyJustification, SyncJustifiedSynonym, SyncTreatments } from '@factsmission/synogroup'
+import type { anyJustification, SyncJustifiedSynonym, SyncTreatments, SynonymGroup } from '@factsmission/synogroup'
 import config from '@/config'
 import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
@@ -76,13 +76,13 @@ import Taxomplete from 'taxomplete'
 
 type sparqlEndpoint = {
   getSparqlResultSet: (query: string, fetchOptions?: any) => Promise<{
-  head: {
-    vars: string[];
-  };
-  results: {
-    bindings: { [key: string]: { type: string; value: string } }[];
-  };
-}>
+    head: {
+      vars: string[];
+    };
+    results: {
+      bindings: { [key: string]: { type: string; value: string } }[];
+    };
+  }>
 }
 
 @Component({
@@ -128,14 +128,14 @@ export default class SynonymGrouper extends Vue {
     if (this.syg) {
       this.syg.abort()
     }
-    this.syg = new SynonymGroup(this.endpoint, this.input, this.ignoreRank)
+    this.syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
     const promises: Promise<any>[] = []
-    for await (const { taxonConceptUri, taxonNameUri, justifications, treatments, loading } of this.syg) {
-      console.groupCollapsed(taxonConceptUri.slice(-10))
+    for await (const justSyn of this.syg) {
+      const { taxonConceptUri, taxonNameUri, justifications, treatments } = justSyn
       const justs: anyJustification[] = []
       const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
-      const js = { taxonConceptUri, taxonNameUri, justifications: justs, treatments: treats, loading }
+      const js = { ...justSyn, justifications: justs, treatments: treats }
       this.jsArray.push(js)
       const resultArr = this.result.get(taxonNameUri)
       if (resultArr) {
@@ -143,43 +143,46 @@ export default class SynonymGrouper extends Vue {
       } else {
         this.result.set(taxonNameUri, [js])
       }
-      promises.push(
+      const jsPromises: Promise<any>[] = []
+      jsPromises.push(
         (async () => {
           for await (const just of justifications) {
             justs.push(just)
           }
-          console.log(taxonConceptUri.slice(-10), 'JUST done')
         })())
-      promises.push(
+      jsPromises.push(
         (async () => {
-          console.log('BBB')
           for await (const treat of treatments.def) {
-            console.log(taxonConceptUri.slice(-10), 'def', treat)
             treats.def.push(treat)
           }
-          console.log(taxonConceptUri.slice(-10), 'DEF  done')
         })())
-      promises.push(
+      jsPromises.push(
         (async () => {
-          console.log('CCC')
           for await (const treat of treatments.aug) {
-            console.log(taxonConceptUri.slice(-10), 'aug', treat)
             treats.aug.push(treat)
           }
-          console.log(taxonConceptUri.slice(-10), 'AUG  done')
+        })())
+      jsPromises.push(
+        (async () => {
+          for await (const treat of treatments.dpr) {
+            treats.dpr.push(treat)
+          }
         })())
       promises.push(
         (async () => {
-          console.log('DDD')
-          for await (const treat of treatments.dpr) {
-            console.log(taxonConceptUri.slice(-10), 'dpr', treat)
-            treats.dpr.push(treat)
-          }
-          console.log(taxonConceptUri.slice(-10), 'DPR  done')
-        })())
+          await Promise.allSettled(jsPromises)
+          console.groupCollapsed(`%c${taxonConceptUri.slice(taxonConceptUri.lastIndexOf('/'))} done`, 'color: salmon;')
+          console.log(...promises)
+          console.log(promises)
+          console.groupEnd()
+          js.loading = false
+          return taxonConceptUri
+        })()
+      )
       console.groupEnd()
     }
     await Promise.allSettled(promises)
+    console.log('%call settled', 'color: red;')
     this.loading = false
     this.time = ((performance.now() - t0) / 1000).toFixed(2)
   }

@@ -1,2 +1,6 @@
 import type { SynonymGroup as syg } from '@factsmission/synogroup'
-declare const SynonymGroup: syg;
+declare global {
+  interface Window {
+    SynonymGroup: syg;
+  }
+}
