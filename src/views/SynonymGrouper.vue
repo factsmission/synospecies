@@ -61,6 +61,8 @@
         <treatments-view :js="js" :open="openT"/>
       </div>
     </div>
+    <hr>
+    <image-splash :taxamanager="taxamanager" :taxa="jsArray.map(t => ({ url: t.taxonConceptUri }))" />
   </div>
 </template>
 
@@ -72,14 +74,19 @@ import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
 import Timeline from '@/components/Timeline.vue'
+import ImageSplash from '@/components/ImageSplash.vue'
 import Spinner from '@/components/Spinner.vue'
 import Taxomplete from 'taxomplete'
+
+// do not use this for new stuff - temporarly added to integrate ImageSplash easily
+import TaxaManager from '@/TaxaManager'
 
 @Component({
   components: {
     JustificationView,
     TreatmentsView,
     Timeline,
+    ImageSplash,
     Spinner
   }
 })
@@ -98,6 +105,9 @@ export default class SynonymGrouper extends Vue {
   openT = false
   time = ''
   syg: SynonymGroup|null = null
+
+  // do not use this for new stuff - temporarly added to integrate ImageSplash easily
+  taxamanager = new TaxaManager(this.endpoint)
 
   kingdom (uri: string) {
     return (uri.match(/http:\/\/taxon-name\.plazi\.org\/id\/([^/]*)\//) || [])[1]
