@@ -67,9 +67,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { anyJustification, SyncJustifiedSynonym, SyncTreatments, SynonymGroup as syg } from '@factsmission/synogroup'
+import { anyJustification, SparqlEndpoint, default as syg } from '@factsmission/synogroup'
+import type { SyncJustifiedSynonym, SyncTreatments } from '@/SynoGroupSync'
 import config from '@/config'
-import SparqlEndpoint from '@retog/sparql-client'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
 import Timeline from '@/components/Timeline.vue'
@@ -79,17 +79,6 @@ import Taxomplete from 'taxomplete'
 
 // do not use this for new stuff - temporarly added to integrate ImageSplash easily
 import TaxaManager from '@/TaxaManager'
-
-type sparqlEndpoint = {
-  getSparqlResultSet: (query: string, fetchOptions?: any) => Promise<{
-    head: {
-      vars: string[];
-    };
-    results: {
-      bindings: { [key: string]: { type: string; value: string } }[];
-    };
-  }>
-}
 
 @Component({
   components: {
@@ -102,7 +91,7 @@ type sparqlEndpoint = {
 })
 export default class SynonymGrouper extends Vue {
   @Prop() s?: string
-  endpoint = new SparqlEndpoint(config.endpoint()) as sparqlEndpoint
+  endpoint = new SparqlEndpoint(config.endpoint())
   taxomplete!: Taxomplete
   input = ''
   ignoreRank = false
@@ -138,10 +127,10 @@ export default class SynonymGrouper extends Vue {
     if (this.syg) {
       this.syg.abort()
     }
-    this.syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
+    this.syg = new (window.SynonymGroup!)(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
     const promises: Promise<any>[] = []
-    for await (const justSyn of this.syg) {
+    for await (const justSyn of this.syg!) {
       const { taxonConceptUri, taxonNameUri, justifications, treatments } = justSyn
       const justs: anyJustification[] = []
       const treats: SyncTreatments = { def: [], aug: [], dpr: [] }

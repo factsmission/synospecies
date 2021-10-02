@@ -80,8 +80,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { SyncJustifiedSynonym } from '@factsmission/synogroup'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import type { SyncJustifiedSynonym } from '@/SynoGroupSync'
 import Spinner from '@/components/Spinner.vue'
 
 @Component({

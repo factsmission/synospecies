@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@factsmission/synogroup": "^1.0.4",
+    "@factsmission/synogroup": "^1.0.5",
     "@mdi/js": "^5.9.55",
     "@retog/sparql-client": "^1.1.0",
     "@triply/yasqe": "4.2.7",

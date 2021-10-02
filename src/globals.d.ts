@@ -1,4 +1,4 @@
-import type { SynonymGroup as syg } from '@factsmission/synogroup'
+import type syg from '@factsmission/synogroup'
 declare global {
   interface Window {
     SynonymGroup: typeof syg;
