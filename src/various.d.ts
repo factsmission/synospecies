@@ -2,13 +2,6 @@ declare module 'ext-rdflib' {
   function sym(url: string): any
 }
 
-declare module 'taxomplete' {
-  export default class Taxomplete {
-    constructor (element: HTMLInputElement, endpoint: any /* This should be `SparqlEndpoint` but that creates a loop */);
-    [key: string]: any
-  }
-}
-
 declare module '@retog/sparql-client' {
   export default class SparqlEndpoint {
     constructor (url: string);

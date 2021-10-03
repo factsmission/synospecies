@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="query"></div>
-    <div class="result"></div>
+    <div class="query" />
+    <div class="result" />
   </div>
 </template>
 
@@ -12,7 +12,7 @@ import YASR from '@triply/yasr'
 import superagent from 'superagent'
 import '@triply/yasqe/build/yasqe.min.css'
 import '@triply/yasr/build/yasr.min.css'
-import { endpoint } from '@/config'
+import { getEndpoint } from '@/utilities/config'
 
 @Component
 export default class QueryEditor extends Vue {
@@ -25,7 +25,7 @@ export default class QueryEditor extends Vue {
       requestConfig: {
         showQueryButton: true,
         persistenceId,
-        endpoint: endpoint()
+        endpoint: getEndpoint()
       }
     })
     const resultElement: HTMLElement = this.$el.getElementsByClassName('result')[0] as HTMLElement

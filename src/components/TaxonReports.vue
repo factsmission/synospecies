@@ -1,12 +1,12 @@
 <template>
-<div>
-  <single-taxon-report
-    v-for="taxon in taxa"
-    :key="taxon.value"
-    :taxon="taxon"
-    :taxamanager="taxamanager"
-  />
-</div>
+  <div>
+    <single-taxon-report
+      v-for="taxon in taxa"
+      :key="taxon.value"
+      :taxon="taxon"
+      :taxamanager="taxamanager"
+    />
+  </div>
 </template>
 
 <script lang="ts">

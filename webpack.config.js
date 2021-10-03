@@ -1,3 +1,4 @@
+/* eslint-disable */
 const webpack = require('webpack')
 const path = require('path')
 const fs = require('fs')
@@ -14,7 +15,7 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
+        // exclude: path.resolve(__dirname, '/node_modules'),
         use: {
           loader: 'babel-loader',
           options: {
@@ -86,7 +87,8 @@ module.exports = {
     'node-fetch': 'fetch',
     xmldom: 'window',
     '@nleanba/ndjs': 'window',
-    mustache: 'Mustache'
+    mustache: 'Mustache',
+    '@factsmission/synogroup': 'SynonymGroup',
   },
   optimization: {
     minimize: true

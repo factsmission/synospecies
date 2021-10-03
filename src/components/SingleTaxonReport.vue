@@ -1,132 +1,185 @@
 <template>
-<div :class="'card' + (deprecates.length > 0 && 0 === taxon.dpr.length ? ' deprecates ' : ' ') + (taxon.dpr.length > 0 ? 'deprecated' : '')">
-  <div class="flex">
-    <div class="text">
-      <hgroup>
-        <h2 class="card_header">{{ getFormattedName(taxon.url) }}</h2>
-        <h3
-          class="card_header"
-          v-for="p in preferedNameBy"
-          :key="p.url"
-        >
-          Preferred by
-          <a :href="p.url">
-            {{ p.creators.join('; ') }} {{ p.dates.join('/') }}
-          </a>
-        </h3>
-      </hgroup>
-      <p v-if="taxon.loading">
-        <spinner/>
-        Loading Treatments
-      </p>
-      <p v-if="!taxon.loading">
-        <svg v-if="taxon.def.length" class="green" viewBox="0 0 24 24">
-          <path fill="currentcolor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-        </svg>
-        <svg v-else class="green" viewBox="0 0 24 24">
-          <path fill="currentcolor" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"/>
-        </svg>
-        {{ taxon.def.length || taxon.loading ? 'Defining Treatments: ' : 'Defining treatment not yet on Plazi' }}
-        <ul v-if="taxon.def.length">
-          <li
-            v-for="t in taxon.def"
-            :key="t.url"
+  <div :class="'card' + (deprecates.length > 0 && 0 === taxon.dpr.length ? ' deprecates ' : ' ') + (taxon.dpr.length > 0 ? 'deprecated' : '')">
+    <div class="flex">
+      <div class="text">
+        <hgroup>
+          <h2 class="card_header">
+            {{ getFormattedName(taxon.url) }}
+          </h2>
+          <h3
+            v-for="p in preferedNameBy"
+            :key="p.url"
+            class="card_header"
           >
-            <a :href="t.url">
-              {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+            Preferred by
+            <a :href="p.url">
+              {{ p.creators.join('; ') }} {{ p.dates.join('/') }}
             </a>
-            <ul v-if="deprecates.find(d => d.url === t.url)">
-              <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
-                Deprecates {{ getFormattedName(d.old) }}
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </p>
-      <p v-if="taxon.aug.length">
-        <svg class="blue" viewBox="0 0 24 24">
-          <path fill="currentcolor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-        </svg>
-        Augmenting Treatments:
-        <ul>
-          <li
-            v-for="t in taxon.aug"
-            :key="t.url"
+          </h3>
+        </hgroup>
+        <p v-if="taxon.loading">
+          <spinner />
+          Loading Treatments
+        </p>
+        <p v-if="!taxon.loading">
+          <svg
+            v-if="taxon.def.length"
+            class="green"
+            viewBox="0 0 24 24"
           >
-            <a :href="t.url">
-              {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
-            </a>
-            <ul v-if="deprecates.find(d => d.url === t.url)">
-              <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
-                Deprecates {{ getFormattedName(d.old) }}
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </p>
-      <p v-if="taxon.dpr.length">
-        <svg class="red" viewBox="0 0 24 24">
-          <path fill="currentcolor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
-        </svg>
-        Deprecating Treatments:
-        <ul>
-          <li
-            v-for="t in taxon.dpr"
-            :key="t.url"
+            <path
+              fill="currentcolor"
+              d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+            />
+          </svg>
+          <svg
+            v-else
+            class="green"
+            viewBox="0 0 24 24"
           >
-            <a :href="t.url">
-              {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
-            </a>
-            <ul v-if="deprecations.find(d => d.url === t.url)">
-              <li v-for="d in deprecations.filter(d => d.url === t.url)" :key="d.new">
-                Deprecated by {{ getFormattedName(d.new) }}
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </p>
-    </div>
-    <div class="vert">
-      <table class="nobold">
-        <tr>
-          <th>Kingdom</th>
-          <td v-if="!loading">{{ ranks[0] }}</td>
-          <td v-else></td>
-        </tr>
-        <tr>
-          <th>Phylum</th>
-          <td v-if="!loading">{{ ranks[1] }}</td>
-          <td v-else></td>
-        </tr>
-        <tr>
-          <th>Class</th>
-          <td v-if="!loading">{{ ranks[2] }}</td>
-          <td v-else></td>
-        </tr>
-        <tr>
-          <th>Order</th>
-          <td v-if="!loading">{{ ranks[3] }}</td>
-          <td v-else><spinner /></td>
-        </tr>
-        <tr>
-          <th>Family</th>
-          <td v-if="!loading">{{ ranks[4] }}</td>
-          <td v-else></td>
-        </tr>
-        <tr>
-          <th>Genus</th>
-          <td v-if="!loading">{{ ranks[5] }}</td>
-          <td v-else></td>
-        </tr>
-        <tr>
-          <th>Species</th>
-          <td v-if="!loading">{{ ranks[6] }}</td>
-          <td v-else></td>
-        </tr>
-      </table>
+            <path
+              fill="currentcolor"
+              d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"
+            />
+          </svg>
+          {{ taxon.def.length || taxon.loading ? 'Defining Treatments: ' : 'Defining treatment not yet on Plazi' }}
+          <ul v-if="taxon.def.length">
+            <li
+              v-for="t in taxon.def"
+              :key="t.url"
+            >
+              <a :href="t.url">
+                {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+              </a>
+              <ul v-if="deprecates.find(d => d.url === t.url)">
+                <li
+                  v-for="d in deprecates.filter(d => d.url === t.url)"
+                  :key="d.old"
+                >
+                  Deprecates {{ getFormattedName(d.old) }}
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </p>
+        <p v-if="taxon.aug.length">
+          <svg
+            class="blue"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentcolor"
+              d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+            />
+          </svg>
+          Augmenting Treatments:
+          <ul>
+            <li
+              v-for="t in taxon.aug"
+              :key="t.url"
+            >
+              <a :href="t.url">
+                {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+              </a>
+              <ul v-if="deprecates.find(d => d.url === t.url)">
+                <li
+                  v-for="d in deprecates.filter(d => d.url === t.url)"
+                  :key="d.old"
+                >
+                  Deprecates {{ getFormattedName(d.old) }}
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </p>
+        <p v-if="taxon.dpr.length">
+          <svg
+            class="red"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentcolor"
+              d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"
+            />
+          </svg>
+          Deprecating Treatments:
+          <ul>
+            <li
+              v-for="t in taxon.dpr"
+              :key="t.url"
+            >
+              <a :href="t.url">
+                {{ t.creators }} ({{ t.year }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+              </a>
+              <ul v-if="deprecations.find(d => d.url === t.url)">
+                <li
+                  v-for="d in deprecations.filter(d => d.url === t.url)"
+                  :key="d.new"
+                >
+                  Deprecated by {{ getFormattedName(d.new) }}
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </p>
+      </div>
+      <div class="vert">
+        <table class="nobold">
+          <tr>
+            <th>Kingdom</th>
+            <td v-if="!loading">
+              {{ ranks[0] }}
+            </td>
+            <td v-else />
+          </tr>
+          <tr>
+            <th>Phylum</th>
+            <td v-if="!loading">
+              {{ ranks[1] }}
+            </td>
+            <td v-else />
+          </tr>
+          <tr>
+            <th>Class</th>
+            <td v-if="!loading">
+              {{ ranks[2] }}
+            </td>
+            <td v-else />
+          </tr>
+          <tr>
+            <th>Order</th>
+            <td v-if="!loading">
+              {{ ranks[3] }}
+            </td>
+            <td v-else>
+              <spinner />
+            </td>
+          </tr>
+          <tr>
+            <th>Family</th>
+            <td v-if="!loading">
+              {{ ranks[4] }}
+            </td>
+            <td v-else />
+          </tr>
+          <tr>
+            <th>Genus</th>
+            <td v-if="!loading">
+              {{ ranks[5] }}
+            </td>
+            <td v-else />
+          </tr>
+          <tr>
+            <th>Species</th>
+            <td v-if="!loading">
+              {{ ranks[6] }}
+            </td>
+            <td v-else />
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script lang="ts">

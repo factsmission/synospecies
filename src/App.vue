@@ -8,24 +8,39 @@
             alt="Plazi - take care of freedom"
             width="200"
             height="50"
-          />
+          >
         </a>
         <a href="https://factsmission.com">
-          <img src="./assets/FactsMissionTEO.png" alt="FactsMission" height="20" />
+          <img
+            src="./assets/FactsMissionTEO.png"
+            alt="FactsMission"
+            height="20"
+          >
         </a>
       </div>
     </header>
-    <nav class="plazi-nav" id="nav">
+    <nav
+      id="nav"
+      class="plazi-nav"
+    >
       <div class="container">
-        <router-link to="/">Home</router-link>
-        <router-link to="/advanced">Advanced</router-link>
-        <router-link to="/about">About</router-link>
-        <router-link to="/settings">Settings</router-link>
+        <router-link to="/">
+          Home
+        </router-link>
+        <router-link to="/advanced">
+          Advanced
+        </router-link>
+        <router-link to="/about">
+          About
+        </router-link>
+        <router-link to="/settings">
+          Settings
+        </router-link>
       </div>
     </nav>
 
     <main class="container">
-      <router-view/>
+      <router-view />
     </main>
 
     <div class="plazi-footer">
@@ -44,17 +59,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import Classic from '@/views/Classic.vue'
-@Component({
-  components: {
-    Classic
-  }
-})
-export default class App extends Vue {}
-</script>
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300&family=Open+Sans:ital,wght@0,400;0,600;0,800;1,400;1,600;1,800&family=Oswald:wght@500&display=swap');
@@ -160,9 +164,6 @@ table tr td {
   text-align: center;
   // border-top: 1px solid #00000033;
   padding: 0.5rem;
-}
-tr:nth-child(even) {
-  // background-color: #ffffff0f;
 }
 tr:nth-child(odd) {
   background-color: #0000000f;

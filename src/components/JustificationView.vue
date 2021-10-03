@@ -1,8 +1,16 @@
 <template>
   <div>
     <ul>
-      <li v-for="j in js.justifications.values()" :key="j.toString()">
-        <span class="just" v-for="i in prosaify(j)" :key="i.toString()" v-html="i"/>
+      <li
+        v-for="j in justifications"
+        :key="j.toString()"
+      >
+        <span
+          v-for="i in j"
+          :key="i.toString()"
+          class="just"
+          v-html="i"
+        />
       </li>
     </ul>
     <!--{{ Array.from(js.justifications.values()) }}-->
@@ -10,23 +18,36 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import type { JustifiedSynonym, Justification } from '@/SynonymGroup'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import type { anyJustification, JustifiedSynonym } from '@factsmission/synogroup'
+import type { anySyncJustification, SyncJustifiedSynonym } from '@/utilities/SynogroupSync'
 
 @Component
 export default class JustifcationView extends Vue {
-  @Prop() js!: JustifiedSynonym;
+  @Prop() js!: SyncJustifiedSynonym;
 
-  prosaify (j: Justification): string[] {
-    const predececessor: (t: JustifiedSynonym) => string[] = (t) => {
-      return this.prosaify([...t.justifications.values()][0])
-    }
-    return [this.linkify(j.toString())].concat(j.precedingSynonym ? predececessor(j.precedingSynonym) : [])
+  justifications: string[][] = []
+
+  async predecessor (t: JustifiedSynonym) {
+    return this.prosaify(await t.justifications.first())
+  }
+
+  async prosaify (j: anyJustification): Promise<string[]> {
+    return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
+  }
+
+  async prosaifyInitial (j: anySyncJustification) {
+    return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
   }
 
   linkify (str: string): string {
     const shorten = (s: string) => s.replace(/http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/([^/]*\/)?/g, '').replace(/\/|_/g, ' ')
     return str.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `<a href="${g}">${shorten(g)}</a>`)
+  }
+
+  @Watch('js.justifications')
+  updateJustifications () {
+    (async () => (this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaifyInitial(j)))))()
   }
 }
 </script>

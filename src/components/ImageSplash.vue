@@ -1,27 +1,32 @@
 <template>
-<!-- eslint-disable vue/require-v-for-key -->
-<div :class="images.length <= 2 ? 'twocol card' : images.length === 3 ? 'threecol card' : 'card'">
-  <figure
-    v-for="image in (loadAll ? images : images.slice(0, 7))"
-    :key="image.url"
-    @click="e => e.currentTarget.classList.toggle('open')"
-    @keyup.space="e => e.currentTarget.classList.toggle('open')"
-    @keyup.enter="e => e.currentTarget.classList.toggle('open')"
-    :title="'Click to show details\n' + image.url"
-    tabindex="0"
-  >
-    <img
-      :src="image.url"
-      :alt="image.description||''"
-      loading="lazy"
-    />
-    <figcaption>
-      <div>{{ image.description||'' }}</div>
-      <a :href="image.url">{{ image.url }}</a>
-    </figcaption>
-  </figure>
-  <button v-if="!loadAll && images.length > 7" @click="loadAll = true">Load all {{ images.length }} images</button>
-</div>
+  <!-- eslint-disable vue/require-v-for-key -->
+  <div :class="images.length <= 2 ? 'twocol card' : images.length === 3 ? 'threecol card' : 'card'">
+    <figure
+      v-for="image in (loadAll ? images : images.slice(0, 7))"
+      :key="image.url"
+      :title="'Click to show details\n' + image.url"
+      tabindex="0"
+      @click="e => e.currentTarget.classList.toggle('open')"
+      @keyup.space="e => e.currentTarget.classList.toggle('open')"
+      @keyup.enter="e => e.currentTarget.classList.toggle('open')"
+    >
+      <img
+        :src="image.url"
+        :alt="image.description||''"
+        loading="lazy"
+      >
+      <figcaption>
+        <div>{{ image.description||'' }}</div>
+        <a :href="image.url">{{ image.url }}</a>
+      </figcaption>
+    </figure>
+    <button
+      v-if="!loadAll && images.length > 7"
+      @click="loadAll = true"
+    >
+      Load all {{ images.length }} images
+    </button>
+  </div>
 </template>
 
 <script lang="ts">

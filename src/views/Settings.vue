@@ -6,26 +6,30 @@
         Set SPARQL endpoint
       </h2>
       <b>Select SPARQL endpoint serving the Plazi Treatment Data:</b>
-      <selector :options="allEndpoints" v-model="endpoint" />
+      <selector
+        v-model="endpoint"
+        :options="allEndpoints"
+      />
     </div>
   </div>
 </template>
 
-<script lang="js">
+<script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
-import config from '@/config'
-import Selector from '@/components/Selector'
+
+import Selector from '@/components/Selector.vue'
+
+import * as config from '@/utilities/config'
 
 @Component({
   components: { Selector }
 })
-export default class About extends Vue {
-  allEndpoints = ['https://lindas-cached.cluster.ldbar.ch/query', 'https://lindas.admin.ch/query', 'https://trifid-lindas.test.cluster.ldbar.ch/query', 'https://treatment.ld.plazi.org/sparql']
-
-  endpoint = config.endpoint();
+export default class Settings extends Vue {
+  allEndpoints = config.allEndpoints
+  endpoint = config.getEndpoint();
 
   @Watch('endpoint')
-  onEndpointChanged (v) {
+  onEndpointChanged (v: string) {
     localStorage.setItem('plazi-treatments-endpoint', v)
   }
 }
