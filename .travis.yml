@@ -10,6 +10,8 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-5
+before_install:
+  - npm i -g npm@lts
 script:
   - npm run build
 deploy:
