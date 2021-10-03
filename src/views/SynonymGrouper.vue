@@ -185,6 +185,7 @@ export default class Home extends Vue {
     if (this.syg) {
       this.syg.abort()
     }
+    this.syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
     const promises: Promise<any>[] = []
     for await (const justSyn of this.syg) {
