@@ -46,7 +46,7 @@ export default class JustifcationView extends Vue {
   }
 
   @Watch('js.justifications')
-  eeh () {
+  updateJustifications () {
     (async () => (this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaifyInitial(j)))))()
   }
 }

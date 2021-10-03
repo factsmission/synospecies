@@ -125,7 +125,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { anyJustification, SparqlEndpoint, default as syg } from '@factsmission/synogroup'
+import type { anyJustification } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
 import JustificationView from '@/components/JustificationView.vue'
@@ -161,7 +161,7 @@ export default class Home extends Vue {
   openJ = false
   openT = false
   time = ''
-  syg: syg|null = null
+  syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
 
   // do not use this for new stuff - temporarly added to integrate ImageSplash easily
   taxamanager = new TaxaManager(this.endpoint)
@@ -185,7 +185,6 @@ export default class Home extends Vue {
     if (this.syg) {
       this.syg.abort()
     }
-    this.syg = new (window.SynonymGroup!)(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
     const promises: Promise<any>[] = []
     for await (const justSyn of this.syg) {
