@@ -1,17 +1,26 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Classic from '@/views/Classic.vue'
-import About from '@/views/About.vue'
-import Settings from '@/views/Settings.vue'
-import SynonymGrouper from '@/views/SynonymGrouper.vue'
+import VueRouter, { RouteConfig } from 'vue-router'
+import Home from '../views/Classic.vue'
+import About from '../views/About.vue'
+import Settings from '../views/Settings.vue'
 
 Vue.use(VueRouter)
 
-const routes = [
+const routes: Array<RouteConfig> = [
   {
     path: '/',
-    name: 'classic',
-    component: Classic
+    name: 'home',
+    component: Home
+  },
+  {
+    path: '/syg',
+    name: 'syg',
+    component: () => import(/* webpackChunkName: "syg" */ '../views/SynonymGrouper.vue')
+  },
+  {
+    path: '/advanced',
+    name: 'advanced',
+    component: () => import(/* webpackChunkName: "advanced" */ '../views/Advanced.vue')
   },
   {
     path: '/about',
@@ -23,24 +32,11 @@ const routes = [
     name: 'settings',
     component: Settings
   },
-  {
-    path: '/syg',
-    name: 'SynonymGrouper',
-    props: (route: any) => ({ s: route.query.s }),
-    component: SynonymGrouper
-  },
-  {
-    path: '/advanced',
-    name: 'advanced',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Advanced.vue')
-  }
 ]
 
 const router = new VueRouter({
   mode: 'history',
+  base: process.env.BASE_URL,
   routes
 })
 

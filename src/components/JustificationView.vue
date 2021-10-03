@@ -1,8 +1,16 @@
 <template>
   <div>
     <ul>
-      <li v-for="j in justifications" :key="j.toString()">
-        <span class="just" v-for="i in j" :key="i.toString()" v-html="i"/>
+      <li
+        v-for="j in justifications"
+        :key="j.toString()"
+      >
+        <span
+          v-for="i in j"
+          :key="i.toString()"
+          class="just"
+          v-html="i"
+        />
       </li>
     </ul>
     <!--{{ Array.from(js.justifications.values()) }}-->
@@ -12,7 +20,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import type { anyJustification, JustifiedSynonym } from '@factsmission/synogroup'
-import type { anySyncJustification, SyncJustifiedSynonym } from '@/SynoGroupSync'
+import type { anySyncJustification, SyncJustifiedSynonym } from '@/utilities/SynogroupSync'
 
 @Component
 export default class JustifcationView extends Vue {

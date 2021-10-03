@@ -157,7 +157,7 @@ SELECT * WHERE {
 import QueryEditor from '@/components/QueryEditor.vue'
 
 export default {
-  name: 'home',
+  name: 'Home',
   components: {
     QueryEditor
   }

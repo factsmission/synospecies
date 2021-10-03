@@ -1,5 +1,8 @@
 <template>
-<div class="rot" aria-hidden="true"/>
+  <div
+    class="rot"
+    aria-hidden="true"
+  />
 </template>
 
 <style scoped lang="scss">

@@ -1,34 +1,49 @@
 <template>
-<div>
-  <i id="betabtn"><router-link to="/syg">view beta</router-link></i>
-  <h1>SynoSpecies</h1>
-  <form id="search-form">
-    <label for="combinedfield">Input Genus and species here:</label>
-    <input type="text" id="combinedfield" placeholder="Sadayoshia acroporae" />
-    <button @click.prevent="onClick" id="lookup">Look up</button>
-  </form>
-  <hr />
-  {{ message }}
-  <timeline
-    v-if="taxa.length > 0"
-    :taxa="taxa"
-    :years="years"
-  />
-  <hr />
-  <taxon-reports
-    :taxa="taxa"
-    :taxamanager="taxamanager"
-    ref="taxonreports"
-  />
-  <hr />
-  <image-splash
-    :taxa="taxa"
-    :taxamanager="taxamanager"
-  />
-  <hr />
-  <div class="section" id="vernacular-area"></div>
-  <div class="section" id="wikidata-area"></div>
-</div>
+  <div>
+    <i id="betabtn"><router-link to="/syg">view beta</router-link></i>
+    <h1>SynoSpecies</h1>
+    <form id="search-form">
+      <label for="combinedfield">Input Genus and species here:</label>
+      <input
+        id="combinedfield"
+        type="text"
+        placeholder="Sadayoshia acroporae"
+      >
+      <button
+        id="lookup"
+        @click.prevent="onClick"
+      >
+        Look up
+      </button>
+    </form>
+    <hr>
+    {{ message }}
+    <timeline
+      v-if="taxa.length > 0"
+      :taxa="taxa"
+      :years="years"
+    />
+    <hr>
+    <taxon-reports
+      ref="taxonreports"
+      :taxa="taxa"
+      :taxamanager="taxamanager"
+    />
+    <hr>
+    <image-splash
+      :taxa="taxa"
+      :taxamanager="taxamanager"
+    />
+    <hr>
+    <div
+      id="vernacular-area"
+      class="section"
+    />
+    <div
+      id="wikidata-area"
+      class="section"
+    />
+  </div>
 </template>
 
 <script lang="ts">
@@ -46,7 +61,7 @@ import VernacularViewer from '@/VernacularViewer'
 import TaxaManager from '@/TaxaManager'
 import TaxonReports from '@/components/TaxonReports.vue'
 import Taxomplete from 'taxomplete'
-import config from '@/config'
+import { getEndpoint } from '@/utilities/config'
 
 type SparqlJson = {
   head: {
@@ -122,7 +137,7 @@ export default class Classic extends Vue {
   beforeMount () {
     const params = new URLSearchParams(window.location.search)
 
-    this.sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || config.endpoint())
+    this.sparqlEndpoint = new SparqlEndpoint(params.get('endpoint') || getEndpoint())
     this.taxamanager = new TaxaManager(this.sparqlEndpoint)
   }
 
@@ -289,7 +304,9 @@ export default class Classic extends Vue {
         const genus = nameSection.substring(0, nameSection.indexOf('_'))
         const species = nameSection.substring(nameSection.indexOf('_') + 1, nameSection.indexOf('_', nameSection.indexOf('_') + 1))
         this.getHorizontalData(genus, species)
-      } catch (error) {}
+      } catch (error) {
+        // ignore error
+      }
     })
 
     this.years.forEach(y => {

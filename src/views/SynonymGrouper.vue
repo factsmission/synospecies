@@ -1,20 +1,45 @@
 <template>
   <div>
     <h1>SynoSpecies</h1>
-    <div class="card notice"><b>Beta:</b> This is under development. Looks and behavior will change.</div>
     <div class="card form">
       <div class="flex">
         <label>Enter Taxon Name</label>
       </div>
       <div class="flex">
-        <input type="text" v-model="input" id="combinedfield" placeholder="Sadayoshia acamar" />
-        <button class="go" @click="updateSG">Go</button>
-        <div class="dropdown" :data-open="settingsOpen">
-          <button class="icon" @click="settingsOpen = !settingsOpen" aria-label="Search Settings">
-            <svg role="presentation" viewBox="0 0 24 24"><path fill="currentcolor" :d="$icons.mdiCogOutline"></path></svg>
+        <input
+          id="combinedfield"
+          v-model="input"
+          type="text"
+          placeholder="Sadayoshia acamar"
+        >
+        <button
+          class="go"
+          @click="updateSG"
+        >
+          Go
+        </button>
+        <div
+          class="dropdown"
+          :data-open="settingsOpen"
+        >
+          <button
+            class="icon"
+            aria-label="Search Settings"
+            @click="settingsOpen = !settingsOpen"
+          >
+            <svg
+              role="presentation"
+              viewBox="0 0 24 24"
+            ><path
+              fill="currentcolor"
+              :d="$icons.mdiCogOutline"
+            /></svg>
           </button>
           <div>
-            <label><input type="checkbox" v-model="ignoreRank">Include Subtaxa</label>
+            <label><input
+              v-model="ignoreRank"
+              type="checkbox"
+            >Include Subtaxa</label>
           </div>
         </div>
       </div>
@@ -23,20 +48,40 @@
         <div style="line-height: 2.5rem; padding-left: .5rem;">
           <div v-if="loading">
             Loading
-            <spinner/>
+            <spinner />
             ({{ jsArray.length }} result(s) so far)
           </div>
           <div v-else-if="time">
             {{ jsArray.length }} result(s), took {{ time }}s
           </div>
         </div>
-        <div class="dropdown" :data-open="tunerOpen">
-          <button class="icon" @click="tunerOpen = !tunerOpen" aria-label="Search Settings" :disabled="!time && !loading">
-            <svg role="presentation" viewBox="0 0 24 24"><path fill="currentcolor" :d="$icons.mdiTune"></path></svg>
+        <div
+          class="dropdown"
+          :data-open="tunerOpen"
+        >
+          <button
+            class="icon"
+            aria-label="Search Settings"
+            :disabled="!time && !loading"
+            @click="tunerOpen = !tunerOpen"
+          >
+            <svg
+              role="presentation"
+              viewBox="0 0 24 24"
+            ><path
+              fill="currentcolor"
+              :d="$icons.mdiTune"
+            /></svg>
           </button>
           <div>
-            <label><input type="checkbox" v-model="openJ">Expand all Justifications</label>
-            <label><input type="checkbox" v-model="openT">Expand all Treatments</label>
+            <label><input
+              v-model="openJ"
+              type="checkbox"
+            >Expand all Justifications</label>
+            <label><input
+              v-model="openT"
+              type="checkbox"
+            >Expand all Treatments</label>
           </div>
         </div>
       </div>
@@ -45,9 +90,16 @@
       v-if="jsArray.length > 0"
       :result="jsArray"
     />
-    <div v-for="taxonName in result" :key="taxonName[0]">
+    <div
+      v-for="taxonName in result"
+      :key="taxonName[0]"
+    >
       <span class="muted">{{ kingdom(taxonName[0]) }}</span> {{ shorten(taxonName[0]) }}
-      <div :class="js.treatments.dpr.length ? 'card deprecated' : 'card'" v-for="js in taxonName[1]" :key="js.taxonConceptUri">
+      <div
+        v-for="js in taxonName[1]"
+        :key="js.taxonConceptUri"
+        :class="js.treatments.dpr.length ? 'card deprecated' : 'card'"
+      >
         <h2>
           <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
         </h2>
@@ -55,21 +107,27 @@
           <summary>
             {{ js.justifications.length === 1 ? 'Justification' : `Justifications (${js.justifications.length})` }}
           </summary>
-          <justification-view :js="js"/>
+          <justification-view :js="js" />
         </details>
-        <treatments-view :js="js" :open="openT"/>
+        <treatments-view
+          :js="js"
+          :open="openT"
+        />
       </div>
     </div>
     <hr>
-    <image-splash :taxamanager="taxamanager" :taxa="jsArray.map(t => ({ url: t.taxonConceptUri }))" />
+    <image-splash
+      :taxamanager="taxamanager"
+      :taxa="jsArray.map(t => ({ url: t.taxonConceptUri }))"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import { anyJustification, SparqlEndpoint, default as syg } from '@factsmission/synogroup'
-import type { SyncJustifiedSynonym, SyncTreatments } from '@/SynoGroupSync'
-import config from '@/config'
+import type { anyJustification, SparqlEndpoint, default as syg } from '@factsmission/synogroup'
+import type { SyncJustifiedSynonym, SyncTreatments } from '@/utilities/SynogroupSync'
+import { getEndpoint } from '@/utilities/config'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
 import Timeline from '@/components/Timeline.vue'
@@ -89,9 +147,9 @@ import TaxaManager from '@/TaxaManager'
     Spinner
   }
 })
-export default class SynonymGrouper extends Vue {
+export default class Home extends Vue {
   @Prop() s?: string
-  endpoint = new SparqlEndpoint(config.endpoint())
+  endpoint = new window.SparqlEndpoint(getEndpoint())
   taxomplete!: Taxomplete
   input = ''
   ignoreRank = false
@@ -130,7 +188,7 @@ export default class SynonymGrouper extends Vue {
     this.syg = new (window.SynonymGroup!)(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
     const promises: Promise<any>[] = []
-    for await (const justSyn of this.syg!) {
+    for await (const justSyn of this.syg) {
       const { taxonConceptUri, taxonNameUri, justifications, treatments } = justSyn
       const justs: anyJustification[] = []
       const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
@@ -142,7 +200,7 @@ export default class SynonymGrouper extends Vue {
       } else {
         this.result.set(taxonNameUri, [js])
       }
-      const jsPromises: Promise<any>[] = []
+      const jsPromises: Promise<void>[] = []
       jsPromises.push(
         (async () => {
           for await (const just of justifications) {

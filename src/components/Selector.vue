@@ -1,12 +1,29 @@
 <template>
-<div>
-  <label v-for="o in options" :key="o">
-    <input type="radio" v-model="val" :value="o" name="server">{{o}}
-  </label>
-  <label>
-    <input type="radio" v-model="val" :value="custom" name="server">Custom:<input type="text" v-model="custom" @click="val = custom">
-  </label>
-</div>
+  <div>
+    <label
+      v-for="o in options"
+      :key="o"
+    >
+      <input
+        v-model="val"
+        type="radio"
+        :value="o"
+        name="server"
+      >{{ o }}
+    </label>
+    <label>
+      <input
+        v-model="val"
+        type="radio"
+        :value="custom"
+        name="server"
+      >Custom:<input
+        v-model="custom"
+        type="text"
+        @click="val = custom"
+      >
+    </label>
+  </div>
 </template>
 
 <script lang="ts">
