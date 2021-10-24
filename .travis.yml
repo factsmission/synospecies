@@ -11,7 +11,7 @@ addons:
     packages:
     - g++-5
 before_install:
-  - npm i -g npm@lts
+  - npm i -g npm@7.24.2
 script:
   - npm run build
 deploy:
