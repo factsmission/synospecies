@@ -229,9 +229,10 @@ export default class Home extends Vue {
         (async () => {
           await Promise.allSettled(jsPromises)
           console.log(`%c${taxonConceptUri.slice(taxonConceptUri.lastIndexOf('/'))} done`, 'color: gold;') // eslint-disable-line no-console
+          js.loading = false
           return taxonConceptUri
         })()
-      )
+        )
     }
     console.log('awaiting now') // eslint-disable-line no-console
     await Promise.allSettled(promises)

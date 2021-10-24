@@ -36,7 +36,7 @@
         />
       </svg>)
     </summary>
-    <div>
+    <div v-if="(!js.treatments.def.length && !js.loading) || js.treatments.def.length || js.treatments.aug.length">
       Augmenting Treatments:
       <ul class="nobullet">
         <li
