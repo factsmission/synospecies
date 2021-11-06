@@ -100,6 +100,17 @@
         :key="js.taxonConceptUri"
         :class="js.treatments.dpr.length ? 'card deprecated' : 'card'"
       >
+        <div class="tree">
+          <table>
+            <tr>
+              <th>Phylum</th><th>Class</th><th>Order</th><th>Family</th>
+            </tr>
+            <tr>
+              <td v-if="!trees.has(js.taxonConceptUri)" colspan="4" class="loading">Loading</td>
+              <td v-for="t in trees.get(js.taxonConceptUri)" :key="t">{{ t }}</td>
+            </tr>
+          </table>
+        </div>
         <h2>
           <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
         </h2>
@@ -163,8 +174,30 @@ export default class Home extends Vue {
   time = ''
   syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
 
+  //         tc-uri : phylum  class   order   family
+  trees: Map<string, [string, string, string, string]> = new Map()
+
   // do not use this for new stuff - temporarly added to integrate ImageSplash easily
   taxamanager = new TaxaManager(this.endpoint)
+
+  async getTree (tcuri: string) {
+    if (this.trees.has(tcuri)) {
+      return this.trees.get(tcuri)
+    } else {
+      const query =
+`PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
+SELECT DISTINCT * WHERE {
+  <${tcuri}> dwc:phylum ?phylum; dwc:class ?class; dwc:family ?family; dwc:order ?order.
+}`
+      return this.endpoint.getSparqlResultSet(query)
+        .then(json => json.results.bindings[0])
+        .then(result => {
+          const tree = ['phylum', 'class', 'order', 'family'].map(r => result[r] ? result[r].value : '') as [string, string, string, string]
+          this.trees.set(tcuri, tree)
+          return tree
+        })
+    }
+  }
 
   kingdom (uri: string) {
     return (uri.match(/http:\/\/taxon-name\.plazi\.org\/id\/([^/]*)\//) || [])[1]
@@ -200,6 +233,7 @@ export default class Home extends Vue {
       } else {
         this.result.set(taxonNameUri, [js])
       }
+      this.getTree(js.taxonConceptUri)
       const jsPromises: Promise<void>[] = []
       jsPromises.push(
         (async () => {
@@ -362,6 +396,39 @@ table tr {
   th,
   td {
     text-align: left;
+  }
+}
+
+.tree {
+  background: #ffffff33;
+  border: 1px solid #00000033;
+  border-radius: 0.2rem;
+  float: right;
+  font-size: 0.8rem;
+  margin: 0 0 0.5rem 0.5rem;
+  max-width: 100%;
+  overflow: auto;
+  width: auto;
+
+  * {
+    background: none;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .loading {
+    font-style: italic;
+    color: grey;
+    text-align: center;
+  }
+
+  th {
+    font-weight: normal;
+    padding: 0.4rem;
+  }
+
+  td {
+    padding: 0 0.4rem 0.4rem;
   }
 }
 
