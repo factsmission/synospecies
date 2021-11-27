@@ -60,7 +60,7 @@
         <ul>
           <li v-if="links.enwikipedia"><a :href="links.enwikipedia">{{ links.enwikipedia }}</a></li>
           <li v-for="link in links.wikipedia" :key="link">
-            <a :href="link">{{ link }}</a>
+            <a :href="link">{{ readableLinks(link) }}</a>
           </li>
         </ul>
       </div>
@@ -182,6 +182,36 @@
         <circle cx="470.5" cy="161" r="125" fill="url(#d)" stroke="#555" />
       </svg>
     </a>
+    <a
+      v-if="links.commons"
+      :href="links.commons"
+      aria-label="associated wikimedia commons page"
+      class="button"
+      target="_blank"
+    >
+      <svg height="24" version="1.1" viewBox="-305 -516 610 820" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs>
+          <clipPath id="wc_b">
+            <circle r="298"/>
+          </clipPath>
+        </defs>
+        <circle r="100" fill="#900"/>
+        <g fill="#069">
+          <g id="wc_a" clip-path="url(#wc_b)">
+          <path d="m-11 180v118h22v-118"/>
+          <path d="m-43 185 43-75 43 75"/>
+          </g>
+          <g id="wc_c">
+          <use transform="rotate(45)" xlink:href="#wc_a"/>
+          <use transform="rotate(90)" xlink:href="#wc_a"/>
+          <use transform="rotate(135)" xlink:href="#wc_a"/>
+          </g>
+          <use transform="scale(-1 1)" xlink:href="#wc_c"/>
+          <path transform="rotate(-45)" d="m0-256a256 256 0 1 0 256 256c0-100-101-150-6-275" fill="none" stroke="#069" stroke-width="84"/>
+          <path d="m-23-515s-36 135-80 185 116-62 170-5-90-180-90-180z"/>
+        </g>
+      </svg>
+    </a>
   </div>
 </template>
 
@@ -197,7 +227,8 @@ export default class WikidatatButtons extends Vue {
     gbif: undefined as string|undefined,
     enwikipedia: undefined as string|undefined,
     wikipedia: [] as string[],
-    wikispecies: undefined as string|undefined
+    wikispecies: undefined as string|undefined,
+    commons: undefined as string|undefined,
   }
 
   dropdown = false
@@ -227,10 +258,15 @@ GROUP BY ?item ?gbif
           console.log(pages)
           this.links.enwikipedia = pages.find(p => p.match(/^https?:\/\/en\.wikipedia\.org\//))
           this.links.wikispecies = pages.find(p => p.match(/^https?:\/\/species\.wikimedia\.org\//))
-          this.links.wikipedia = pages.filter(p => p !== this.links.enwikipedia && p !== this.links.wikispecies && p !== '')
+          this.links.commons = pages.find(p => p.match(/^https?:\/\/commons\.wikimedia\.org\//))
+          this.links.wikipedia = pages.filter(p => p !== this.links.enwikipedia && p !== this.links.wikispecies && p !== this.links.commons && p !== '').sort()
         }
       }
     })
+  }
+
+  readableLinks (url: string) {
+    return decodeURI(url.replace(/^https?:\/\//, ''))
   }
 
   mounted () {
@@ -256,11 +292,13 @@ a {
   border: none;
   border-radius: 0.2rem;
   margin: 0 0.2rem;
+  min-width: calc(.4rem + 24px);
   padding: 0.2rem;
 
   & svg {
     display: block;
     height: 24px;
+    margin: 0 auto;
   }
 
   &:hover {
@@ -317,6 +355,9 @@ a {
     box-shadow: 2px 4px 9px -4px #212121;
     display: flex;
     flex-direction: column;
+    max-height: 80vh;
+    max-width: 80vw;
+    overflow-y: auto;
     position: absolute;
     right: 0;
     top: calc(.4rem + 24px);
