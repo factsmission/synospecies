@@ -1,7 +1,7 @@
 <template>
   <div>
-    <a href="https://wikidata.org/" aria-label="associated wikidata page"
-    class="button">
+    <a v-if="links.wikidata || links.gbif || links.wikipedia.en || hasOtherWikipedia || links.wikispecies" :href="links.wikidata" aria-label="associated wikidata page"
+    class="button" :disabled="!links.wikidata">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         version="1.2"
@@ -24,11 +24,12 @@
         />
       </svg>
     </a>
-    <a href="#">GBIF ID: 1234567</a>
+    <a v-if="links.gbif" :href="links.gbif">GBIF ID: 1234567</a>
     <a
-      href="https://wikipedia.org/"
+      v-if="hasOtherWikipedia || links.wikipedia.en" :href="links.wikipedia.en"
       aria-label="associated english wikipedia page"
-      class="button split"
+      :class="hasOtherWikipedia ? 'button split' : 'button'"
+      :disabled="!links.wikipedia.en"
     >
       <svg
         version="1.0"
@@ -43,13 +44,14 @@
         />
       </svg>
     </a>
-    <button class="button split" aria-label="other language wikipedia pages">
+    <button v-if="hasOtherWikipedia" class="button split" aria-label="other language wikipedia pages">
       <svg viewBox="0 0 24 24">
         <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
       </svg>
     </button>
     <a
-      href="https://species.wikimedia.org/"
+      v-if="links.wikispecies"
+      :href="links.wikispecies"
       aria-label="associated wikispecies page"
       class="button"
     >
@@ -170,12 +172,21 @@
 import { Component, Vue } from "vue-property-decorator";
 
 @Component({})
-export default class WikidatatButtons extends Vue {}
+export default class WikidatatButtons extends Vue {
+  links = {
+    wikidata: null,
+    gbif: null,
+    wikipedia: {},
+    wikispecies: null
+  }
+  hasOtherWikipedia = false
+}
 </script>
 
 <style lang="scss" scoped>
 div {
   display: flex;
+  margin-right: -0.2rem;
 }
 
 a {
@@ -194,6 +205,10 @@ a {
   & svg {
     display: block;
     height: 24px;
+  }
+
+  &[disabled] {
+    background: none;
   }
 }
 
