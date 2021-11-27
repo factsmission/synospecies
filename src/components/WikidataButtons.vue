@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a v-if="links.wikidata || links.gbif || links.wikipedia.en || hasOtherWikipedia || links.wikispecies" :href="links.wikidata" aria-label="associated wikidata page"
+    <a v-if="links.wikidata || links.gbif || links.enwikipedia || links.wikipedia.length || links.wikispecies" :href="links.wikidata" aria-label="associated wikidata page"
     class="button" :disabled="!links.wikidata">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -24,12 +24,12 @@
         />
       </svg>
     </a>
-    <a v-if="links.gbif" :href="links.gbif">GBIF ID: 1234567</a>
+    <a v-if="links.gbif" :href="'https://www.gbif.org/species/' + links.gbif">GBIF ID: {{ links.gbif }}</a>
     <a
-      v-if="hasOtherWikipedia || links.wikipedia.en" :href="links.wikipedia.en"
+      v-if="links.wikipedia.length || links.enwikipedia" :href="links.enwikipedia"
       aria-label="associated english wikipedia page"
-      :class="hasOtherWikipedia ? 'button split' : 'button'"
-      :disabled="!links.wikipedia.en"
+      :class="links.wikipedia.length ? 'button split' : 'button'"
+      :disabled="!links.enwikipedia"
     >
       <svg
         version="1.0"
@@ -44,7 +44,7 @@
         />
       </svg>
     </a>
-    <button v-if="hasOtherWikipedia" class="button split" aria-label="other language wikipedia pages">
+    <button v-if="links.wikipedia.length" class="button split" aria-label="other language wikipedia pages">
       <svg viewBox="0 0 24 24">
         <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
       </svg>
@@ -168,18 +168,55 @@
   </div>
 </template>
 
-<script>
-import { Component, Vue } from "vue-property-decorator";
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 
 @Component({})
 export default class WikidatatButtons extends Vue {
+  @Prop() taxonName!: string;
+
   links = {
-    wikidata: null,
-    gbif: null,
-    wikipedia: {},
-    wikispecies: null
+    wikidata: undefined as string|undefined,
+    gbif: undefined as string|undefined,
+    enwikipedia: undefined as string|undefined,
+    wikipedia: [] as string[],
+    wikispecies: undefined as string|undefined
   }
-  hasOtherWikipedia = false
+
+  @Watch('taxonName')
+  getData () {
+    if (!this.taxonName) return;
+    const endpointURL = 'https://query.wikidata.org/sparql'
+    const query = `
+SELECT DISTINCT ?item ?gbif (group_concat(?page;separator="|") as ?pages)
+WHERE {
+  ?item wdt:P225 "${this.taxonName}" .
+  OPTIONAL { ?item wdt:P846 ?gbif . }
+  OPTIONAL { ?page schema:about ?item . }
+}
+GROUP BY ?item ?gbif
+`
+    fetch(endpointURL + '?query=' + encodeURIComponent(query), {
+      headers: {accept: 'application/sparql-results+json'}
+    }).then(r => r.json()).then(j => {
+      const result = j.results.bindings[0]
+      if (result) {
+        this.links.wikidata = result.item?.value
+        this.links.gbif = result.gbif?.value
+        const pages: string[] = (result.pages?.value || '').split('|')
+        if (pages.length) {
+          console.log(pages)
+          this.links.enwikipedia = pages.find(p => p.match(/^https?:\/\/en\.wikipedia\.org\//))
+          this.links.wikispecies = pages.find(p => p.match(/^https?:\/\/species\.wikimedia\.org\//))
+          this.links.wikipedia = pages.filter(p => p !== this.links.enwikipedia && p !== this.links.wikispecies)
+        }
+      }
+    })
+  }
+
+  mounted () {
+    this.getData()
+  }
 }
 </script>
 

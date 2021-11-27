@@ -99,7 +99,7 @@
           <span class="muted">{{ kingdom(taxonName[0]) }}</span>
           {{ shorten(taxonName[0]) }}
         </div>
-        <wikidata-buttons />
+        <wikidata-buttons :taxonName="shorten(taxonName[0])" />
       </div>
       <div
         v-for="js in taxonName[1]"
