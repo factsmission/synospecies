@@ -94,7 +94,13 @@
       v-for="taxonName in result"
       :key="taxonName[0]"
     >
-      <span class="muted">{{ kingdom(taxonName[0]) }}</span> {{ shorten(taxonName[0]) }}
+      <div class="flex">
+        <div>
+          <span class="muted">{{ kingdom(taxonName[0]) }}</span>
+          {{ shorten(taxonName[0]) }}
+        </div>
+        <wikidata-buttons />
+      </div>
       <div
         v-for="js in taxonName[1]"
         :key="js.taxonConceptUri"
@@ -144,6 +150,7 @@ import TreatmentsView from '@/components/TreatmentsView.vue'
 import Timeline from '@/components/Timeline.vue'
 import ImageSplash from '@/components/ImageSplash.vue'
 import Spinner from '@/components/Spinner.vue'
+import WikidataButtons from '@/components/WikidataButtons.vue'
 import Taxomplete from 'taxomplete'
 
 // do not use this for new stuff - temporarly added to integrate ImageSplash easily
@@ -155,7 +162,8 @@ import TaxaManager from '@/TaxaManager'
     TreatmentsView,
     Timeline,
     ImageSplash,
-    Spinner
+    Spinner,
+    WikidataButtons
   }
 })
 export default class Home extends Vue {
