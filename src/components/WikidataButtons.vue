@@ -227,7 +227,7 @@ GROUP BY ?item ?gbif
           console.log(pages)
           this.links.enwikipedia = pages.find(p => p.match(/^https?:\/\/en\.wikipedia\.org\//))
           this.links.wikispecies = pages.find(p => p.match(/^https?:\/\/species\.wikimedia\.org\//))
-          this.links.wikipedia = pages.filter(p => p !== this.links.enwikipedia && p !== this.links.wikispecies)
+          this.links.wikipedia = pages.filter(p => p !== this.links.enwikipedia && p !== this.links.wikispecies && p !== '')
         }
       }
     })
