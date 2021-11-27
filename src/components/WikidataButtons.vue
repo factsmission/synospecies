@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex">
     <a v-if="links.wikidata || links.gbif || links.enwikipedia || links.wikipedia.length || links.wikispecies" :href="links.wikidata" aria-label="associated wikidata page"
     class="button" :disabled="!links.wikidata" target="_blank">
       <svg
@@ -28,7 +28,7 @@
     <a
       v-if="links.wikipedia.length || links.enwikipedia" :href="links.enwikipedia"
       aria-label="associated english wikipedia page"
-      :class="links.wikipedia.length ? 'button split' : 'button'"
+      :class="links.wikipedia.length ? 'button split start' : 'button'"
       :disabled="!links.enwikipedia"
       target="_blank"
     >
@@ -45,11 +45,26 @@
         />
       </svg>
     </a>
-    <button v-if="links.wikipedia.length" class="button split" aria-label="other language wikipedia pages">
-      <svg viewBox="0 0 24 24">
-        <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
-      </svg>
-    </button>
+    <div class="dropdown" :data-open="dropdown">
+      <button
+        aria-label="other language wikipedia pages"
+        class="button split end"
+        v-if="links.wikipedia.length"
+        @click="dropdown = !dropdown"
+      >
+        <svg viewBox="0 0 24 24">
+          <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+        </svg>
+      </button>
+      <div class="dropdown_menu">
+        <ul>
+          <li v-if="links.enwikipedia"><a :href="links.enwikipedia">{{ links.enwikipedia }}</a></li>
+          <li v-for="link in links.wikipedia" :key="link">
+            <a :href="link">{{ link }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
     <a
       v-if="links.wikispecies"
       :href="links.wikispecies"
@@ -185,6 +200,8 @@ export default class WikidatatButtons extends Vue {
     wikispecies: undefined as string|undefined
   }
 
+  dropdown = false
+
   @Watch('taxonName')
   getData () {
     if (!this.taxonName) return;
@@ -223,7 +240,7 @@ GROUP BY ?item ?gbif
 </script>
 
 <style lang="scss" scoped>
-div {
+.flex {
   display: flex;
   margin-right: -0.2rem;
 }
@@ -246,23 +263,85 @@ a {
     height: 24px;
   }
 
-  &[disabled] {
-    background: none;
+  &:hover {
+    background: #cccccc;
+  }
+
+  &[disabled],
+  &[disabled]:hover {
+    background: #ffffff;
+    & path {
+      fill: #777777;
+    }
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: 2px solid #81951d;
   }
 }
 
-.button.split {
+.button.split.start {
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
   margin-right: 1px;
 }
 
-.button.split + .split {
+.button.split.end {
   border-bottom-left-radius: 0;
-  border-bottom-right-radius: .2rem;
   border-top-left-radius: 0;
-  border-top-right-radius: .2rem;
   margin-left: 1px;
-  margin-right: 0.2rem;
+}
+
+.dropdown {
+  position: relative;
+
+  svg {
+    transition: 500ms transform;
+  }
+}
+
+.dropdown_menu {
+  display: none;
+}
+
+.dropdown[data-open="true"] {
+  svg {
+    transform: rotate(180deg);
+  }
+
+  .dropdown_menu {
+    background: white;
+    border: 1px solid #00000033;
+    border-radius: 0.25rem;
+    box-shadow: 2px 4px 9px -4px #212121;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: calc(.4rem + 24px);
+    width: max-content;
+    z-index: 990;
+
+    & ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    & li {
+      display: flex;
+    }
+
+    & li + li {
+      border-top: 1px solid #00000033;
+    }
+
+    & a {
+      display: block;
+      padding: .25rem .5rem;
+      width: 100%;
+    }
+  }
 }
 </style>
