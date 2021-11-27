@@ -1,7 +1,7 @@
 <template>
   <div>
     <a v-if="links.wikidata || links.gbif || links.enwikipedia || links.wikipedia.length || links.wikispecies" :href="links.wikidata" aria-label="associated wikidata page"
-    class="button" :disabled="!links.wikidata">
+    class="button" :disabled="!links.wikidata" target="_blank">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         version="1.2"
@@ -24,12 +24,13 @@
         />
       </svg>
     </a>
-    <a v-if="links.gbif" :href="'https://www.gbif.org/species/' + links.gbif">GBIF ID: {{ links.gbif }}</a>
+    <a v-if="links.gbif" :href="'https://www.gbif.org/species/' + links.gbif" target="_blank">GBIF ID: {{ links.gbif }}</a>
     <a
       v-if="links.wikipedia.length || links.enwikipedia" :href="links.enwikipedia"
       aria-label="associated english wikipedia page"
       :class="links.wikipedia.length ? 'button split' : 'button'"
       :disabled="!links.enwikipedia"
+      target="_blank"
     >
       <svg
         version="1.0"
@@ -54,6 +55,7 @@
       :href="links.wikispecies"
       aria-label="associated wikispecies page"
       class="button"
+      target="_blank"
     >
       <svg
         viewBox="0 0 941 1103"
