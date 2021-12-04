@@ -285,6 +285,13 @@ SELECT DISTINCT * WHERE {
     this.time = ((performance.now() - t0) / 1000).toFixed(2)
   }
 
+  onHashChanged () {
+    if (this.input !== window.location.hash.substring(1).replaceAll('+', ' ')) {
+      this.input = window.location.hash.substring(1).replaceAll('+', ' ')
+      this.updateSG()
+    }
+  }
+
   mounted () {
     const input = document.getElementById('combinedfield') as HTMLInputElement
     this.taxomplete = new Taxomplete(input, this.endpoint)
@@ -293,9 +300,9 @@ SELECT DISTINCT * WHERE {
       this.updateSG()
     }
     if (window.location.hash) {
-      this.input = window.location.hash.substring(1).replaceAll('+', ' ')
-      this.updateSG()
+      this.onHashChanged()
     }
+    window.addEventListener('hashchange', this.onHashChanged)
   }
 }
 </script>

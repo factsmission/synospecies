@@ -23,7 +23,7 @@
       class="plazi-nav"
     >
       <div class="container">
-        <router-link to="/">
+        <router-link to="/#">
           Home
         </router-link>
         <router-link to="/advanced">
