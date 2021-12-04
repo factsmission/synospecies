@@ -168,6 +168,7 @@ import TaxaManager from '@/TaxaManager'
 })
 export default class Home extends Vue {
   @Prop() s?: string
+  respondToRouteChanges = true
   endpoint = new window.SparqlEndpoint(getEndpoint())
   taxomplete!: Taxomplete
   input = ''
@@ -220,6 +221,14 @@ SELECT DISTINCT * WHERE {
 
   async updateSG () {
     if (!this.input) this.input = 'Sadayoshia acamar'
+    console.log(this.s, this.input, this.s !== this.input)
+    if (this.s !== this.input) {
+      console.log('replacing ?s')
+      this.respondToRouteChanges = false
+      this.$router.replace({query: { s: this.input }}).finally(() => {
+          this.respondToRouteChanges = true;
+        });
+    }
     this.jsArray = []
     this.result = new Map()
     this.loading = true
@@ -284,6 +293,14 @@ SELECT DISTINCT * WHERE {
   }
 
   @Watch('s')
+  searchChanged() {
+    console.log(this.respondToRouteChanges, this.s)
+    if (this.respondToRouteChanges) {
+      this.input = this.s ?? ''
+      this.updateSG()
+    }
+  }
+
   mounted () {
     const input = document.getElementById('combinedfield') as HTMLInputElement
     this.taxomplete = new Taxomplete(input, this.endpoint)
@@ -292,8 +309,7 @@ SELECT DISTINCT * WHERE {
       this.updateSG()
     }
     if (this.s) {
-      this.input = this.s ?? ''
-      this.updateSG()
+      this.searchChanged()
     }
   }
 }

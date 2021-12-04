@@ -15,6 +15,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '/syg',
     name: 'syg',
+    props: (route: any) => ({ s: route.query.s }),
     component: () => import(/* webpackChunkName: "syg" */ '../views/SynonymGrouper.vue')
   },
   {

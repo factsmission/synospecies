@@ -263,7 +263,6 @@ GROUP BY ?item ?gbif
         this.links.gbif = result.gbif?.value
         const pages: string[] = (result.pages?.value || '').split('|')
         if (pages.length) {
-          console.log(pages)
           this.links.enwikipedia = pages.find(p => p.match(/^https?:\/\/en\.wikipedia\.org\//))
           this.links.wikispecies = pages.find(p => p.match(/^https?:\/\/species\.wikimedia\.org\//))
           this.links.commons = pages.find(p => p.match(/^https?:\/\/commons\.wikimedia\.org\//))
