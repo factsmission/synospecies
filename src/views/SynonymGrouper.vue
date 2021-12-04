@@ -95,7 +95,7 @@
       :key="taxonName[0]"
     >
       <div class="flex">
-        <div>
+        <div class="bottom-align">
           <span class="muted">{{ kingdom(taxonName[0]) }}</span>
           {{ shorten(taxonName[0]) }}
         </div>
@@ -330,6 +330,10 @@ SELECT DISTINCT * WHERE {
 }
 </style>
 <style lang="scss" scoped>
+.bottom-align {
+  align-self: end;
+}
+
 .flex {
   display: flex;
   justify-content: space-between;

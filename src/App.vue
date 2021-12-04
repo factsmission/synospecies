@@ -6,15 +6,14 @@
           <img
             src="./assets/logo.png"
             alt="Plazi - take care of freedom"
-            width="200"
-            height="50"
+            class="logo plazi"
           >
         </a>
         <a href="https://factsmission.com">
           <img
             src="./assets/FactsMissionTEO.png"
             alt="FactsMission"
-            height="20"
+            class="logo fm"
           >
         </a>
       </div>
@@ -253,6 +252,7 @@ a img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 .plazi-footer {
   flex-shrink: 0;
@@ -287,6 +287,17 @@ body.fullscreen-on {
     border-radius: 0;
     border: none;
     overflow: auto;
+  }
+}
+.logo {
+  max-width: 100%;
+
+  &.fm {
+    max-height: 24px;
+  }
+
+  &.plazi {
+    max-height: 48px;
   }
 }
 
