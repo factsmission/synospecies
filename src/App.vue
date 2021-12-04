@@ -23,7 +23,7 @@
       class="plazi-nav"
     >
       <div class="container">
-        <router-link to="/#">
+        <router-link to="/">
           Home
         </router-link>
         <router-link to="/advanced">
@@ -243,7 +243,7 @@ a img {
     }
   }
 }
-.router-link-exact-active {
+.router-link-active {
   background-color: #f3f3f3;
 }
 .plazi-header > .container {
