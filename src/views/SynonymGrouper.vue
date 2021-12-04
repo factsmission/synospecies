@@ -118,7 +118,7 @@
           </table>
         </div>
         <h2>
-          <a :href="js.taxonConceptUri">{{ shorten(js.taxonConceptUri) }}</a>
+          {{ shorten(js.taxonConceptUri) }}
         </h2>
         <details :open="openJ">
           <summary>
