@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Home from '../views/Classic.vue'
+import Home from '../views/SynonymGrouper.vue'
 import About from '../views/About.vue'
 import Settings from '../views/Settings.vue'
 
@@ -10,13 +10,11 @@ const routes: Array<RouteConfig> = [
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: Home,
   },
   {
     path: '/syg',
-    name: 'syg',
-    props: (route: any) => ({ s: route.query.s }),
-    component: () => import(/* webpackChunkName: "syg" */ '../views/SynonymGrouper.vue')
+    redirect: '/',
   },
   {
     path: '/advanced',
