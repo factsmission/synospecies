@@ -296,6 +296,10 @@ SELECT DISTINCT * WHERE {
       this.input = window.location.hash.substring(1).replaceAll('+', ' ')
       this.updateSG()
     }
+    window.addEventListener('hashchange', () => {
+      this.input = window.location.hash.substring(1).replaceAll('+', ' ')
+      this.updateSG()
+    })
   }
 }
 </script>
