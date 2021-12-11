@@ -1,6 +1,6 @@
 <!-- eslint-disable -->
 <template dir>
-  <div class="home">
+  <main class="container home">
   <h2>Retrieving triples</h2>
   This query retrieves 10 arbitrary triples from the SPARQL endpoint.
   <query-editor query="SELECT ?s ?p ?o WHERE {?s ?p ?o} LIMIT 10"/>
@@ -150,7 +150,7 @@ SELECT * WHERE {
 } 
     </pre>
   </query-editor>
-  </div>
+  </main>
 </template>
 
 <script>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <main class="container">
     <h1>Settings</h1>
     <div class="card">
       <h2 class="card_header">
@@ -11,7 +11,7 @@
         :options="allEndpoints"
       />
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts">

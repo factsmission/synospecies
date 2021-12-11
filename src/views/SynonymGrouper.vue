@@ -1,10 +1,7 @@
 <template>
-  <div>
-    <h1>SynoSpecies</h1>
-    <div class="card form">
-      <div class="flex">
-        <label>Enter Taxon Name</label>
-      </div>
+  <main :class="loading || time ? 'container' : 'container splash'">
+    <div class="form">
+      <h1>SynoSpecies</h1>
       <div class="flex">
         <input
           id="combinedfield"
@@ -40,11 +37,13 @@
               v-model="ignoreRank"
               type="checkbox"
             >Include Subtaxa</label>
+            <router-link to="settings">All Settings</router-link>
           </div>
         </div>
       </div>
-      <hr>
-      <div class="flex">
+      <label for="combinedfield">Enter Taxon Name</label>
+      <div class="flex" v-if="loading || time">
+        <hr>
         <div style="line-height: 2.5rem; padding-left: .5rem;">
           <div v-if="loading">
             Loading
@@ -132,12 +131,13 @@
         />
       </div>
     </div>
-    <hr>
+    <hr v-if="jsArray.length">
     <image-splash
+      v-if="jsArray.length"
       :taxamanager="taxamanager"
       :taxa="jsArray.map(t => ({ url: t.taxonConceptUri }))"
     />
-  </div>
+  </main>
 </template>
 
 <script lang="ts">
@@ -470,5 +470,19 @@ table tr {
 
 .muted {
   color: gray;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+
+  &.splash {
+    justify-content: center;
+
+    h1 {
+      text-align: center;
+    }
+  }
 }
 </style>

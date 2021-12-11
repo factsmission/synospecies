@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <main class="container">
     <h1>About</h1>
     <div class="section">
       <p>
@@ -34,7 +34,7 @@
       <p>FactsMission helps you provide data in such a way that it can be easily used as the foundation of different applications as well as linked to as an authoritative source.</p>
       <p>FactsMission helps you grow communities around your data to maximize its impact and increase your organization’s influence.</p>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="js">

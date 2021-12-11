@@ -38,9 +38,7 @@
       </div>
     </nav>
 
-    <main class="container">
-      <router-view />
-    </main>
+    <router-view />
 
     <div class="plazi-footer">
       <div class="container">
