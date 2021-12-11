@@ -8,6 +8,7 @@
           v-model="input"
           type="text"
           placeholder="Sadayoshia acamar"
+          aria-label="Enter Taxon Name"
         >
         <button
           class="go"
@@ -41,7 +42,7 @@
           </div>
         </div>
       </div>
-      <label for="combinedfield">Enter Taxon Name</label>
+      <label v-if="!loading && !time" for="combinedfield">Enter Taxon Name</label>
       <div class="flex" v-if="loading || time">
         <hr>
         <div style="line-height: 2.5rem; padding-left: .5rem;">
