@@ -2,7 +2,7 @@
   <!-- eslint-disable vue/require-v-for-key -->
   <div
     v-if="taxa && years"
-    class="card"
+    :class="collapsed ? 'card collapsed' : 'card'"
     aria-hidden="true"
   >
     <div class="timeline">
@@ -336,6 +336,9 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
         </div>
       </div>
     </div>
+    <div tabindex="0" v-if="collapsed && !isFullscreen" class="expander" @click="collapsed = false">
+      Show full timeline
+    </div>
   </div>
 </template>
 
@@ -391,6 +394,7 @@ export default class Timeline extends Vue {
 
   @Watch('result', { deep: true })
   updateYears () {
+    this.collapsed = this.result.length > 7
     if (this.result.length === 0) {
       // empty results => reset
       this.internal = []
@@ -468,6 +472,7 @@ export default class Timeline extends Vue {
   }
 
   isFullscreen = false;
+  collapsed = true;
   legendOpen = false;
 
   aggregate (year: Year) {
@@ -583,6 +588,30 @@ html {
 
 .card {
   padding: 0 !important;
+  overflow: hidden;
+}
+
+.card.collapsed {
+  max-height: 18rem;
+  position: relative;
+}
+
+.expander {
+  --fade-height: 2rem;
+  background: linear-gradient(#ffffff00 0, #ffffffff var(--fade-height), #ffffffff 100%);
+  bottom: 0;
+  color: #388e3c;
+  display: block;
+  font-style: italic;
+  padding: var(--fade-height) 0.5rem 0.5rem;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+
+  &:hover,
+  &:focus {
+    color: #000000;
+  }
 }
 
 .timeline {
