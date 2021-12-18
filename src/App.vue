@@ -209,7 +209,6 @@ a img {
   border-top-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
-  z-index: 1001;
 }
 .plazi-nav {
   flex-shrink: 0;
@@ -218,7 +217,6 @@ a img {
   margin-bottom: 0;
   border-bottom: 1px solid #00000033;
   border-radius: 0;
-  z-index: 1001;
   & > .container {
     display: flex;
     padding-top: 0;

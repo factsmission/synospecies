@@ -55,6 +55,22 @@
             {{ jsArray.length }} result(s), took {{ time }}s
           </div>
         </div>
+        <issue-creator
+          :input="lastInput"
+          :taxonConceptList="jsArray"
+        >
+          <button>
+            Report Issue in the Data
+            <svg
+              role="presentation"
+              viewBox="0 0 24 24"
+              style="max-height: 24px;"
+            ><path
+              fill="currentcolor"
+              :d="$icons.mdiFlagOutline"
+            /></svg>
+          </button>
+        </issue-creator>
         <div
           class="dropdown"
           :data-open="tunerOpen"
@@ -146,6 +162,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import type { anyJustification } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
+import IssueCreator from '@/components/IssueCreator.vue'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
 import Timeline from '@/components/Timeline.vue'
@@ -159,6 +176,7 @@ import TaxaManager from '@/TaxaManager'
 
 @Component({
   components: {
+    IssueCreator,
     JustificationView,
     TreatmentsView,
     Timeline,
@@ -173,6 +191,7 @@ export default class Home extends Vue {
   endpoint = new window.SparqlEndpoint(getEndpoint())
   taxomplete!: Taxomplete
   input = ''
+  lastInput = ''
   ignoreRank = false
   jsArray: SyncJustifiedSynonym[] = []
   result: Map<string, SyncJustifiedSynonym[]> = new Map()
@@ -223,6 +242,7 @@ SELECT DISTINCT * WHERE {
   async updateSG () {
     if (!this.input) this.input = 'Sadayoshia acamar'
     window.location.hash = this.input.replaceAll(' ', '+')
+    this.lastInput = this.input
     this.jsArray = []
     this.result = new Map()
     this.loading = true
