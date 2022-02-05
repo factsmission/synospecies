@@ -42,6 +42,7 @@
         <li
           v-for="t in js.treatments.def"
           :key="t.url"
+          title="Defining Treatment"
         >
           <svg
             class="green"
@@ -53,7 +54,7 @@
             />
           </svg>
           <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+            {{ t.creators }} ({{ t.date }})
           </a>
           <!--<ul v-if="deprecates.find(d => d.url === t.url)">
             <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
@@ -87,7 +88,7 @@
             />
           </svg>
           <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+            {{ t.creators }} ({{ t.date }})
           </a>
           <!--<ul v-if="deprecates.find(d => d.url === t.url)">
             <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
@@ -114,7 +115,7 @@
             />
           </svg>
           <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+            {{ t.creators }} ({{ t.date }})
           </a>
           <!--<ul v-if="deprecations.find(d => d.url === t.url)">
             <li v-for="d in deprecations.filter(d => d.url === t.url)" :key="d.new">
