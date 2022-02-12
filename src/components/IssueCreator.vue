@@ -37,26 +37,40 @@
                   {{ tc.taxonConceptUri }}
                 </label>
               </div>
+              <div v-if="selectedTC" class="preview">
+                Selected: <i>{{ selectedTC }}</i>
+              </div>
             </div>
             <div :data-open="accordion === 1">
               <div class="accordion-header" @click="accordion === 1 ? accordion = -1 : accordion = 1">
                 <h3>Select Justification Step (optional)</h3>
               </div>
-              <div class="list">
-                <div v-if="!selectedTC">Please select a taxon first</div>
+              <div v-if="!selectedTC" class="list">Please select a taxon first</div>
+              <div v-else class="list">
+                <label>
+                  <input
+                    type="radio"
+                    name="offending-justification"
+                    :value="undefined"
+                    v-model="selectedJ"
+                  >
+                  None selected
+                </label>
                 <label
-                  v-else
                   v-for="j in justificationSteps"
                   :key="j"
                 >
                   <input
                     type="radio"
-                    name="offending-taxon"
+                    name="offending-justification"
                     :value="j"
                     v-model="selectedJ"
                   >
                   {{ j }}
                 </label>
+              </div>
+              <div v-if="selectedJ" class="preview">
+                Selected: <i>{{ selectedJ }}</i>
               </div>
             </div>
           </div>
@@ -166,11 +180,14 @@ export default class IssueCreator extends Vue {
   display: block;
 }
 
+.accordion > div[data-open=true] > .preview {
+  display: none;
+}
+
 .backdrop {
   background: #00000033;
   bottom: 0;
   left: 0;
-  padding: max(10vh, 1rem) max(20vw, 1rem);
   position: fixed;
   right: 0;
   top: 0;
@@ -185,9 +202,11 @@ export default class IssueCreator extends Vue {
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  max-height: 100%;
-  max-width: 100%;
-  overflow: auto;
+  height: 100vh;
+  margin: 0 0 0 auto;
+  max-width: 80vw;
+  overflow-y: auto;
+  width: 42ch;
 }
 
 .modal-body {
