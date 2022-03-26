@@ -47,13 +47,10 @@
         is powered by <a href="https://allegrograph.com/products/allegrograph/">Franz Inc. AllegroGraph</a> and uses the
         taxonomic treatment data provided by
         <a href="http://plazi.org/">Plazi</a>.
-      </div>
-      <div class="container">
-        <small style="opacity:0.6;">
-          The Wikidata logo, Wikipedia 'W' icon, Wikispecies logo and Wikimedia Commons logo are trademarks of the <a href="https://wikimediafoundation.org/">Wikimedia Foundation</a> and are used with the permission of the Wikimedia Foundation. We are not endorsed by or affiliated with the Wikimedia Foundation. The <a href="https://commons.wikimedia.org/wiki/File:Wikispecies-logo.svg">Wikispecies logo</a> by Zephram Stark is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.en">CC BY-SA 3.0</a>
-        </small>
-      </div>
-      <div class="container">
+        <hr>
+        This project has received funding from the European Union’s Horizon 2020 programme (grant agreement 101007492) and from the Arcadia Fund.
+        <hr>
+        This is an open source project:
         <a href="https://github.com/factsmission/synospecies">
           View the code on Github
         </a>
@@ -84,7 +81,7 @@ main.container {
   flex: 1 0 auto;
 }
 .container {
-  width: 140ch;
+  width: 65rem;
   max-width: 100%;
   max-width: calc(100vw - 32px);
   margin: 0 auto;
@@ -254,10 +251,11 @@ a img {
 }
 .plazi-footer {
   flex-shrink: 0;
-  background-color: #333333;
-  border-top: 1px solid #2b2b2b;
-  color: #ffffff;
+  background-color: #f5f5f5;
+  border-top: 1px solid #9bc134;
+  color: #444444;
   padding: 10px 0;
+  font-size: small;
 }
 .plazi-footer > .container {
   padding-top: 0;
@@ -308,7 +306,7 @@ code *,
     font-family: 'Fira Code', monospace;
 }
 
-@media (max-width: 140ch) {
+@media (max-width: 65rem) {
   .container {
     width: 100%;
     padding-left: 0;

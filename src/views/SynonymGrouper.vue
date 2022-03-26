@@ -138,6 +138,12 @@
       :taxamanager="taxamanager"
       :taxa="jsArray.map(t => ({ url: t.taxonConceptUri }))"
     />
+
+    <div class="footer" v-if="jsArray.length > 0">
+      <small style="opacity:0.6;">
+        The Wikidata logo, Wikipedia 'W' icon, Wikispecies logo and Wikimedia Commons logo are trademarks of the <a href="https://wikimediafoundation.org/">Wikimedia Foundation</a> and are used with the permission of the Wikimedia Foundation. We are not endorsed by or affiliated with the Wikimedia Foundation. The <a href="https://commons.wikimedia.org/wiki/File:Wikispecies-logo.svg">Wikispecies logo</a> by Zephram Stark is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.en">CC BY-SA 3.0</a>
+      </small>
+    </div>
   </main>
 </template>
 

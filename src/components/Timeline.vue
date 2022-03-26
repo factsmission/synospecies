@@ -691,7 +691,7 @@ html {
   }
 }
 
-@media (max-width: 140ch) {
+@media (max-width: 65rem) {
   .scroll-x {
     min-width: 140px;
     max-width: 65%;
