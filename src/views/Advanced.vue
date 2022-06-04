@@ -69,7 +69,7 @@ LIMIT 10
   This query returns the triples of a single graphs.
   <query-editor>
     <pre>
-CONSTRUCT {?s ?p ?o} { GRAPH &lt;https://raw.githubusercontent.com/plazi/treatments-rdf/master/8E33E30FFFD9FFCC4AD302B2FFB04209> {?s ?p ?o} }
+CONSTRUCT {?s ?p ?o} { GRAPH &lt;https://raw.githubusercontent.com/plazi/treatments-rdf/main/data/8E/33/E3/8E33E30FFFD9FFCC4AD302B2FFB04209> {?s ?p ?o} }
     </pre>
   </query-editor>
   <hr>
