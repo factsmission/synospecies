@@ -115,6 +115,16 @@ SELECT * WHERE {
 }
     </pre>
   </query-editor>
+
+  <h2>List material citations</h2>
+  <query-editor>
+    <pre>
+PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?s WHERE {?s rdf:type &lt;http://rs.tdwg.org/dwc/terms/MaterialCitation>} LIMIT 10
+    </pre>
+  </query-editor>
+
+
   <h2>Count quads</h2>
   <query-editor>
     SELECT (COUNT(*) AS ?quads) WHERE { GRAPH ?g { ?s ?p ?o } }
