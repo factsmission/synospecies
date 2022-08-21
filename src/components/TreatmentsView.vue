@@ -53,8 +53,13 @@
             />
           </svg>
           <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+            {{ t.creators }} ({{ t.date }}) <!--<code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>-->
           </a>
+          <ul v-if="t.materialCitations.length > 0">
+            <li>
+             Cited materials: <span v-for="mc in t.materialCitations" class="mc"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
+            </li>
+          </ul>
           <!--<ul v-if="deprecates.find(d => d.url === t.url)">
             <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
               Deprecates {{ getFormattedName(d.old) }}
@@ -87,8 +92,13 @@
             />
           </svg>
           <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+            {{ t.creators }} ({{ t.date }})
           </a>
+          <ul v-if="t.materialCitations.length > 0">
+            <li>
+             Cited materials: <span v-for="mc in t.materialCitations" class="mc"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
+            </li>
+          </ul>
           <!--<ul v-if="deprecates.find(d => d.url === t.url)">
             <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
               Deprecates {{ getFormattedName(d.old) }}
@@ -114,8 +124,13 @@
             />
           </svg>
           <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>
+            {{ t.creators }} ({{ t.date }}) <!--<code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>-->
           </a>
+          <ul v-if="t.materialCitations.length > 0">
+            <li>
+             Cited materials: <span v-for="mc in t.materialCitations" class="mc"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
+            </li>
+          </ul>
           <!--<ul v-if="deprecations.find(d => d.url === t.url)">
             <li v-for="d in deprecations.filter(d => d.url === t.url)" :key="d.new">
               Deprecated by {{ getFormattedName(d.new) }}
@@ -176,5 +191,9 @@ ul {
 
 .red {
   color: #e53935;
+}
+
+.mc:not(:last-of-type)::after {
+  content: ", "
 }
 </style>

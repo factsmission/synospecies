@@ -149,8 +149,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { anyJustification } from '@factsmission/synogroup'
-import type { SyncJustifiedSynonym, SyncTreatments } from '@/utilities/SynogroupSync'
+import type { anyJustification, MaterialCitation, Treatment } from '@factsmission/synogroup'
+import type { SyncJustifiedSynonym, SyncTreatment, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
@@ -162,6 +162,8 @@ import Taxomplete from 'taxomplete'
 
 // do not use this for new stuff - temporarly added to integrate ImageSplash easily
 import TaxaManager from '@/TaxaManager'
+import { time, trace } from 'console'
+import { mdiCached } from '@mdi/js'
 
 @Component({
   components: {
@@ -186,9 +188,10 @@ export default class Home extends Vue {
   settingsOpen = false
   tunerOpen = false
   openJ = false
-  openT = false
+  openT = open
   time = ''
   syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
+
 
   //         tc-uri : phylum  class   order   family
   trees: Map<string, [string, string, string, string]> = new Map()
@@ -258,22 +261,29 @@ SELECT DISTINCT * WHERE {
             justs.push(just)
           }
         })())
+
+      const handleTreatment = async (treat: Treatment, where: "def"|"aug"|"dpr") => {
+        const mc = await treat.materialCitations;
+        (treat as any).materialCitations = mc;
+        treats[where].push(treat as any);
+      }
+
       jsPromises.push(
         (async () => {
           for await (const treat of treatments.def) {
-            treats.def.push(treat)
+            await handleTreatment(treat, "def")
           }
         })())
       jsPromises.push(
         (async () => {
           for await (const treat of treatments.aug) {
-            treats.aug.push(treat)
+            await handleTreatment(treat, "aug")
           }
         })())
       jsPromises.push(
         (async () => {
           for await (const treat of treatments.dpr) {
-            treats.dpr.push(treat)
+            await handleTreatment(treat, "dpr")
           }
         })())
       promises.push(
