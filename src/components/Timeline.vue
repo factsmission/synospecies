@@ -178,7 +178,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
           <!-- NEW -->
           <div
             v-for="taxon in result"
-            :key="taxon.url"
+            :key="taxon.taxonConceptUri"
             class="label"
           >
             {{ getFormattedName(taxon.taxonConceptUri) }}
@@ -346,8 +346,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
 /* eslint-disable comma-dangle */
 import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator'
 import Spinner from '@/components/Spinner.vue'
-import type { Treatment } from '@factsmission/synogroup'
-import type { SyncJustifiedSynonym } from '@/utilities/SynogroupSync'
+import type { SyncJustifiedSynonym, SyncTreatment } from '@/utilities/SynogroupSync'
 
 // Required as typescript doesn't know about these nonstandard functions
 declare global {
@@ -400,7 +399,7 @@ export default class Timeline extends Vue {
       this.internal = []
       return
     }
-    const addTreatment = (index: number, t: Treatment, type: TT) => {
+    const addTreatment = (index: number, t: SyncTreatment, type: TT) => {
       const date = t.date ?? -1
       const yearIndex = this.internal.findIndex(y => y !== 'sep' && y.year === date)
       if (~yearIndex) {

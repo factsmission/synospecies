@@ -57,7 +57,7 @@
           </a>
           <ul v-if="t.materialCitations.length > 0">
             <li>
-             Cited materials: <span v-for="mc in t.materialCitations" class="mc"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
+             Cited materials: <span v-for="mc in t.materialCitations" class="mc" :key="mc.collectionCode + '::' + mc.catalogNumber"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
             </li>
           </ul>
           <!--<ul v-if="deprecates.find(d => d.url === t.url)">
@@ -96,7 +96,7 @@
           </a>
           <ul v-if="t.materialCitations.length > 0">
             <li>
-             Cited materials: <span v-for="mc in t.materialCitations" class="mc"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
+             Cited materials: <span v-for="mc in t.materialCitations" class="mc" :key="mc.collectionCode + '::' + mc.catalogNumber"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
             </li>
           </ul>
           <!--<ul v-if="deprecates.find(d => d.url === t.url)">
@@ -128,7 +128,7 @@
           </a>
           <ul v-if="t.materialCitations.length > 0">
             <li>
-             Cited materials: <span v-for="mc in t.materialCitations" class="mc"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
+             Cited materials: <span v-for="mc in t.materialCitations" class="mc" :key="mc.collectionCode + '::' + mc.catalogNumber"><abbr :title="JSON.stringify(mc, undefined, 2)">{{mc.collectionCode}}: {{mc.catalogNumber}}</abbr></span>
             </li>
           </ul>
           <!--<ul v-if="deprecations.find(d => d.url === t.url)">
