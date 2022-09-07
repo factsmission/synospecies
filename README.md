@@ -1,4 +1,4 @@
-# synospecies [![Build Status](https://travis-ci.org/factsmission/synospecies.svg?branch=master)](https://travis-ci.org/factsmission/synospecies)
+# synospecies [![Build Status](https://app.travis-ci.com/factsmission/synospecies.svg?branch=master)](https://app.travis-ci.com/factsmission/synospecies)
 
 http://synospecies.factsmission.com/
 
