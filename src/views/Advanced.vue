@@ -124,6 +124,23 @@ SELECT ?s WHERE {?s rdf:type &lt;http://rs.tdwg.org/dwc/terms/MaterialCitation>}
     </pre>
   </query-editor>
 
+<h2>List specific material citations</h2>
+  This query returns all material citations for all synonyms of <em>Tyrannosaurus rex</em> that are in the <em>New Mexico Museum of Natural History & Science</em> (NMMNH).
+  <query-editor>
+    <pre>
+PREFIX dwc: &lt;http://rs.tdwg.org/dwc/terms/>
+PREFIX treat: &lt;http://plazi.org/vocab/treatment#>
+SELECT DISTINCT ?collectionCode ?catalogNumber ?syn WHERE {
+  &lt;http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^treat:deprecates/(treat:augmentsTaxonConcept|treat:definesTaxonConcept))|((^treat:augmentsTaxonConcept|^treat:definesTaxonConcept)/treat:deprecates))* ?syn .
+   ?treat (treat:definesTaxonConcept|treat:augmentsTaxonConcept|treat:deprecates) ?syn ; dwc:basisOfRecord ?mc .
+   ?mc dwc:collectionCode "NMMNH" ;
+   # This might miss some specimens where the ‘dwc:collectionCode’ was entered in a non-standard way.
+   # Replace ‘"NMMNH"’ with ‘?collectionCode’ to remove this restriction.
+   # You may then add ‘?collectionCode’ to the ‘SELECT’ line to see each specimen’s collection.
+       dwc:catalogNumber ?catalogNumber .
+}
+    </pre>
+  </query-editor>
 
   <h2>Count quads</h2>
   <query-editor>
