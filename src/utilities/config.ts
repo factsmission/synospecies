@@ -5,7 +5,7 @@ export const allEndpoints = [
   'https://trifid-lindas.test.cluster.ldbar.ch/query'
 ]
 
-export const defaultEndpoint = 'https://lindas-cached.cluster.ldbar.ch/query'
+export const defaultEndpoint = 'https://treatment.ld.plazi.org/sparql'
 
 export function getEndpoint () {
   const localValue = localStorage.getItem('plazi-treatments-endpoint')
