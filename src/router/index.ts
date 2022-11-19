@@ -22,6 +22,11 @@ const routes: Array<RouteConfig> = [
     component: () => import(/* webpackChunkName: "advanced" */ '../views/Advanced.vue')
   },
   {
+    path: '/classic',
+    name: 'classic',
+    component: () => import(/* webpackChunkName: "advanced" */ '../views/Classic.vue')
+  },
+  {
     path: '/about',
     name: 'about',
     component: About
