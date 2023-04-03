@@ -6,9 +6,7 @@ name: Pages Build (Vue)
 env:
   node-version: 16.x
 
-on:
-  push:
-    branches: [ "master" ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -32,6 +30,9 @@ jobs:
   deploy:
     # Add a dependency to the build job
     needs: build
+    
+    # Only deploy from master
+    if: github.ref == 'refs/heads/master'
 
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
