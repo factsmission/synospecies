@@ -1,11 +1,14 @@
 /* eslint-disable */
 const webpack = require('webpack')
 const path = require('path')
-const fs = require('fs')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 
 module.exports = {
+  chainWebpack: config => {
+    config.plugin('polyfills').use(NodePolyfillPlugin)
+  },
   entry: path.resolve(__dirname, 'src', 'synospecies.js'),
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -104,8 +107,8 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: 'bundle.css'
-    })
-
+    }),
+    new NodePolyfillPlugin(),
   ],
   devServer: {
     compress: true,
