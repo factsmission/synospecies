@@ -25,7 +25,7 @@
     "rdfgraphnode-rdfext": "^1.5.0",
     "superagent": "^8.0.9",
     "taxomplete": "^1.4.0",
-    "vue": "^2.6.11",
+    "vue": "^3.2.47",
     "vue-class-component": "^7.2.3",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.2.0"
