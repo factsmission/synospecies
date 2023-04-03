@@ -4,7 +4,7 @@
 name: Pages Build (Vue)
 
 env:
-  node-version: 17.x
+  node-version: 16.x
 
 on:
   push:
