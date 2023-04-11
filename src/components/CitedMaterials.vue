@@ -1,58 +1,78 @@
 <template>
-  <div v-if="mcs.length > 0">
-    {{ mcs.length }} specimens referenced
-    <button @click="open = !open">
-      [{{ open ? "hide" : "show" }}]
-    </button>
-    {{ mcs.find(mc => mc.typeStatus?.toLocaleLowerCase().includes('holotype')) ? '(incl. holotype)' : '' }}
-    <table v-if="open">
-      <tr
-        v-for="mc in mcs"
-        :key="JSON.stringify(mc)"
-        :title="pretty(mc)"
-      >
-        <td :class="`mc_type ${mc.typeStatus?.toLocaleLowerCase().includes('holotype') ? 'green' : ''}`">
-          {{ mc.typeStatus?.[0].toUpperCase() }}
-        </td>
-        <td class="mc_code">
-          {{ mc.collectionCode }}:
-          {{ mc.catalogNumber }}
-        </td>
-        <td
-          v-if="mc.eventDate"
-          class="mc_date"
-        >
-          ({{ date(mc) }})
-        </td>
-        <td v-else />
-        <td class="mc_links">
-          <a
-            v-if="mc.httpUri && (!mc.gbifSpecimenId || mc.httpUri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || mc.httpUri.endsWith(mc.gbifOccurrenceId))"
-            :href="mc.httpUri"
-          >Link ➶</a>
-        </td>
-        <td
-          v-if="mc.gbifSpecimenId || mc.gbifOccurrenceId"
-          class="mc_links"
-        >
-          <small>GBIF:</small> <a
-            v-if="mc.gbifSpecimenId"
-            :href="'https://www.gbif.org/specimen/' + mc.gbifSpecimenId"
-          >Specimen</a> <a
-            v-if="mc.gbifOccurrenceId"
-            :href="'https://www.gbif.org/occurrence/' + mc.gbifSpecimenId"
-          >Occurrence</a>
-        </td>
-      </tr>
-      <tr>
-        <td
-          colspan="5"
-          style="text-align: center;"
-        >
-          <small><i>hover over a row for more details</i></small>
-        </td>
-      </tr>
-    </table>
+  <div
+    v-if="mcs.length > 0"
+    style="margin-left: 0.4rem;"
+  >
+    <div
+      class="dropdown"
+      :data-open="open"
+    >
+      <button @click="open = !open">
+        <div class="icon">
+          <svg
+            viewBox="0 0 24 24"
+            :title="open ? 'hide' : 'show'"
+          >
+            <path
+              fill="currentColor"
+              d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
+            />
+          </svg>
+        </div>
+        {{ mcs.length }} specimens referenced
+        {{ mcs.find(mc => mc.typeStatus?.toLocaleLowerCase().includes('holotype')) ? '(incl. holotype)' : '' }}
+      </button>
+      <div class="dropdown_menu">
+        <table>
+          <tr
+            v-for="mc in mcs"
+            :key="JSON.stringify(mc)"
+            :title="pretty(mc)"
+          >
+            <td :class="`mc_type ${mc.typeStatus?.toLocaleLowerCase().includes('holotype') ? 'green' : ''}`">
+              {{ mc.typeStatus?.[0].toUpperCase() }}
+            </td>
+            <td class="mc_code">
+              {{ mc.collectionCode }}:
+              {{ mc.catalogNumber }}
+            </td>
+            <td
+              v-if="mc.eventDate"
+              class="mc_date"
+            >
+              ({{ date(mc) }})
+            </td>
+            <td v-else />
+            <td class="mc_links">
+              <a
+                v-if="mc.httpUri && (!mc.gbifSpecimenId || mc.httpUri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || mc.httpUri.endsWith(mc.gbifOccurrenceId))"
+                :href="mc.httpUri"
+              >Link ➶</a>
+            </td>
+            <td
+              v-if="mc.gbifSpecimenId || mc.gbifOccurrenceId"
+              class="mc_links"
+            >
+              <small>GBIF:</small> <a
+                v-if="mc.gbifSpecimenId"
+                :href="'https://www.gbif.org/specimen/' + mc.gbifSpecimenId"
+              >Specimen</a> <a
+                v-if="mc.gbifOccurrenceId"
+                :href="'https://www.gbif.org/occurrence/' + mc.gbifSpecimenId"
+              >Occurrence</a>
+            </td>
+          </tr>
+          <tr>
+            <td
+              colspan="5"
+              style="text-align: center;"
+            >
+              <small><i>hover over a row for more details</i></small>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -70,9 +90,11 @@ export default class CitedMaterials extends Vue {
   @Prop() mcs!: MaterialCitation[];
   open = false;
 
-  date(mc:MaterialCitation): string {
+  date(mc: MaterialCitation): string {
     if (!mc.eventDate) return "";
-    return (new Date(mc.eventDate)).getFullYear().toString();
+    const date = (new Date(mc.eventDate)).getFullYear();
+    if (isNaN(date)) return mc.eventDate;
+    return date.toString();
   }
 
   pretty(mc: MaterialCitation): string {
@@ -91,18 +113,6 @@ export default class CitedMaterials extends Vue {
 </script>
 
 <style scoped lang="scss">
-template {
-  position: relative;
-}
-
-button {
-  font-family: "Fira Code", monospace;
-}
-
-.mc_type {
-  font-weight: bold;
-}
-
 .mc_links {
   a+a::before {
     content: " ";
@@ -115,6 +125,7 @@ button {
 }
 
 .mc_type {
+  font-weight: bold;
   min-width: 1.2em;
   text-align: center;
 }
@@ -124,17 +135,6 @@ button {
 }
 
 table {
-  background: #ffffff;
-  border: 1px solid #00000033;
-  border-radius: 0.2rem;
-  font-size: 0.8rem;
-  max-width: 100%;
-  overflow: auto;
-  width: auto;
-  min-width: 33ch;
-  border-collapse: separate;
-  position: absolute;
-
   * {
     background: none;
     border: none;
@@ -144,6 +144,81 @@ table {
 
   td {
     padding: 0;
+  }
+}
+
+button {
+  background: none;
+  display: block;
+  border: none;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+
+  & .icon {
+    border-radius: 0.2rem;
+    display: inline-block;
+    margin: 0 0.2rem 0 0;
+    vertical-align: text-bottom;
+  }
+
+  & svg {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:hover .icon {
+    background: #00000066 !important;
+  }
+
+  &:focus,
+  &:focus-visible{
+    outline: none;
+    .icon {
+      outline: 2px solid #81951d;}
+    }
+}
+
+.dropdown {
+  position: relative;
+
+  svg {
+    transition: 500ms transform;
+  }
+}
+
+.dropdown_menu {
+  display: none;
+}
+
+.dropdown[data-open="true"] {
+  overflow: visible;
+
+  svg {
+    transform: rotate(180deg);
+  }
+
+  .icon {
+    background: #00000033;
+  }
+
+  .dropdown_menu {
+    background: white;
+    border: 1px solid #00000033;
+    border-radius: 0.25rem;
+    box-shadow: 2px 4px 9px -4px #212121;
+    display: block;
+    max-height: 80vh;
+    max-width: 80vw;
+    overflow-y: auto;
+    position: absolute;
+    left: 0;
+    top: 1.2rem;
+    width: max-content;
+    z-index: 990;
+    font-size: 0.8rem;
+    overflow: auto;
   }
 }
 </style>
