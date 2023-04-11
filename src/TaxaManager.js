@@ -1,7 +1,4 @@
 // eslint-disable
-import $rdf from 'ext-rdflib'
-import GraphNode from 'rdfgraphnode-rdfext'
-
 export default class TaxaManager {
   constructor (sparqlEndpoint) {
     this._sparqlEndpoint = sparqlEndpoint

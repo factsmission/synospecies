@@ -83,15 +83,6 @@ type Treat = {
   year?: number;
 }
 
-function getFormattedName (uri: string) {
-  const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
-  const lastSeparator = nameSection.lastIndexOf('_')
-  return nameSection.substring(0, lastSeparator)
-    .replace(new RegExp('_', 'g'), ' ') +
-    ', ' +
-    nameSection.substring(lastSeparator + 1)
-}
-
 @Component({
   components: {
     TaxonReports,
@@ -129,7 +120,7 @@ export default class Classic extends Vue {
     this.taxomplete.lookup()
   }
 
-  relatedTaxonEncountered (genus: string, species: string) {
+  relatedTaxonEncountered (/*genus: string, species: string*/) {
     // wikidataViewer.addTaxon(genus + ' ' + species)
     // vernacularViewer.addTaxon(genus + ' ' + species)
   }
@@ -318,7 +309,9 @@ export default class Classic extends Vue {
   }
 
   mounted () {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.wikidataViewer = new WikidataViewer(document.getElementById('wikidata-area')!)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.vernacularViewer = new VernacularViewer(document.getElementById('vernacular-area')!)
     // Search field
     const input = document.getElementById('combinedfield') as HTMLInputElement

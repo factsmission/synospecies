@@ -180,15 +180,16 @@ SELECT * WHERE {
   </main>
 </template>
 
-<script>
+<script lang="ts">
 import QueryEditor from '@/components/QueryEditor.vue'
+import { Component, Vue } from 'vue-property-decorator';
 
-export default {
-  name: 'Home',
+@Component({
   components: {
     QueryEditor
   }
-}
+})
+export default class Advanced extends Vue {}
 </script>
 
 <style scoped>

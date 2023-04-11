@@ -18,7 +18,7 @@
           </h3>
         </hgroup>
         <p v-if="taxon.loading">
-          <spinner />
+          <dot-spinner />
           Loading Treatments
         </p>
         <p v-if="!taxon.loading">
@@ -152,7 +152,7 @@
               {{ ranks[3] }}
             </td>
             <td v-else>
-              <spinner />
+              <dot-spinner />
             </td>
           </tr>
           <tr>
@@ -183,39 +183,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import Spinner from '@/components/Spinner.vue'
-import $rdf from 'ext-rdflib'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import DotSpinner from '@/components/DotSpinner.vue'
 import TaxaManager from '@/TaxaManager'
-
-function dwc (localName: string) {
-  return $rdf.sym('http://rs.tdwg.org/dwc/terms/' + localName)
-}
-function treat (localName: string) {
-  return $rdf.sym('http://plazi.org/vocab/treatment#' + localName)
-}
-function dc (localName: string) {
-  return $rdf.sym('http://purl.org/dc/elements/1.1/' + localName)
-}
-
-function truncate () {
-  const toTruncate = document.getElementsByClassName('truncate')
-  for (let i = 0; i < toTruncate.length; i++) {
-    const el = toTruncate[i]
-    const tc = el.textContent
-    if (tc && tc.length > 80) {
-      el.innerHTML = tc.slice(0, 81) + '<span hidden aria-hidden="false">' + tc.slice(81) + '</span>'
-      const expandbtn = document.createElement('span')
-      expandbtn.innerHTML = '...'
-      expandbtn.classList.add('expandbtn')
-      expandbtn.addEventListener('click', e => {
-        el.innerHTML = tc
-        e.preventDefault()
-      })
-      el.append(expandbtn)
-    }
-  }
-}
 
 type SparqlJson = {
   head: {
@@ -233,7 +203,7 @@ type Treat = {
 }
 
 @Component({
-  components: { Spinner }
+  components: { DotSpinner }
 })
 export default class TaxonReport extends Vue {
   @Prop() taxon!: {url: string;
@@ -287,11 +257,6 @@ export default class TaxonReport extends Vue {
     })
     this.loading = false
     this.$emit('taxonRendered', this.taxon)
-  }
-
-  graph: any = '...';
-  loadGraph () {
-    this.taxamanager.getSynonymGraph().then((g: any) => { this.graph = g })
   }
 
   mounted () {

@@ -1,33 +1,45 @@
 <template>
   <div class="flex">
-    <a v-if="links.wikidata || links.gbif || links.enwikipedia || links.wikipedia.length || links.wikispecies" :href="links.wikidata" aria-label="associated wikidata page"
-    class="button" :disabled="!links.wikidata" target="_blank" title="Wikidata">
+    <a
+      v-if="links.wikidata || links.gbif || links.enwikipedia || links.wikipedia.length || links.wikispecies"
+      :href="links.wikidata"
+      aria-label="associated wikidata page"
+      class="button"
+      :disabled="!links.wikidata"
+      target="_blank"
+      title="Wikidata"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         version="1.2"
         viewBox="0 0 1050 590"
       >
         <path
+          id="path2"
           d="m 120,545 h 30 V 45 H 120 V 545 z m 60,0 h 90 V 45 H 180 V 545 z M 300,45 V 545 h 90 V 45 h -90 z"
           style="fill: #990000"
-          id="path2"
         />
         <path
+          id="path4"
           d="m 840,545 h 30 V 45 H 840 V 545 z M 900,45 V 545 h 30 V 45 H 900 z M 420,545 h 30 V 45 H 420 V 545 z M 480,45 V 545 h 30 V 45 h -30 z"
           style="fill: #339966"
-          id="path4"
         />
         <path
+          id="path6"
           d="m 540,545 h 90 V 45 h -90 V 545 z m 120,0 h 30 V 45 H 660 V 545 z M 720,45 V 545 h 90 V 45 H 720 z"
           style="fill: #006699"
-          id="path6"
         />
       </svg>
     </a>
-    <a v-if="links.gbif" :href="'https://www.gbif.org/species/' + links.gbif" target="_blank">GBIF ID: {{ links.gbif }}</a>
+    <a
+      v-if="links.gbif"
+      :href="'https://www.gbif.org/species/' + links.gbif"
+      target="_blank"
+    >GBIF ID: {{ links.gbif }}</a>
     <div class="button_group">
       <a
-        v-if="links.wikipedia.length || links.enwikipedia" :href="links.enwikipedia"
+        v-if="links.wikipedia.length || links.enwikipedia"
+        :href="links.enwikipedia"
         aria-label="associated english wikipedia page"
         class="button"
         :disabled="!links.enwikipedia"
@@ -48,23 +60,31 @@
         </svg>
       </a>
       <div
+        v-if="links.wikipedia.length"
         class="dropdown button"
         :data-open="dropdown"
-        v-if="links.wikipedia.length"
       >
         <button
           aria-label="Other language Wikipedia pages"
-          @click="dropdown = !dropdown"
           title="Other languages"
+          @click="dropdown = !dropdown"
         >
           <svg viewBox="0 0 24 24">
-            <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+            <path
+              fill="currentColor"
+              d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"
+            />
           </svg>
         </button>
         <div class="dropdown_menu">
           <ul>
-            <li v-if="links.enwikipedia"><a :href="links.enwikipedia">{{ links.enwikipedia }}</a></li>
-            <li v-for="link in links.wikipedia" :key="link">
+            <li v-if="links.enwikipedia">
+              <a :href="links.enwikipedia">{{ links.enwikipedia }}</a>
+            </li>
+            <li
+              v-for="link in links.wikipedia"
+              :key="link"
+            >
               <a :href="link">{{ readableLinks(link) }}</a>
             </li>
           </ul>
@@ -93,11 +113,26 @@
             r="210"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#D8ABA5" offset=".04" />
-            <stop stop-color="#AD604E" offset=".4" />
-            <stop stop-color="#9C4029" offset=".6" />
-            <stop stop-color="#92331F" offset=".7" />
-            <stop stop-color="#43180F" offset="1" />
+            <stop
+              stop-color="#D8ABA5"
+              offset=".04"
+            />
+            <stop
+              stop-color="#AD604E"
+              offset=".4"
+            />
+            <stop
+              stop-color="#9C4029"
+              offset=".6"
+            />
+            <stop
+              stop-color="#92331F"
+              offset=".7"
+            />
+            <stop
+              stop-color="#43180F"
+              offset="1"
+            />
           </radialGradient>
           <radialGradient
             id="i"
@@ -106,40 +141,109 @@
             r="430"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="#4F8FB3" offset=".8" />
-            <stop stop-color="#0C5178" offset=".95" />
-            <stop stop-color="#002D4A" offset="1" />
+            <stop
+              stop-color="#4F8FB3"
+              offset=".8"
+            />
+            <stop
+              stop-color="#0C5178"
+              offset=".95"
+            />
+            <stop
+              stop-color="#002D4A"
+              offset="1"
+            />
           </radialGradient>
           <clipPath id="h">
             <path d="m0 199 470.5 428 470.5-428v904h-941z" />
           </clipPath>
           <linearGradient id="b">
-            <stop stop-color="#00090E" offset="0" />
-            <stop stop-color="#082E45" offset=".1" />
-            <stop stop-color="#0A6997" offset=".5" />
-            <stop stop-color="#082E45" offset=".9" />
-            <stop stop-color="#00090E" offset="1" />
+            <stop
+              stop-color="#00090E"
+              offset="0"
+            />
+            <stop
+              stop-color="#082E45"
+              offset=".1"
+            />
+            <stop
+              stop-color="#0A6997"
+              offset=".5"
+            />
+            <stop
+              stop-color="#082E45"
+              offset=".9"
+            />
+            <stop
+              stop-color="#00090E"
+              offset="1"
+            />
           </linearGradient>
           <linearGradient id="j">
-            <stop stop-color="#375D72" offset="0" />
-            <stop stop-color="#407B9B" offset=".1" />
-            <stop stop-color="#A0C0CF" offset=".5" />
-            <stop stop-color="#407B9B" offset=".9" />
-            <stop stop-color="#375D72" offset="1" />
+            <stop
+              stop-color="#375D72"
+              offset="0"
+            />
+            <stop
+              stop-color="#407B9B"
+              offset=".1"
+            />
+            <stop
+              stop-color="#A0C0CF"
+              offset=".5"
+            />
+            <stop
+              stop-color="#407B9B"
+              offset=".9"
+            />
+            <stop
+              stop-color="#375D72"
+              offset="1"
+            />
           </linearGradient>
           <linearGradient id="g">
-            <stop stop-color="#0F3119" offset="0" />
-            <stop stop-color="#01703B" offset=".1" />
-            <stop stop-color="#89C4AE" offset=".5" />
-            <stop stop-color="#01703B" offset=".9" />
-            <stop stop-color="#0F3119" offset="1" />
+            <stop
+              stop-color="#0F3119"
+              offset="0"
+            />
+            <stop
+              stop-color="#01703B"
+              offset=".1"
+            />
+            <stop
+              stop-color="#89C4AE"
+              offset=".5"
+            />
+            <stop
+              stop-color="#01703B"
+              offset=".9"
+            />
+            <stop
+              stop-color="#0F3119"
+              offset="1"
+            />
           </linearGradient>
           <linearGradient id="a">
-            <stop stop-color="#476C5A" offset="0" />
-            <stop stop-color="#52A27D" offset=".1" />
-            <stop stop-color="#A7D2BE" offset=".5" />
-            <stop stop-color="#52A27D" offset=".9" />
-            <stop stop-color="#476C5A" offset="1" />
+            <stop
+              stop-color="#476C5A"
+              offset="0"
+            />
+            <stop
+              stop-color="#52A27D"
+              offset=".1"
+            />
+            <stop
+              stop-color="#A7D2BE"
+              offset=".5"
+            />
+            <stop
+              stop-color="#52A27D"
+              offset=".9"
+            />
+            <stop
+              stop-color="#476C5A"
+              offset="1"
+            />
           </linearGradient>
         </defs>
         <g stroke-width="0">
@@ -186,7 +290,13 @@
           stroke="url(#i)"
           stroke-width="100px"
         />
-        <circle cx="470.5" cy="161" r="125" fill="url(#d)" stroke="#555" />
+        <circle
+          cx="470.5"
+          cy="161"
+          r="125"
+          fill="url(#d)"
+          stroke="#555"
+        />
       </svg>
     </a>
     <a
@@ -197,26 +307,56 @@
       target="_blank"
       title="Wikimedia Commons"
     >
-      <svg height="24" version="1.1" viewBox="-305 -516 610 820" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <svg
+        height="24"
+        version="1.1"
+        viewBox="-305 -516 610 820"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+      >
         <defs>
           <clipPath id="wc_b">
-            <circle r="298"/>
+            <circle r="298" />
           </clipPath>
         </defs>
-        <circle r="100" fill="#900"/>
+        <circle
+          r="100"
+          fill="#900"
+        />
         <g fill="#069">
-          <g id="wc_a" clip-path="url(#wc_b)">
-          <path d="m-11 180v118h22v-118"/>
-          <path d="m-43 185 43-75 43 75"/>
+          <g
+            id="wc_a"
+            clip-path="url(#wc_b)"
+          >
+            <path d="m-11 180v118h22v-118" />
+            <path d="m-43 185 43-75 43 75" />
           </g>
           <g id="wc_c">
-          <use transform="rotate(45)" xlink:href="#wc_a"/>
-          <use transform="rotate(90)" xlink:href="#wc_a"/>
-          <use transform="rotate(135)" xlink:href="#wc_a"/>
+            <use
+              transform="rotate(45)"
+              xlink:href="#wc_a"
+            />
+            <use
+              transform="rotate(90)"
+              xlink:href="#wc_a"
+            />
+            <use
+              transform="rotate(135)"
+              xlink:href="#wc_a"
+            />
           </g>
-          <use transform="scale(-1 1)" xlink:href="#wc_c"/>
-          <path transform="rotate(-45)" d="m0-256a256 256 0 1 0 256 256c0-100-101-150-6-275" fill="none" stroke="#069" stroke-width="84"/>
-          <path d="m-23-515s-36 135-80 185 116-62 170-5-90-180-90-180z"/>
+          <use
+            transform="scale(-1 1)"
+            xlink:href="#wc_c"
+          />
+          <path
+            transform="rotate(-45)"
+            d="m0-256a256 256 0 1 0 256 256c0-100-101-150-6-275"
+            fill="none"
+            stroke="#069"
+            stroke-width="84"
+          />
+          <path d="m-23-515s-36 135-80 185 116-62 170-5-90-180-90-180z" />
         </g>
       </svg>
     </a>

@@ -1,7 +1,7 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div
-    v-if="taxa && years"
+    v-if="taxa && _years"
     :class="collapsed ? 'card collapsed' : 'card'"
     aria-hidden="true"
   >
@@ -182,7 +182,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             class="label"
           >
             {{ getFormattedName(taxon.taxonConceptUri) }}
-            <spinner v-if="taxon.loading" />
+            <dot-spinner v-if="taxon.loading" />
           </div>
           <!-- OLD -->
           <div
@@ -191,17 +191,17 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             class="label"
           >
             {{ getFormattedName(taxon.url) }}
-            <spinner v-if="taxon.loading" />
+            <dot-spinner v-if="taxon.loading" />
           </div>
         </div>
       </div>
       <div class="scroll-x">
         <div
-          v-for="year in years"
+          v-for="year in _years"
           :class="year === 'sep' ? 'sep' : 'year'"
           tabindex="0"
-          @click="year.exp = !year.exp"
-          @keyup.enter.prevent="year.exp = !year.exp"
+          @click="(year !== 'sep') && (year.exp = !year.exp)"
+          @keyup.enter.prevent="(year !== 'sep') && (year.exp = !year.exp)"
         >
           <div
             v-if="year !== 'sep'"
@@ -268,7 +268,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             </a>
           </div>
           <div
-            v-else-if="!year.exp"
+            v-else-if="year !== 'sep' && !year.exp"
             class="treatments compacted"
           >
             <a
@@ -336,7 +336,12 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
         </div>
       </div>
     </div>
-    <div tabindex="0" v-if="collapsed && !isFullscreen" class="expander" @click="collapsed = false">
+    <div
+      v-if="collapsed && !isFullscreen"
+      tabindex="0"
+      class="expander"
+      @click="collapsed = false"
+    >
       Show full timeline
     </div>
   </div>
@@ -345,7 +350,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
 <script lang="ts">
 /* eslint-disable comma-dangle */
 import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator'
-import Spinner from '@/components/Spinner.vue'
+import DotSpinner from '@/components/DotSpinner.vue'
 import type { SyncJustifiedSynonym, SyncTreatment } from '@/utilities/SynogroupSync'
 
 // Required as typescript doesn't know about these nonstandard functions
@@ -357,9 +362,9 @@ declare global {
   }
 
   interface Element {
-    mozRequestFullScreen?: (..._: any) => any;
-    webkitRequestFullscreen?: (..._: any) => any;
-    msRequestFullscreen?: (..._: any) => any;
+    mozRequestFullScreen?: (..._: any) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    webkitRequestFullscreen?: (..._: any) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    msRequestFullscreen?: (..._: any) => any; // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 }
 
@@ -376,18 +381,18 @@ type Year = {
 }
 
 @Component({
-  components: { Spinner }
+  components: { DotSpinner }
 })
 export default class Timeline extends Vue {
   @Prop({ default: () => [] }) taxa!: {
     url?: string;
-    def: any[];
-    aug: any[];
-    dpr: any[];
+    def: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    aug: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    dpr: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
     loading: boolean;
   }[] // OLD
 
-  @PropSync('years', { default: () => [] }) internal!: (Year|'sep')[];
+  @PropSync('years', { default: () => [] }) _years!: (Year|'sep')[];
 
   @Prop({ default: () => [] }) result!: SyncJustifiedSynonym[]
 
@@ -396,15 +401,15 @@ export default class Timeline extends Vue {
     this.collapsed = this.result.length > 7
     if (this.result.length === 0) {
       // empty results => reset
-      this.internal = []
+      this._years = []
       return
     }
     const addTreatment = (index: number, t: SyncTreatment, type: TT) => {
       const date = t.date ?? -1
-      const yearIndex = this.internal.findIndex(y => y !== 'sep' && y.year === date)
+      const yearIndex = this._years.findIndex(y => y !== 'sep' && y.year === date)
       if (~yearIndex) {
         // This year already exists
-        const year = this.internal[yearIndex] as Year
+        const year = this._years[yearIndex] as Year
         const treatmentIndex = year.treatments.findIndex(y => y.url === t.url)
         if (~treatmentIndex) {
           // This treatment already exists
@@ -426,7 +431,7 @@ export default class Timeline extends Vue {
         const data: (TT|false)[] = []
         data.length = this.result.length
         data[index] = type
-        this.internal.push({
+        this._years.push({
           year: date,
           exp: false,
           treatments: [{
@@ -446,7 +451,8 @@ export default class Timeline extends Vue {
 
     // Sort
 
-    (this.internal as Year[]).sort((a, b) => {
+    this._years.sort((a, b) => {
+      if (a === "sep" || b === "sep") return 0;
       if (a.year < b.year) {
         return -1
       }
@@ -454,11 +460,11 @@ export default class Timeline extends Vue {
         return 1
       }
       return 0
-    })
+    });
 
     // Fill
 
-    this.internal.forEach(y => {
+    this._years.forEach(y => {
       if (y === 'sep') { return }
       y.treatments.forEach(t => {
         t.data = t.data.concat(Array(this.result.length - t.data.length).fill(false))
@@ -492,8 +498,8 @@ export default class Timeline extends Vue {
     })
   }
 
-  getFormattedName (uri: string) {
-    const nameSection = uri.substring(uri.lastIndexOf('/') + 1)
+  getFormattedName (uri?: string) {
+    const nameSection = (uri as string).substring((uri as string).lastIndexOf('/') + 1)
     const lastSeparator = nameSection.lastIndexOf('_')
     return nameSection.substring(0, lastSeparator)
       .replace(new RegExp('_', 'g'), ' ') +
@@ -524,6 +530,7 @@ export default class Timeline extends Vue {
       } else if (this.$el.mozRequestFullScreen) {
         this.$el.mozRequestFullScreen()
       } else if (this.$el.webkitRequestFullscreen) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.$el.webkitRequestFullscreen((Element as any).ALLOW_KEYBOARD_INPUT)
       } else if (this.$el.msRequestFullscreen) {
         this.$el.msRequestFullscreen()

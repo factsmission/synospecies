@@ -30,7 +30,7 @@
               viewBox="0 0 24 24"
             ><path
               fill="currentcolor"
-              :d="$icons.mdiCogOutline"
+              :d="icons.mdiCogOutline"
             /></svg>
           </button>
           <div>
@@ -38,17 +38,25 @@
               v-model="ignoreRank"
               type="checkbox"
             >Include Subtaxa</label>
-            <router-link to="settings">All Settings</router-link>
+            <router-link to="settings">
+              All Settings
+            </router-link>
           </div>
         </div>
       </div>
-      <label v-if="!loading && !time" for="combinedfield">Enter Taxon Name</label>
-      <div class="flex" v-if="loading || time">
+      <label
+        v-if="!loading && !time"
+        for="combinedfield"
+      >Enter Taxon Name</label>
+      <div
+        v-if="loading || time"
+        class="flex"
+      >
         <hr>
         <div style="line-height: 2.5rem; padding-left: .5rem;">
           <div v-if="loading">
             Loading
-            <spinner />
+            <dot-spinner />
             ({{ jsArray.length }} result(s) so far)
           </div>
           <div v-else-if="time">
@@ -70,7 +78,7 @@
               viewBox="0 0 24 24"
             ><path
               fill="currentcolor"
-              :d="$icons.mdiTune"
+              :d="icons.mdiTune"
             /></svg>
           </button>
           <div>
@@ -99,7 +107,7 @@
           <span class="muted">{{ kingdom(taxonName[0]) }}</span>
           {{ shorten(taxonName[0]) }}
         </div>
-        <wikidata-buttons :taxonName="shorten(taxonName[0])" />
+        <wikidata-buttons :taxon-name="shorten(taxonName[0])" />
       </div>
       <div
         v-for="js in taxonName[1]"
@@ -112,8 +120,19 @@
               <th>Phylum</th><th>Class</th><th>Order</th><th>Family</th>
             </tr>
             <tr>
-              <td v-if="!trees.has(js.taxonConceptUri)" colspan="4" class="loading">Loading</td>
-              <td v-for="t in trees.get(js.taxonConceptUri)" :key="t">{{ t }}</td>
+              <td
+                v-if="!trees.has(js.taxonConceptUri)"
+                colspan="4"
+                class="loading"
+              >
+                Loading
+              </td>
+              <td
+                v-for="t in trees.get(js.taxonConceptUri)"
+                :key="t"
+              >
+                {{ t }}
+              </td>
             </tr>
           </table>
         </div>
@@ -139,7 +158,10 @@
       :taxa="jsArray.map(t => ({ url: t.taxonConceptUri }))"
     />
 
-    <div class="footer" v-if="jsArray.length > 0">
+    <div
+      v-if="jsArray.length > 0"
+      class="footer"
+    >
       <small style="opacity:0.6;">
         The Wikidata logo, Wikipedia 'W' icon, Wikispecies logo and Wikimedia Commons logo are trademarks of the <a href="https://wikimediafoundation.org/">Wikimedia Foundation</a> and are used with the permission of the Wikimedia Foundation. We are not endorsed by or affiliated with the Wikimedia Foundation. The <a href="https://commons.wikimedia.org/wiki/File:Wikispecies-logo.svg">Wikispecies logo</a> by Zephram Stark is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.en">CC BY-SA 3.0</a>
       </small>
@@ -148,22 +170,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import type { anyJustification, MaterialCitation, Treatment } from '@factsmission/synogroup'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import type { anyJustification, Treatment } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatment, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
+import { mdiCogOutline, mdiTune } from '@mdi/js'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
 import Timeline from '@/components/Timeline.vue'
 import ImageSplash from '@/components/ImageSplash.vue'
-import Spinner from '@/components/Spinner.vue'
+import DotSpinner from '@/components/DotSpinner.vue'
 import WikidataButtons from '@/components/WikidataButtons.vue'
 import Taxomplete from 'taxomplete'
 
 // do not use this for new stuff - temporarly added to integrate ImageSplash easily
 import TaxaManager from '@/TaxaManager'
-import { time, trace } from 'console'
-import { mdiCached } from '@mdi/js'
 
 @Component({
   components: {
@@ -171,7 +192,7 @@ import { mdiCached } from '@mdi/js'
     TreatmentsView,
     Timeline,
     ImageSplash,
-    Spinner,
+    DotSpinner,
     WikidataButtons
   }
 })
@@ -191,14 +212,16 @@ export default class Home extends Vue {
   openT = open
   time = ''
   syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
-
+  icons = {
+    mdiCogOutline,
+    mdiTune
+  }
 
   //         tc-uri : phylum  class   order   family
   trees: Map<string, [string, string, string, string]> = new Map()
 
   // do not use this for new stuff - temporarly added to integrate ImageSplash easily
   taxamanager = new TaxaManager(this.endpoint)
-
   async getTree (tcuri: string) {
     if (this.trees.has(tcuri)) {
       return this.trees.get(tcuri)
@@ -240,7 +263,7 @@ SELECT DISTINCT * WHERE {
     }
     this.syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
-    const promises: Promise<any>[] = []
+    const promises: Promise<string>[] = []
     for await (const justSyn of this.syg) {
       const { taxonConceptUri, taxonNameUri, justifications, treatments } = justSyn
       const justs: anyJustification[] = []
@@ -263,9 +286,10 @@ SELECT DISTINCT * WHERE {
         })())
 
       const handleTreatment = async (treat: Treatment, where: "def"|"aug"|"dpr") => {
+        const sct = treat as Omit<Treatment, "materialCitations"> as SyncTreatment;
         const mc = await treat.materialCitations;
-        (treat as any).materialCitations = mc;
-        treats[where].push(treat as any);
+        sct.materialCitations = mc;
+        treats[where].push(sct);
         treats[where].sort((a,b) => {
           const year_a = a.date || 0;
           const year_b = b.date || 0;
@@ -500,7 +524,7 @@ table tr {
 main {
   display: flex;
   flex-direction: column;
-  justify-content: start;
+  justify-content: flex-start;
 
   &.splash {
     justify-content: center;

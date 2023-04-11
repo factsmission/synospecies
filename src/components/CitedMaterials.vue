@@ -6,7 +6,11 @@
     </button>
     {{ mcs.find(mc => mc.typeStatus?.toLocaleLowerCase().includes('holotype')) ? '(incl. holotype)' : '' }}
     <table v-if="open">
-      <tr v-for="mc in mcs" :key="JSON.stringify(mc)" :title="pretty(mc)">
+      <tr
+        v-for="mc in mcs"
+        :key="JSON.stringify(mc)"
+        :title="pretty(mc)"
+      >
         <td :class="`mc_type ${mc.typeStatus?.toLocaleLowerCase().includes('holotype') ? 'green' : ''}`">
           {{ mc.typeStatus?.[0].toUpperCase() }}
         </td>
@@ -14,22 +18,39 @@
           {{ mc.collectionCode }}:
           {{ mc.catalogNumber }}
         </td>
-        <td v-if="mc.eventDate" class="mc_date">
+        <td
+          v-if="mc.eventDate"
+          class="mc_date"
+        >
           ({{ date(mc) }})
         </td>
         <td v-else />
         <td class="mc_links">
-          <a v-if="mc.httpUri && (!mc.gbifSpecimenId || mc.httpUri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || mc.httpUri.endsWith(mc.gbifOccurrenceId))"
-            :href="mc.httpUri">Link ➶</a>
+          <a
+            v-if="mc.httpUri && (!mc.gbifSpecimenId || mc.httpUri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || mc.httpUri.endsWith(mc.gbifOccurrenceId))"
+            :href="mc.httpUri"
+          >Link ➶</a>
         </td>
-        <td v-if="mc.gbifSpecimenId || mc.gbifOccurrenceId" class="mc_links">
-          <small>GBIF:</small> <a v-if="mc.gbifSpecimenId"
-            :href="'https://www.gbif.org/specimen/' + mc.gbifSpecimenId">Specimen</a> <a v-if="mc.gbifOccurrenceId"
-            :href="'https://www.gbif.org/occurrence/' + mc.gbifSpecimenId">Occurrence</a>
+        <td
+          v-if="mc.gbifSpecimenId || mc.gbifOccurrenceId"
+          class="mc_links"
+        >
+          <small>GBIF:</small> <a
+            v-if="mc.gbifSpecimenId"
+            :href="'https://www.gbif.org/specimen/' + mc.gbifSpecimenId"
+          >Specimen</a> <a
+            v-if="mc.gbifOccurrenceId"
+            :href="'https://www.gbif.org/occurrence/' + mc.gbifSpecimenId"
+          >Occurrence</a>
         </td>
       </tr>
       <tr>
-        <td colspan="5" style="text-align: center;"><small><i>hover over a row for more details</i></small></td>
+        <td
+          colspan="5"
+          style="text-align: center;"
+        >
+          <small><i>hover over a row for more details</i></small>
+        </td>
       </tr>
     </table>
   </div>

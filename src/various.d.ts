@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module 'ext-rdflib' {
   function sym(url: string): any
 }
