@@ -33,8 +33,10 @@
               {{ mc.typeStatus?.[0].toUpperCase() }}
             </td>
             <td class="mc_code">
-              {{ mc.collectionCode }}:
-              {{ mc.catalogNumber }}
+              {{ mc.collectionCode }}<span
+                v-if="mc.collectionCode"
+              >:</span>
+              {{ mc.collectionCode && mc.catalogNumber.startsWith(mc.collectionCode) ? mc.catalogNumber.slice(mc.collectionCode.length) : mc.catalogNumber }}
             </td>
             <td
               v-if="mc.eventDate"
@@ -114,13 +116,18 @@ export default class CitedMaterials extends Vue {
 
 <style scoped lang="scss">
 .mc_links {
-  a+a::before {
-    content: " ";
+  padding-left: 0.4em;
+  a+a {
+    padding-left: 0.2em;
   }
 }
 
+.mc_links:empty {
+  padding: 0;
+}
+
 .mc_date {
-  margin-inline: 1em;
+  padding-left: 0.4em;
   display: block;
 }
 
@@ -217,8 +224,8 @@ button {
     top: 1.2rem;
     width: max-content;
     z-index: 990;
-    font-size: 0.8rem;
     overflow: auto;
+    padding: 0.2rem 0.4em;
   }
 }
 </style>
