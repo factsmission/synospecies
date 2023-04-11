@@ -1,6 +1,6 @@
 import type { JustifiedSynonym, Treatment } from '@factsmission/synogroup'
 
-export declare type SyncTreatment = Omit<Treatement, "materialCitations"> & {
+export declare type SyncTreatment = Omit<Treatment, "materialCitations"> & {
   materialCitations: MaterialCitation[]
 }
 

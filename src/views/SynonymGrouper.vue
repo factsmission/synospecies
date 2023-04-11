@@ -266,6 +266,14 @@ SELECT DISTINCT * WHERE {
         const mc = await treat.materialCitations;
         (treat as any).materialCitations = mc;
         treats[where].push(treat as any);
+        treats[where].sort((a,b) => {
+          const year_a = a.date || 0;
+          const year_b = b.date || 0;
+          if (year_a == year_b) {
+            return (a.creators ?? "").localeCompare((b.creators ?? ""), undefined, { numeric: true }); // Sort alphabetically
+          }
+          return year_a - year_b;
+        })
       }
 
       jsPromises.push(
