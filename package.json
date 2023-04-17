@@ -19,7 +19,7 @@
     "@triply/yasqe": "^4.2.18",
     "@triply/yasr": "^4.2.19",
     "@types/superagent": "^4.1.13",
-    "core-js": "^3.6.5",
+    "core-js": "^3.30.1",
     "ext-rdflib": "^0.3.4",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "rdfgraphnode-rdfext": "^1.5.0",
