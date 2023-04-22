@@ -19,7 +19,7 @@
             />
           </svg>
         </div>
-        {{ mcs.length }} specimens referenced
+        {{ mcs.length > 1 ? `${mcs.length} material citations` : `Material citation` }}
         {{ mcs.find(mc => mc.typeStatus?.toLocaleLowerCase().includes('holotype')) ? '(incl. holotype)' : '' }}
       </button>
       <div class="dropdown_menu">
