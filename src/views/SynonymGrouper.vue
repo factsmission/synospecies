@@ -150,6 +150,32 @@
           :open="openT"
         />
       </div>
+      <div
+        v-if="treatsTaxonName.get(taxonName[0])?.length"
+        class="trl"
+      >
+        Other Treatments associated with this Taxon Name:
+        <ul class="nobullet">
+          <li
+            v-for="t in treatsTaxonName.get(taxonName[0])"
+            :key="t.url"
+          >
+            <svg
+              class="gray"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentcolor"
+                d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+              />
+            </svg>
+            <a :href="t.url">
+              {{ t.creators }} ({{ t.date }})
+            </a>
+            <CitedMaterials :mcs="t.materialCitations" />
+          </li>
+        </ul>
+      </div>
     </div>
     <hr v-if="jsArray.length">
     <image-splash
@@ -171,7 +197,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import type { anyJustification, Treatment } from '@factsmission/synogroup'
+import type { anyJustification, MaterialCitation, Treatment } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatment, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
 import { mdiCogOutline, mdiTune } from '@mdi/js'
@@ -185,6 +211,7 @@ import Taxomplete from 'taxomplete'
 
 // do not use this for new stuff - temporarly added to integrate ImageSplash easily
 import TaxaManager from '@/TaxaManager'
+import SparqlEndpoint from '@retog/sparql-client'
 
 @Component({
   components: {
@@ -205,6 +232,7 @@ export default class Home extends Vue {
   ignoreRank = false
   jsArray: SyncJustifiedSynonym[] = []
   result: Map<string, SyncJustifiedSynonym[]> = new Map()
+  treatsTaxonName: Map<string, SyncTreatment[]> = new Map()
   loading = false
   settingsOpen = false
   tunerOpen = false
@@ -241,6 +269,58 @@ SELECT DISTINCT * WHERE {
     }
   }
 
+  getMaterialCitations(treat: { url: string, creators: string, date: string }, taxonName: string): Promise<void> {
+    const query = `
+    PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
+    SELECT DISTINCT *
+    WHERE {
+      <${treat.url}> dwc:basisOfRecord ?mc .
+      ?mc dwc:catalogNumber ?catalogNumber .
+      OPTIONAL { ?mc dwc:collectionCode ?collectionCode . }
+      OPTIONAL { ?mc dwc:typeStatus ?typeStatus . }
+      OPTIONAL { ?mc dwc:countryCode ?countryCode . }
+      OPTIONAL { ?mc dwc:stateProvince ?stateProvince . }
+      OPTIONAL { ?mc dwc:municipality ?municipality . }
+      OPTIONAL { ?mc dwc:county ?county . }
+      OPTIONAL { ?mc dwc:locality ?locality . }
+      OPTIONAL { ?mc dwc:verbatimLocality ?verbatimLocality . }
+      OPTIONAL { ?mc dwc:recordedBy ?recordedBy . }
+      OPTIONAL { ?mc dwc:eventDate ?eventDate . }
+      OPTIONAL { ?mc dwc:samplingProtocol ?samplingProtocol . }
+      OPTIONAL { ?mc dwc:decimalLatitude ?decimalLatitude . }
+      OPTIONAL { ?mc dwc:decimalLongitude ?decimalLongitude . }
+      OPTIONAL { ?mc dwc:verbatimElevation ?verbatimElevation . }
+    }`;
+    return this.endpoint.getSparqlResultSet(query).then(
+      (json) => {
+        const resultArray: MaterialCitation[] = []
+        json.results.bindings.forEach((t: any) => {
+          if (!t.mc || !t.catalogNumber) return;
+          const result = {
+            "catalogNumber": t.catalogNumber.value,
+            "collectionCode": t.collectionCode?.value || undefined,
+            "typeStatus": t.typeStatus?.value || undefined,
+            "countryCode": t.countryCode?.value || undefined,
+            "stateProvince": t.stateProvince?.value || undefined,
+            "municipality": t.municipality?.value || undefined,
+            "county": t.county?.value || undefined,
+            "locality": t.locality?.value || undefined,
+            "verbatimLocality": t.verbatimLocality?.value || undefined,
+            "recordedBy": t.recordedBy?.value || undefined,
+            "eventDate": t.eventDate?.value || undefined,
+            "samplingProtocol": t.samplingProtocol?.value || undefined,
+            "decimalLatitude": t.decimalLatitude?.value || undefined,
+            "decimalLongitude": t.decimalLongitude?.value || undefined,
+            "verbatimElevation": t.verbatimElevation?.value || undefined,
+          }
+          resultArray.push(result)
+        })
+        if (this.treatsTaxonName.has(taxonName))
+          this.treatsTaxonName.get(taxonName)?.push({ ...treat, materialCitations: resultArray } as unknown as SyncTreatment)
+        else this.treatsTaxonName.set(taxonName, [({ ...treat, materialCitations: resultArray } as unknown as SyncTreatment)])
+      })
+  }
+
   kingdom (uri: string) {
     return (uri.match(/http:\/\/taxon-name\.plazi\.org\/id\/([^/]*)\//) || [])[1]
   }
@@ -257,6 +337,7 @@ SELECT DISTINCT * WHERE {
     window.location.hash = this.input.replaceAll(' ', '+')
     this.jsArray = []
     this.result = new Map()
+    this.treatsTaxonName = new Map()
     this.loading = true
     if (this.syg) {
       this.syg.abort()
@@ -270,14 +351,41 @@ SELECT DISTINCT * WHERE {
       const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
       const js = { ...justSyn, justifications: justs, treatments: treats }
       this.jsArray.push(js)
+
       const resultArr = this.result.get(taxonNameUri)
+      const jsPromises: Promise<void>[] = []
       if (resultArr) {
         resultArr.push(js)
       } else {
-        this.result.set(taxonNameUri, [js])
+        this.result.set(taxonNameUri, [js]);
+        // TODO new taxon name -> look for generic treatments
+        jsPromises.push(
+        (async () => {
+          const query = `PREFIX treat: <http://plazi.org/vocab/treatment#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+SELECT DISTINCT ?treat ?date (group_concat(DISTINCT ?creator;separator="; ") as ?creators)
+WHERE {
+  ?treat a treat:Treatment ;
+    (treat:citesTaxonName|treat:treatsTaxonName) <${taxonNameUri}> ;
+    dc:creator ?creator .
+  OPTIONAL {
+    ?treat treat:publishedIn ?publ .
+    ?publ dc:date ?date .
+  }
+}
+GROUP BY ?treat ?date`
+          return this.endpoint.getSparqlResultSet(query)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .then(json => (json.results.bindings as any[]).forEach(treat => {
+              jsPromises.push(this.getMaterialCitations({
+                url: treat["treat"].value,
+                date: treat["date"].value,
+                creators: treat["creators"].value
+              }, taxonNameUri))
+            }))
+          })())
       }
       this.getTree(js.taxonConceptUri)
-      const jsPromises: Promise<void>[] = []
       jsPromises.push(
         (async () => {
           for await (const just of justifications) {
@@ -371,6 +479,35 @@ SELECT DISTINCT * WHERE {
 }
 </style>
 <style lang="scss" scoped>
+.trl {
+  padding-inline-start: 1rem;
+  padding-block-end: 1rem;
+
+  svg {
+    height: 1em;
+    vertical-align: middle;
+    margin: 0;
+  }
+
+  ul.nobullet {
+    list-style: none;
+
+    svg {
+      margin: 0 0 3px calc(-.5ch - 1em);
+    }
+  }
+
+  p,
+  ul {
+    padding: 0 0 0 calc(1em + 1ch);
+    margin: 0;
+  }
+
+  .gray {
+    color: #666666;
+  }
+}
+
 .bottom-align {
   align-self: end;
 }
