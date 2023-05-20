@@ -39,7 +39,7 @@
               type="checkbox"
             >Include Subtaxa</label>
             <router-link to="settings">
-              All Settings
+              App Settings
             </router-link>
           </div>
         </div>
