@@ -48,7 +48,7 @@
         taxonomic treatment data provided by
         <a href="http://plazi.org/">Plazi</a>.
         <hr>
-        This project has received funding from the European Union’s Horizon 2020 programme (grant agreement 101007492) and from the Arcadia Fund.
+        This project has received funding from the European Union’s Horizon 2020 programme (grant agreement 101007492) and from the <a href="https://www.arcadiafund.org.uk/">Arcadia Fund</a>.
         <hr>
         This is an open source project:
         <a href="https://github.com/factsmission/synospecies">
