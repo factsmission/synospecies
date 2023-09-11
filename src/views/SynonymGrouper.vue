@@ -111,10 +111,35 @@
             class="vernaculars"
           >
             <span
-              v-for="(name, key) in vernacular[taxonName[0]]"
+              v-if="vernacular[taxonName[0]]?.en"
+              class="muted vernacular"
+              title="en"
+            >{{ vernacular[taxonName[0]]?.en }} </span>
+            <span
+              v-if="vernacular[taxonName[0]]?.de"
+              class="muted vernacular"
+              title="de"
+            >{{ vernacular[taxonName[0]]?.de }} </span>
+            <span
+              v-if="vernacular[taxonName[0]]?.es"
+              class="muted vernacular"
+              title="es"
+            >{{ vernacular[taxonName[0]]?.es }} </span>
+            <span
+              v-if="vernacular[taxonName[0]]?.zh"
+              class="muted vernacular"
+              title="zh"
+            >{{ vernacular[taxonName[0]]?.zh }} </span>
+            <span
+              v-if="vernacular[taxonName[0]]?.fr"
+              class="muted vernacular"
+              title="fr"
+            >{{ vernacular[taxonName[0]]?.fr }} </span>
+            <span
+              v-for="[k, name] in Object.entries(vernacular[taxonName[0]] || {}).filter(([key, _]) => (key !== 'en' && key !== 'de' && key !== 'es' && key !== 'zh' && key !== 'fr'))"
               :key="name"
               class="muted vernacular"
-              :title="key"
+              :title="k"
             >{{ name }} </span>
           </div>
         </div>
