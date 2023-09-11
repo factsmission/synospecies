@@ -106,6 +106,17 @@
         <div class="bottom-align">
           <span class="muted">{{ kingdom(taxonName[0]) }}</span>
           {{ shorten(taxonName[0]) }}
+          <div
+            v-if="!loading && vernacular[taxonName[0]]"
+            class="vernaculars"
+          >
+            <span
+              v-for="(name, key) in vernacular[taxonName[0]]"
+              :key="name"
+              class="muted vernacular"
+              :title="key"
+            >{{ name }}</span>
+          </div>
         </div>
         <wikidata-buttons :taxon-name="shorten(taxonName[0])" />
       </div>
@@ -208,13 +219,14 @@ import ImageSplash from '@/components/ImageSplash.vue'
 import DotSpinner from '@/components/DotSpinner.vue'
 import WikidataButtons from '@/components/WikidataButtons.vue'
 import Taxomplete from 'taxomplete'
+import CitedMaterials from '@/components/CitedMaterials.vue';
 
 // do not use this for new stuff - temporarly added to integrate ImageSplash easily
 import TaxaManager from '@/TaxaManager'
-import SparqlEndpoint from '@retog/sparql-client'
 
 @Component({
   components: {
+    CitedMaterials,
     JustificationView,
     TreatmentsView,
     Timeline,
@@ -248,6 +260,9 @@ export default class Home extends Vue {
   //         tc-uri : phylum  class   order   family
   trees: Map<string, [string, string, string, string]> = new Map()
 
+  //                 tn-uri:       { lang : name  }
+  vernacular: Record<string, Record<string, string> | null> = {};
+
   // do not use this for new stuff - temporarly added to integrate ImageSplash easily
   taxamanager = new TaxaManager(this.endpoint)
   async getTree (tcuri: string) {
@@ -265,6 +280,28 @@ SELECT DISTINCT * WHERE {
           const tree = ['phylum', 'class', 'order', 'family'].map(r => result[r] ? result[r].value : '') as [string, string, string, string]
           this.trees.set(tcuri, tree)
           return tree
+        })
+    }
+  }
+
+  async getVernacular(tnuri: string): Promise<void> {
+    if (this.vernacular[tnuri] === null) {
+      return;
+    } else {
+      this.vernacular[tnuri] = null;
+      const query =
+        `SELECT DISTINCT ?n WHERE { <${tnuri}> <http://rs.tdwg.org/dwc/terms/vernacularName> ?n . }`
+      return this.endpoint.getSparqlResultSet(query)
+        .then(json => json.results.bindings)
+        .then(bindings => {
+          if (bindings.length) {
+            const m: Record<string, string> = {};
+            for (const n of bindings) {
+              console.log(n, n.n["xml:lang"], n.n.value);
+              if (n.n["xml:lang"] && n.n.value) m[n.n["xml:lang"]] = n.n.value;
+            }
+            this.vernacular[tnuri] = m;
+          }
         })
     }
   }
@@ -294,6 +331,7 @@ SELECT DISTINCT * WHERE {
     return this.endpoint.getSparqlResultSet(query).then(
       (json) => {
         const resultArray: MaterialCitation[] = []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         json.results.bindings.forEach((t: any) => {
           if (!t.mc || !t.catalogNumber) return;
           const result = {
@@ -359,6 +397,9 @@ SELECT DISTINCT * WHERE {
       } else {
         this.result.set(taxonNameUri, [js]);
         // TODO new taxon name -> look for generic treatments
+        jsPromises.push((async () => {
+          this.getVernacular(taxonNameUri);
+        })());
         jsPromises.push(
         (async () => {
           const query = `PREFIX treat: <http://plazi.org/vocab/treatment#>
@@ -656,6 +697,16 @@ table tr {
 
 .muted {
   color: gray;
+}
+
+.vernaculars {
+  line-height: 1;
+  text-wrap: balance;
+  font-size: 0.8rem;
+}
+
+.vernacular + .vernacular::before {
+  content: " / ";
 }
 
 main {

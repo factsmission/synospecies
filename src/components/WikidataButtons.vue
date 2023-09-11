@@ -425,9 +425,11 @@ GROUP BY ?item ?gbif
 <style lang="scss" scoped>
 .flex {
   display: flex;
-  flex-wrap: wrap;
   justify-content: right !important;
   margin-right: -0.2rem;
+  max-height: 30.4px;
+  align-self: end;
+  flex-shrink: 0;
 }
 
 a {
