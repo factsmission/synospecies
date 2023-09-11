@@ -115,7 +115,7 @@
               :key="name"
               class="muted vernacular"
               :title="key"
-            >{{ name }}</span>
+            >{{ name }} </span>
           </div>
         </div>
         <wikidata-buttons :taxon-name="shorten(taxonName[0])" />
@@ -706,7 +706,7 @@ table tr {
 }
 
 .vernacular + .vernacular::before {
-  content: " / ";
+  content: "/ ";
 }
 
 main {
