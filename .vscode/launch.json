@@ -16,7 +16,7 @@
                 "<node_internals>/**"
             ],
             "env": {
-                "NODE_OPTIONS": "--openssl-legacy-provider"
+                "NODE_OPTIONS": "openssl-legacy-provider"
             },
             "type": "node"
         },
