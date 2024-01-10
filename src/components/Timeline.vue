@@ -207,7 +207,8 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             v-if="year !== 'sep'"
             class="label center"
           >
-            {{ year.year }}
+            <span v-if="year.year > 0">{{ year.year }}</span>
+            <abbr v-else title="year missing in RDF data">?</abbr>
           </div>
           <div
             v-if="year !== 'sep' && (year.exp || year.treatments.length === 1)"
