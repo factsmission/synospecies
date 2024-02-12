@@ -181,7 +181,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             :key="taxon.taxonConceptUri"
             class="label"
           >
-            {{ getFormattedName(taxon.taxonConceptUri) }}
+            <span>{{ getFormattedName(taxon.taxonConceptUri) }}</span>
             <dot-spinner v-if="taxon.loading" />
           </div>
           <!-- OLD -->
@@ -222,8 +222,8 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
               :title="treatment.creators"
             >
               <div
-                v-for="dot in treatment.data"
-                class="label"
+                v-for="(dot,i) in treatment.data"
+                :class="!dot && result[i].loading ? 'label loading' : 'label'"
               >
                 <svg
                   v-if="dot === 'def'"
@@ -338,7 +338,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
       </div>
     </div>
     <div
-      v-if="collapsed && !isFullscreen"
+      v-if="collapsed && result.length > 7 && !isFullscreen"
       tabindex="0"
       class="expander"
       @click="collapsed = false"
@@ -756,6 +756,14 @@ html {
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
   overflow: visible;
+  .label {
+    align-items: center;
+    gap: .4rem;
+
+    span:last-child {
+      margin-right: 1.4rem;
+    }
+  }
 
   .label:nth-child(6n+2),
   .label:nth-child(6n+4){
@@ -788,6 +796,27 @@ html {
   display: flex;
   justify-content: space-between;
 }
+
+.treatment .label.loading {
+  position: relative;
+  overflow: hidden;
+}
+.treatment .label.loading::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient( 90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.2) 20%, rgba(255,255,255,0.8) 60%, rgba(255,255,255,0) );
+  animation: shimmer 2s infinite;
+  content: '';
+}
+@keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
 
 button.label {
   background: #ffffff;
