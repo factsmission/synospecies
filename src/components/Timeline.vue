@@ -224,6 +224,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
               <div
                 v-for="(dot,i) in treatment.data"
                 :class="!dot && result[i].loading ? 'label loading' : 'label'"
+                @animationstart="snycAnimations"
               >
                 <svg
                   v-if="dot === 'def'"
@@ -279,6 +280,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
               <div
                 v-for="(dot,i) in aggregate(year)"
                 :class="dot[0] < dot.length && result[i].loading ? 'label loading' : 'label'"
+                @animationstart="snycAnimations"
               >
                 {{ dot[0] > 1 ? dot[0] : '' }}
                 <svg
@@ -536,6 +538,13 @@ export default class Timeline extends Vue {
       } else if (this.$el.msRequestFullscreen) {
         this.$el.msRequestFullscreen()
       }
+    }
+  }
+
+  snycAnimations(e: AnimationEvent) {
+    if (e.animationName.startsWith("shimmer") && e.target) {
+      const a = (e.target as Element).getAnimations({ subtree: true })[0];
+      if (!a.startTime || (a.startTime as number) > 0.01) a.startTime = 0;
     }
   }
 
