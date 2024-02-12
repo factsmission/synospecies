@@ -399,7 +399,7 @@ export default class Timeline extends Vue {
 
   @Watch('result', { deep: true })
   updateYears () {
-    this.collapsed = this.result.length > 7
+    // this.collapsed = this.result.length > 7
     if (this.result.length === 0) {
       // empty results => reset
       this._years = []
