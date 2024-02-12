@@ -277,8 +277,8 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
               :title="`Click to expand ${year.treatments.length} treatments`"
             >
               <div
-                v-for="dot in aggregate(year)"
-                class="label"
+                v-for="(dot,i) in aggregate(year)"
+                :class="dot[0] < dot.length && result[i].loading ? 'label loading' : 'label'"
               >
                 {{ dot[0] > 1 ? dot[0] : '' }}
                 <svg
