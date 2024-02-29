@@ -172,9 +172,11 @@
             </tr>
           </table>
         </div>
-        <h2>
-          {{ shorten(js.taxonConceptUri) }}
+        <h2 v-if="js.taxonConceptAuthority">
+          {{ shorten(js.taxonNameUri) }}
+          <span class="muted">{{ js.taxonConceptAuthority }}</span>
         </h2>
+        <h2 v-else>{{ shorten(js.taxonConceptUri)  }}</h2>
         <details :open="openJ">
           <summary>
             {{ js.justifications.length === 1 ? 'Justification' : `Justifications (${js.justifications.length})` }}
@@ -721,7 +723,7 @@ table tr {
 }
 
 .muted {
-  color: gray;
+  color: #666666;
 }
 
 .vernaculars {

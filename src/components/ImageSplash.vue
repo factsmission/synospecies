@@ -141,7 +141,7 @@ figure.open {
 
     &::after {
       content: 'click anywhere to close';
-      color: gray;
+      color: #666666;
     }
 
   }

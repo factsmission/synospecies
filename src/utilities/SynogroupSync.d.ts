@@ -19,6 +19,7 @@ export declare type anySyncJustification = {
 export declare type SyncJustifiedSynonym = {
   taxonConceptUri: string;
   taxonNameUri: string;
+  taxonConceptAuthority?: string;
   justifications: anySyncJustification[];
   treatments: SyncTreatments;
   loading: boolean;

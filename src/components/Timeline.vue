@@ -181,7 +181,11 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             :key="taxon.taxonConceptUri"
             class="label"
           >
-            <span>{{ getFormattedName(taxon.taxonConceptUri) }}</span>
+            <span v-if="taxon.taxonConceptAuthority">
+              {{ getFormattedName(taxon.taxonNameUri) }}
+              <span class="gray">{{ taxon.taxonConceptAuthority }}</span>
+            </span>
+            <span v-else>{{ getFormattedName(taxon.taxonConceptUri) }}</span>
             <dot-spinner v-if="taxon.loading" />
           </div>
           <!-- OLD -->
@@ -208,7 +212,10 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             class="label center"
           >
             <span v-if="year.year > 0">{{ year.year }}</span>
-            <abbr v-else title="year missing in RDF data">?</abbr>
+            <abbr
+              v-else
+              title="year missing in RDF data"
+            >?</abbr>
           </div>
           <div
             v-if="year !== 'sep' && (year.exp || year.treatments.length === 1)"
@@ -483,7 +490,7 @@ export default class Timeline extends Vue {
   collapsed = true;
   legendOpen = false;
 
-  aggregate (year: Year) {
+  aggregate (year: Year): [number, TT|"multiple"][] {
     const length = this.result.length || this.taxa.length
     const result: (TT|false)[][] = []
     for (let i = 0; i < length; i++) {
@@ -496,18 +503,19 @@ export default class Timeline extends Vue {
       const ass = a.filter(d => d === 'ass').length
       const aug = a.filter(d => d === 'aug').length
       const dpr = a.filter(d => d === 'dpr').length
-      if (+!!def + +!!ass + +!!aug + +!!dpr > 1) return [a.filter(d => d).length, 'multiple']
-      else return [a.filter(d => d).length, a.filter(d => d)[0]]
+      if (+!!def + +!!ass + +!!aug + +!!dpr > 1) return [a.filter(d => d).length, 'multiple'] as [number, "multiple"]
+      else return [a.filter(d => d).length, a.filter(d => d)[0]] as [number, TT]
     })
   }
 
   getFormattedName (uri?: string) {
     const nameSection = (uri as string).substring((uri as string).lastIndexOf('/') + 1)
-    const lastSeparator = nameSection.lastIndexOf('_')
-    return nameSection.substring(0, lastSeparator)
-      .replace(new RegExp('_', 'g'), ' ') +
-      ', ' +
-      nameSection.substring(lastSeparator + 1)
+    // const lastSeparator = nameSection.lastIndexOf('_')
+    // return nameSection.substring(0, lastSeparator)
+    //   .replace(new RegExp('_', 'g'), ' ') +
+    //   ', ' +
+    //   nameSection.substring(lastSeparator + 1)
+    return nameSection.replace(/_/g, ' ')
   }
 
   fullscreen () {
@@ -769,7 +777,7 @@ html {
     align-items: center;
     gap: .4rem;
 
-    span:last-child {
+    & > span:last-child {
       margin-right: 1.4rem;
     }
   }
