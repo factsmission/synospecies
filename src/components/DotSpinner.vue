@@ -21,6 +21,7 @@
   // transform-style: preserve-3d;
   // overflow-x: hidden;
   vertical-align: middle;
+  flex: 0 0 1rem;
 }
 
 .rot::before {

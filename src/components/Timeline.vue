@@ -642,6 +642,7 @@ html {
   display: flex;
   flex-direction: row;
   width: 100%;
+  overflow-x: auto;
 }
 
 .scroll-x {
@@ -649,6 +650,8 @@ html {
   display: flex;
   flex-direction: row;
   padding: .8rem 0 .4rem;
+  min-width: 140px;
+  flex: 1 0.5 content;
 
   &>*:last-child {
     padding-right: .8rem;
@@ -716,23 +719,13 @@ html {
 }
 
 @media (max-width: 65rem) {
-  .scroll-x {
-    min-width: 140px;
-    max-width: 65%;
-    flex: 1 1 auto;
-  }
-
-  .timeline > .labels {
-    min-width: 35%;
-    flex: 1 0.5 auto;
-
-    & > .scroll-opt {
+  .timeline > .labels  > .scroll-opt {
       overflow-x: auto;
       padding: 0 .8rem .8rem .8rem;
       margin: 0 -.8rem -.8rem -.8rem;
     }
   }
-}
+
 
 .treatments {
   display: flex;
@@ -773,9 +766,17 @@ html {
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
   overflow: visible;
+  flex: 0 1 content;
+  min-width: 140px;
   .label {
     align-items: center;
     gap: .4rem;
+
+    & > span {
+      min-width: 0;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
 
     & > span:last-child {
       margin-right: 1.4rem;
@@ -852,6 +853,18 @@ button.label {
 .sep {
   width: 0px;
   border-left: 2px dotted grey;
+}
+
+.fullscreen {
+  .labels, .scroll-x {
+    flex: 0 0 content;
+  }
+
+  .timeline {
+    height: 100vh;
+    overflow: auto;
+    width: 100vw;
+  }
 }
 
 .center {
