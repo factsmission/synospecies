@@ -767,7 +767,7 @@ html {
   border-bottom-left-radius: 8px;
   overflow: visible;
   flex: 0 1 content;
-  min-width: 140px;
+  min-width: max(140px, 40%);
   .label {
     align-items: center;
     gap: .4rem;
