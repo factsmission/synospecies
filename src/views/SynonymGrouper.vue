@@ -450,15 +450,16 @@ WHERE {
   }
 }
 GROUP BY ?treat ?date`
-          return this.endpoint.getSparqlResultSet(query)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .then(json => (json.results.bindings as any[]).forEach(treat => {
-              jsPromises.push(this.getMaterialCitations({
-                url: treat["treat"].value,
-                date: treat["date"].value,
-                creators: treat["creators"].value
-              }, taxonNameUri))
-            }))
+          const json = await this.endpoint.getSparqlResultSet(query);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const treats = (json.results.bindings as any[])
+          for (const treat of treats) {
+            await this.getMaterialCitations({
+              url: treat["treat"].value,
+              date: treat["date"].value,
+              creators: treat["creators"].value
+            }, taxonNameUri);
+          }
           })())
       }
       this.getTree(js.taxonConceptUri)
