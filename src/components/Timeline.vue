@@ -617,6 +617,7 @@ html {
 .card.collapsed {
   max-height: 18rem;
   position: relative;
+  overflow: hidden;
 }
 
 .expander {
@@ -651,6 +652,7 @@ html {
   padding: .8rem 0 .4rem;
   min-width: 140px;
   flex: 1 0.5 content;
+  max-width: calc(100% - max(40%,140px));
 
   &>*:last-child {
     padding-right: .8rem;
@@ -767,6 +769,7 @@ html {
   overflow: visible;
   flex: 0 1 content;
   min-width: max(140px, 40%);
+  max-width: calc(100% - 140px);
   .label {
     align-items: center;
     gap: .4rem;
