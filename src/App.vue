@@ -104,10 +104,6 @@ main.container {
 .image {
   border-radius: 4px;
 }
-.container > .card {
-  margin-left: -16px;
-  margin-right: -16px;
-}
 hr {
   margin: 0.4rem 0;
   border: 0;

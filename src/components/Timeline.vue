@@ -642,7 +642,7 @@ html {
   display: flex;
   flex-direction: row;
   width: 100%;
-  overflow-x: auto;
+  min-width: 280px;
 }
 
 .scroll-x {
