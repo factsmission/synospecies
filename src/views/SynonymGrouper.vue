@@ -176,7 +176,9 @@
           {{ shorten(js.taxonNameUri) }}
           <span class="muted">{{ js.taxonConceptAuthority }}</span>
         </h2>
-        <h2 v-else>{{ shorten(js.taxonConceptUri)  }}</h2>
+        <h2 v-else>
+          {{ shorten(js.taxonConceptUri) }}
+        </h2>
         <details :open="openJ">
           <summary>
             {{ js.justifications.length === 1 ? 'Justification' : `Justifications (${js.justifications.length})` }}
@@ -187,6 +189,12 @@
           :js="js"
           :open="openT"
         />
+      </div>
+      <div
+        v-if="!taxonName[1].length"
+        class="muted card"
+      >
+        No Taxon Concept found for this Taxon Name
       </div>
       <div
         v-if="treatsTaxonName.get(taxonName[0])?.length"
@@ -235,7 +243,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import type { anyJustification, MaterialCitation, Treatment } from '@factsmission/synogroup'
+import type { default as syg, anyJustification, MaterialCitation, Treatment } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatment, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
 import { mdiCogOutline, mdiTune } from '@mdi/js'
@@ -278,7 +286,7 @@ export default class Home extends Vue {
   openJ = false
   openT = open
   time = ''
-  syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
+  syg?: syg;
   icons = {
     mdiCogOutline,
     mdiTune
@@ -505,9 +513,68 @@ GROUP BY ?treat ?date`
     }
     console.log('awaiting now') // eslint-disable-line no-console
     await Promise.allSettled(promises)
+    if (this.jsArray.length === 0) await this.noSuchTaxonConcept();
     console.log('%call settled', 'color: green; font-weight: bold;') // eslint-disable-line no-console
     this.loading = false
     this.time = ((performance.now() - t0) / 1000).toFixed(2)
+  }
+
+  async noSuchTaxonConcept() {
+    const [genus, species, subspecies] = this.input.split(" ");
+    const query = `
+PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
+SELECT DISTINCT ?tn WHERE {
+  ?tn dwc:genus "${genus}";
+    ${species ? `dwc:species "${species}";` : ""}
+    ${subspecies ? `(dwc:subspecies|dwc:variety) "${subspecies}";` : ""}
+      ${this.ignoreRank || !!subspecies
+        ? ""
+        : `dwc:rank "${species ? "species" : "genus"}";`
+      }
+      a <http://filteredpush.org/ontologies/oa/dwcFP#TaxonName>.
+}`;
+    const json = await this.endpoint.getSparqlResultSet(query);
+    const bindings = (json.results.bindings as { [key: string]: { type: string; value: string; }; }[]);
+    const jsPromises: Promise<void>[] = [];
+    bindings.filter(t => t.tn?.value)
+        .map((t) => {
+          const taxonNameUri = t.tn.value;
+          const resultArr = this.result.get(taxonNameUri);
+          if (!resultArr) {
+            this.result.set(taxonNameUri, []);
+            // TODO new taxon name -> look for generic treatments
+            jsPromises.push((async () => {
+              await this.getVernacular(taxonNameUri);
+            })());
+            jsPromises.push(
+              (async () => {
+                const query = `PREFIX treat: <http://plazi.org/vocab/treatment#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+SELECT DISTINCT ?treat ?date (group_concat(DISTINCT ?creator;separator="; ") as ?creators)
+WHERE {
+  ?treat a treat:Treatment ;
+    (treat:citesTaxonName|treat:treatsTaxonName) <${taxonNameUri}> ;
+    dc:creator ?creator .
+  OPTIONAL {
+    ?treat treat:publishedIn ?publ .
+    ?publ dc:date ?date .
+  }
+}
+GROUP BY ?treat ?date`;
+                const json = await this.endpoint.getSparqlResultSet(query);
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const treats = (json.results.bindings as any[])
+                for (const treat of treats) {
+                  await this.getMaterialCitations({
+                    url: treat["treat"].value,
+                    date: treat["date"].value,
+                    creators: treat["creators"].value
+                  }, taxonNameUri);
+                }
+              })());
+          }
+        });
+    return await Promise.allSettled(jsPromises);
   }
 
   onHashChanged () {
