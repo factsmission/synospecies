@@ -202,24 +202,12 @@
       >
         Other Treatments associated with this Taxon Name:
         <ul class="nobullet">
-          <li
+          <treatment-line
             v-for="t in treatsTaxonName.get(taxonName[0])"
             :key="t.url"
-          >
-            <svg
-              class="gray"
-              viewBox="0 0 24 24"
-            >
-              <path
-                fill="currentcolor"
-                d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
-              />
-            </svg>
-            <a :href="t.url">
-              {{ t.creators }} ({{ t.date }})
-            </a>
-            <CitedMaterials :mcs="t.materialCitations" />
-          </li>
+            type="cite"
+            :treat="t"
+          />
         </ul>
       </div>
     </div>
@@ -249,6 +237,7 @@ import { getEndpoint } from '@/utilities/config'
 import { mdiCogOutline, mdiTune } from '@mdi/js'
 import JustificationView from '@/components/JustificationView.vue'
 import TreatmentsView from '@/components/TreatmentsView.vue'
+import TreatmentLine from '@/components/TreatmentLine.vue'
 import Timeline from '@/components/Timeline.vue'
 import ImageSplash from '@/components/ImageSplash.vue'
 import DotSpinner from '@/components/DotSpinner.vue'
@@ -264,6 +253,7 @@ import TaxaManager from '@/TaxaManager'
     CitedMaterials,
     JustificationView,
     TreatmentsView,
+    TreatmentLine,
     Timeline,
     ImageSplash,
     DotSpinner,
@@ -341,7 +331,7 @@ SELECT DISTINCT * WHERE {
     }
   }
 
-  getMaterialCitations(treat: { url: string, creators: string, date: string }, taxonName: string): Promise<void> {
+  getMaterialCitations(treat: { url: string, creators: string, date: string, title?: string }, taxonName: string): Promise<void> {
     const query = `
     PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
     SELECT DISTINCT *
@@ -439,25 +429,27 @@ SELECT DISTINCT * WHERE {
         (async () => {
           const query = `PREFIX treat: <http://plazi.org/vocab/treatment#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
-SELECT DISTINCT ?treat ?date (group_concat(DISTINCT ?creator;separator="; ") as ?creators)
+SELECT DISTINCT ?treat ?date ?title (group_concat(DISTINCT ?creator;separator="; ") as ?creators)
 WHERE {
   ?treat a treat:Treatment ;
     (treat:citesTaxonName|treat:treatsTaxonName) <${taxonNameUri}> ;
     dc:creator ?creator .
+  OPTIONAL { ?treat dc:title ?title }
   OPTIONAL {
     ?treat treat:publishedIn ?publ .
     ?publ dc:date ?date .
   }
 }
-GROUP BY ?treat ?date`
+GROUP BY ?treat ?date ?title`
           const json = await this.endpoint.getSparqlResultSet(query);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const treats = (json.results.bindings as any[])
           for (const treat of treats) {
             await this.getMaterialCitations({
               url: treat["treat"].value,
-              date: treat["date"].value,
-              creators: treat["creators"].value
+              date: treat["date"]?.value,
+              creators: treat["creators"].value,
+              title: treat["title"]?.value,
             }, taxonNameUri);
           }
           })())
@@ -618,30 +610,6 @@ GROUP BY ?treat ?date`;
 .trl {
   padding-inline-start: 1rem;
   padding-block-end: 1rem;
-
-  svg {
-    height: 1em;
-    vertical-align: middle;
-    margin: 0;
-  }
-
-  ul.nobullet {
-    list-style: none;
-
-    svg {
-      margin: 0 0 3px calc(-.5ch - 1em);
-    }
-  }
-
-  p,
-  ul {
-    padding: 0 0 0 calc(1em + 1ch);
-    margin: 0;
-  }
-
-  .gray {
-    color: #666666;
-  }
 }
 
 .bottom-align {
@@ -739,6 +707,10 @@ table tr {
   td {
     text-align: left;
   }
+}
+
+.title {
+  opacity: 0.6;
 }
 
 .tree {

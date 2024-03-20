@@ -36,29 +36,12 @@
     <div v-if="(!js.treatments.def.length && !js.loading) || js.treatments.def.length || js.treatments.aug.length">
       Augmenting Treatments:
       <ul class="nobullet">
-        <li
+        <treatment-line
           v-for="t in js.treatments.def"
           :key="t.url"
-        >
-          <svg
-            class="green"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentcolor"
-              d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
-            />
-          </svg>
-          <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <!--<code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>-->
-          </a>
-          <CitedMaterials :mcs="t.materialCitations" />
-          <!--<ul v-if="deprecates.find(d => d.url === t.url)">
-            <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
-              Deprecates {{ getFormattedName(d.old) }}
-            </li>
-          </ul>-->
-        </li>
+          type="def"
+          :treat="t"
+        />
         <li v-if="!js.treatments.def.length && !js.loading">
           <svg
             class="green"
@@ -71,57 +54,23 @@
           </svg>
           Defining treatment not yet on Plazi
         </li>
-        <li
+        <treatment-line
           v-for="t in js.treatments.aug"
           :key="t.url"
-        >
-          <svg
-            class="blue"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentcolor"
-              d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
-            />
-          </svg>
-          <a :href="t.url">
-            {{ t.creators }} ({{ t.date }})
-          </a>
-          <CitedMaterials :mcs="t.materialCitations" />
-          <!--<ul v-if="deprecates.find(d => d.url === t.url)">
-            <li v-for="d in deprecates.filter(d => d.url === t.url)" :key="d.old">
-              Deprecates {{ getFormattedName(d.old) }}
-            </li>
-          </ul>-->
-        </li>
+          type="aug"
+          :treat="t"
+        />
       </ul>
     </div>
     <div v-if="js.treatments.dpr.length">
       Deprecating Treatments:
       <ul class="nobullet">
-        <li
+        <treatment-line
           v-for="t in js.treatments.dpr"
           :key="t.url"
-        >
-          <svg
-            class="red"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentcolor"
-              d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"
-            />
-          </svg>
-          <a :href="t.url">
-            {{ t.creators }} ({{ t.date }}) <!--<code>{{ t.url.substring(t.url.indexOf('/id/') + 4) }}</code>-->
-          </a>
-          <CitedMaterials :mcs="t.materialCitations" />
-          <!--<ul v-if="deprecations.find(d => d.url === t.url)">
-            <li v-for="d in deprecations.filter(d => d.url === t.url)" :key="d.new">
-              Deprecated by {{ getFormattedName(d.new) }}
-            </li>
-          </ul>-->
-        </li>
+          type="dpr"
+          :treat="t"
+        />
       </ul>
     </div>
   </details>
@@ -132,9 +81,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import type { SyncJustifiedSynonym } from '@/utilities/SynogroupSync'
 import DotSpinner from '@/components/DotSpinner.vue'
 import CitedMaterials from './CitedMaterials.vue';
+import TreatmentLine from './TreatmentLine.vue';
 
 @Component({
-  components: { DotSpinner, CitedMaterials }
+  components: { DotSpinner, CitedMaterials, TreatmentLine }
 })
 export default class TreatmentView extends Vue {
   @Prop() js!: SyncJustifiedSynonym;
@@ -147,24 +97,21 @@ svg {
   vertical-align: middle;
   margin: 0;
 }
-
+</style>
+<style lang="scss">
 ul,
 ul.nobullet ul {
   list-style: '— ' outside none;
+  padding: 0 0 0 calc(1em + 1ch);
+  margin: 0;
 }
 
 ul.nobullet {
   list-style: none;
 
-  svg {
+  li > svg {
     margin: 0 0 3px calc(-.5ch - 1em);
   }
-}
-
-p,
-ul {
-  padding: 0 0 0 calc(1em + 1ch);
-  margin: 0;
 }
 
 .blue {
@@ -177,9 +124,5 @@ ul {
 
 .red {
   color: #e53935;
-}
-
-.mc:not(:last-of-type)::after {
-  content: ", "
 }
 </style>
