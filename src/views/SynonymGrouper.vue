@@ -411,7 +411,7 @@ SELECT DISTINCT * WHERE {
     for await (const justSyn of this.syg) {
       const { taxonConceptUri, taxonNameUri, justifications, treatments } = justSyn
       const justs: anyJustification[] = []
-      const treats: SyncTreatments = { def: [], aug: [], dpr: [] }
+      const treats: SyncTreatments = { def: [], aug: [], dpr: [], cite: [] }
       const js = { ...justSyn, justifications: justs, treatments: treats }
       this.jsArray.push(js)
 
@@ -462,7 +462,7 @@ GROUP BY ?treat ?date ?title`
           }
         })())
 
-      const handleTreatment = async (treat: Treatment, where: "def"|"aug"|"dpr") => {
+      const handleTreatment = async (treat: Treatment, where: "def"|"aug"|"dpr"|"cite") => {
         const sct = treat as Omit<Treatment, "materialCitations"> as SyncTreatment;
         const mc = await treat.materialCitations;
         sct.materialCitations = mc;
@@ -493,6 +493,13 @@ GROUP BY ?treat ?date ?title`
         (async () => {
           for await (const treat of treatments.dpr) {
             await handleTreatment(treat, "dpr")
+          }
+        })())
+      jsPromises.push(
+        (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          for await (const treat of (treatments as any).cite) {
+            await handleTreatment(treat, "cite")
           }
         })())
       promises.push(

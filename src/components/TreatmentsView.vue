@@ -73,6 +73,17 @@
         />
       </ul>
     </div>
+    <div v-if="js.treatments.cite.length">
+      Treatments citing this taxon concept:
+      <ul class="nobullet">
+        <treatment-line
+          v-for="t in js.treatments.cite"
+          :key="t.url"
+          type="cite"
+          :treat="t"
+        />
+      </ul>
+    </div>
   </details>
 </template>
 

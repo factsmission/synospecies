@@ -8,6 +8,7 @@ export declare type SyncTreatments = {
   def: SyncTreatment[];
   aug: SyncTreatment[];
   dpr: SyncTreatment[];
+  cite: SyncTreatment[];
 };
 
 export declare type anySyncJustification = {
