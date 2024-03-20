@@ -612,7 +612,6 @@ html {
 
 .card {
   padding: 0 !important;
-  overflow: hidden;
 }
 
 .card.collapsed {
