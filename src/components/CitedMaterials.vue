@@ -47,8 +47,9 @@
             <td v-else />
             <td class="mc_links">
               <a
-                v-if="mc.httpUri && (!mc.gbifSpecimenId || mc.httpUri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || mc.httpUri.endsWith(mc.gbifOccurrenceId))"
-                :href="mc.httpUri"
+                v-for="uri in mc.httpUri"
+                v-if="(!mc.gbifSpecimenId || !uri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || !uri.endsWith(mc.gbifOccurrenceId))"
+                :href="uri"
               >Link ➶</a>
             </td>
             <td
