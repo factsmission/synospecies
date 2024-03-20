@@ -8,7 +8,7 @@
           v-model="input"
           type="text"
           placeholder="Sadayoshia acamar"
-          aria-label="Enter Taxon Name"
+          aria-label="Enter taxon name"
         >
         <button
           class="go"
@@ -47,7 +47,7 @@
       <label
         v-if="!loading && !time"
         for="combinedfield"
-      >Enter Taxon Name</label>
+      >Enter taxon name</label>
       <div
         v-if="loading || time"
         class="flex"
@@ -85,11 +85,11 @@
             <label><input
               v-model="openJ"
               type="checkbox"
-            >Expand all Justifications</label>
+            >Expand all justifications</label>
             <label><input
               v-model="openT"
               type="checkbox"
-            >Expand all Treatments</label>
+            >Expand all treatments</label>
           </div>
         </div>
       </div>
@@ -194,13 +194,13 @@
         v-if="!taxonName[1].length"
         class="muted card"
       >
-        No Taxon Concept found for this Taxon Name
+        No taxon concept found for this taxon name
       </div>
       <div
         v-if="treatsTaxonName.get(taxonName[0])?.length"
         class="trl"
       >
-        Other Treatments associated with this Taxon Name:
+        Other treatments treating or citing this taxon name:
         <ul class="nobullet">
           <treatment-line
             v-for="t in treatsTaxonName.get(taxonName[0])"
