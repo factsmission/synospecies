@@ -174,7 +174,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             </div>
           </button>
         </div>
-        <div class="scroll-opt">
+        <div>
           <!-- NEW -->
           <div
             v-for="taxon in result"
@@ -664,7 +664,8 @@ export default class Timeline extends Vue {
   overflow-x: auto;
   display: flex;
   flex-direction: row;
-  padding: .8rem 0 .4rem;
+  gap: .6rem;
+  padding: .6rem 0 .2rem .6rem;
   min-width: 140px;
   flex: 1 0.5 content;
   max-width: calc(100% - max(40%,140px));
@@ -685,12 +686,13 @@ export default class Timeline extends Vue {
   border-radius: 0 8px 8px 0;
 
   &>*:last-child {
-    padding-right: .8rem;
+    padding-right: .6rem;
   }
 }
 
 .row {
   display: flex;
+  margin-bottom: .25rem;
 }
 
 .legend {
@@ -749,24 +751,16 @@ export default class Timeline extends Vue {
   }
 }
 
-@media (max-width: 65rem) {
-  .timeline > .labels  > .scroll-opt {
-      overflow-x: auto;
-      padding: 0 .8rem .8rem .8rem;
-      margin: 0 -.8rem -.8rem -.8rem;
-    }
-  }
-
-
 .treatments {
   display: flex;
   flex-direction: row;
+  justify-content: center;
 }
 
 .treatment {
   display: block;
-  margin: .4rem;
-  padding: .4rem 0;
+  margin: 0 .25rem;
+  padding: .25rem 0;
   background-color: beige;
   border-radius: .4rem;
 
@@ -791,7 +785,7 @@ export default class Timeline extends Vue {
 .labels {
   font-size: 1rem;
   margin: 0;
-  padding: .8rem;
+  padding: .6rem 0 .6rem .6rem;
   border-right: 1px solid #ccc;
   background-color: white;
   border-top-left-radius: 8px;
@@ -802,28 +796,23 @@ export default class Timeline extends Vue {
   max-width: calc(100% - 140px);
   .label {
     align-items: center;
-    gap: .4rem;
 
     & > span {
       min-width: 0;
       text-overflow: ellipsis;
       overflow: hidden;
     }
-
-    & > span:last-child {
-      margin-right: 1.4rem;
-    }
   }
 
   .label:nth-child(6n+2),
   .label:nth-child(6n+4){
     background-color: #0000000f;
-    border-radius: .2rem;
+    border-radius: .2rem 0 0 .2rem;
   }
 
   .label:nth-child(6n) {
     background: #0000001f;
-    border-radius: .2rem;
+    border-radius: .2rem 0 0 .2rem;
   }
 
   .label:nth-child(1) {
@@ -835,7 +824,7 @@ export default class Timeline extends Vue {
   font-size: 1rem;
   line-height: 1.8rem;
   margin: 0;
-  padding: 0 .4rem;
+  // padding: 0 .4rem;
 }
 
 .label {
@@ -870,11 +859,10 @@ export default class Timeline extends Vue {
 
 button.label {
   background: #ffffff;
-  border-radius: .2rem;
+  border-radius: .2rem !important;
   display: block;
   font: inherit;
   border: 1px solid grey;
-  margin-bottom: .8rem;
 }
 
 .label>svg {

@@ -28,10 +28,7 @@
   content: '';
   box-sizing: border-box;
   position: absolute;
-  top: .1rem;
-  right: .1rem;
-  bottom: .1rem;
-  left: .1rem;
+  inset: .1rem;
   border-radius: 50%;
   border: 3px solid rgba(0, 0, 0, 0.0588235294);
   border-top-color: #9bc134;
