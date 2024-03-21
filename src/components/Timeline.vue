@@ -51,12 +51,9 @@
               :hidden="!legendOpen"
               class="card"
             >
-              <div class="top">
-                Explanation:
-                <br>
-                <div class="small">
-                  Each yellow vertical bar represents and links to one treatment.
-                </div>
+              Explanation:
+              <div class="small">
+                Each yellow vertical bar represents and links to one treatment.
               </div>
               <div class="treatments">
                 <div class="treatment">
@@ -99,8 +96,17 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
                     </svg>
                   </div>
                   <div class="label" />
+                  <div class="label">
+                    <svg
+                      class="blue"
+                      viewBox="0 0 24 24"
+                    ><path
+                      fill="currentcolor"
+                      d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+                    /></svg>
+                  </div>
                 </div>
-                <div class="labels">
+                <div class="">
                   <div class="label">
                     T. defines this taxon
                   </div><!--
@@ -116,12 +122,17 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
                   <div class="label">
                     T. ignores this taxon
                   </div>
+                  <div class="label">
+                    T. cites this taxon
+                  </div>
+                  <div class="small">
+                    Note that a treatment might cite taxon concepts and names not indicated,
+                    only citations are shown for taxons concepts found via other links.
+                  </div>
                 </div>
               </div>
-              <div class="top">
-                <div class="small">
-                  If there are multiple treatments in one year, they are combined into one gray bar. Clicking on the year will expand it.
-                </div>
+              <div class="small">
+                If there are multiple treatments in one year, they are combined into one gray bar. Clicking on the year will expand it.
               </div>
               <div class="treatments compacted">
                 <div class="treatment">
@@ -160,7 +171,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
                     </svg>
                   </div>
                 </div>
-                <div class="labels">
+                <div>
                   <div class="label">
                     As above
                   </div><div class="label">
@@ -672,9 +683,9 @@ export default class Timeline extends Vue {
 
   background-image: 
     /* Shadow Cover LEFT */
-    linear-gradient(to right, white 30%, rgb(255 255 255 / 0%)),
+    linear-gradient(to right, white 50%, rgb(255 255 255 / 0%)),
     /* Shadow Cover RIGHT */
-    linear-gradient(to left, white 30%, rgb(255 255 255 / 0%)),
+    linear-gradient(to left, white 50%, rgb(255 255 255 / 0%)),
     /* Shadow LEFT */
     linear-gradient(to right, rgb(100 100 100 / 20%), rgb(255 255 255 / 0%)),
     /* Shadow RIGHT */
@@ -682,7 +693,7 @@ export default class Timeline extends Vue {
   background-attachment: local, local, scroll, scroll;
   background-position: left, right, left, right;
   background-repeat: no-repeat;
-  background-size: 40px, 40px, 14px, 14px;
+  background-size: .6rem, .6rem, .5rem, .5rem;
   border-radius: 0 8px 8px 0;
 
   &>*:last-child {
@@ -761,8 +772,8 @@ export default class Timeline extends Vue {
   display: block;
   margin: 0 .25rem;
   padding: .25rem 0;
-  background-color: beige;
   border-radius: .4rem;
+  position: relative;
 
   .label {
     justify-content: center;
@@ -776,9 +787,18 @@ export default class Timeline extends Vue {
   .label:nth-child(6n) {
     background: #0000001f;
   }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: beige;
+    border-radius: .4rem;
+    z-index: -1;
+  }
 }
 
-.compacted .treatment {
+.compacted .treatment::before {
   background-color: #0000000f;
 }
 
