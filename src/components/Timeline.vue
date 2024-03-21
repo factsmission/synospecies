@@ -264,6 +264,16 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
                   />
                 </svg>
                 <svg
+                  v-else-if="dot === 'cite'"
+                  class="gray"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentcolor"
+                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+                  />
+                </svg>
+                <svg
                   v-else-if="dot === 'dpr'"
                   class="red"
                   viewBox="0 0 24 24"
@@ -331,6 +341,16 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
                   />
                 </svg>
                 <svg
+                  v-else-if="dot[1] === 'cite'"
+                  class="gray"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fill="currentcolor"
+                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+                  />
+                </svg>
+                <svg
                   v-else-if="dot[0] > 0"
                   class="gray"
                   viewBox="0 0 24 24"
@@ -346,14 +366,14 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
         </div>
       </div>
     </div>
-    <div
+    <button
       v-if="collapsed && result.length > 7 && !isFullscreen"
       tabindex="0"
       class="expander"
       @click="collapsed = false"
     >
       Show full timeline
-    </div>
+    </button>
   </div>
 </template>
 
@@ -378,7 +398,7 @@ declare global {
   }
 }
 
-type TT = ('def'|'ass'|'aug'|'dpr')
+type TT = ('def'|'ass'|'aug'|'dpr'|'cite')
 
 type Year = {
   year: number;
@@ -457,6 +477,7 @@ export default class Timeline extends Vue {
       v.treatments.def.forEach(t => addTreatment(i, t, 'def'))
       v.treatments.aug.forEach(t => addTreatment(i, t, 'aug'))
       v.treatments.dpr.forEach(t => addTreatment(i, t, 'dpr'))
+      v.treatments.cite.forEach(t => addTreatment(i, t, 'cite'))
     });
 
     // Sort
@@ -503,7 +524,8 @@ export default class Timeline extends Vue {
       const ass = a.filter(d => d === 'ass').length
       const aug = a.filter(d => d === 'aug').length
       const dpr = a.filter(d => d === 'dpr').length
-      if (+!!def + +!!ass + +!!aug + +!!dpr > 1) return [a.filter(d => d).length, 'multiple'] as [number, "multiple"]
+      const cite = a.filter(d => d === 'cite').length
+      if (+!!def + +!!ass + +!!aug + +!!dpr + +!!cite > 1) return [a.filter(d => d).length, 'multiple'] as [number, "multiple"]
       else return [a.filter(d => d).length, a.filter(d => d)[0]] as [number, TT]
     })
   }
@@ -602,26 +624,18 @@ export default class Timeline extends Vue {
 </script>
 
 <style scoped lang="scss">
-* {
-  box-sizing: border-box;
-}
-
-html {
-  font-size: 25px;
-}
-
 .card {
   padding: 0 !important;
+  overflow: hidden;
 }
 
 .card.collapsed {
   max-height: 18rem;
   position: relative;
-  overflow: hidden;
 }
 
 .expander {
-  --fade-height: 2rem;
+  --fade-height: 2em;
   background: linear-gradient(#ffffff00 0, #ffffffff var(--fade-height), #ffffffff 100%);
   bottom: 0;
   color: #388e3c;
@@ -631,6 +645,7 @@ html {
   position: absolute;
   text-align: center;
   width: 100%;
+  border: none;
 
   &:hover,
   &:focus {
@@ -653,6 +668,21 @@ html {
   min-width: 140px;
   flex: 1 0.5 content;
   max-width: calc(100% - max(40%,140px));
+
+  background-image: 
+    /* Shadow Cover LEFT */
+    linear-gradient(to right, white 30%, rgb(255 255 255 / 0%)),
+    /* Shadow Cover RIGHT */
+    linear-gradient(to left, white 30%, rgb(255 255 255 / 0%)),
+    /* Shadow LEFT */
+    linear-gradient(to right, rgb(100 100 100 / 20%), rgb(255 255 255 / 0%)),
+    /* Shadow RIGHT */
+    linear-gradient(to left, rgb(100 100 100 / 20%), rgb(255 255 255 / 0%));
+  background-attachment: local, local, scroll, scroll;
+  background-position: left, right, left, right;
+  background-repeat: no-repeat;
+  background-size: 40px, 40px, 14px, 14px;
+  border-radius: 0 8px 8px 0;
 
   &>*:last-child {
     padding-right: .8rem;
@@ -857,9 +887,13 @@ button.label {
   border-left: 2px dotted grey;
 }
 
-.fullscreen {
+:fullscreen {
   .labels, .scroll-x {
     flex: 0 0 content;
+  }
+
+  .card.collapsed {
+    max-height: unset;
   }
 
   .timeline {
