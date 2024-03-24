@@ -91,7 +91,7 @@ module.exports = {
     xmldom: 'window',
     '@nleanba/ndjs': 'window',
     mustache: 'Mustache',
-    '@factsmission/synogroup': 'SynonymGroup',
+    // '@factsmission/synogroup': 'SynonymGroup',
   },
   optimization: {
     minimize: true

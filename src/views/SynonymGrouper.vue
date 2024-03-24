@@ -231,6 +231,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import SynonymGroup, { SparqlEndpoint } from '@factsmission/synogroup'
 import type { default as syg, anyJustification, MaterialCitation, Treatment } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatment, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
@@ -263,7 +264,7 @@ import TaxaManager from '@/TaxaManager'
 export default class Home extends Vue {
   @Prop() s?: string
   respondToRouteChanges = true
-  endpoint = new window.SparqlEndpoint(getEndpoint())
+  endpoint = new SparqlEndpoint(getEndpoint())
   taxomplete!: Taxomplete
   input = ''
   ignoreRank = false
@@ -405,7 +406,7 @@ SELECT DISTINCT * WHERE {
     if (this.syg) {
       this.syg.abort()
     }
-    this.syg = new window.SynonymGroup(this.endpoint, this.input, this.ignoreRank)
+    this.syg = new SynonymGroup(this.endpoint, this.input, this.ignoreRank)
     const t0 = performance.now()
     const promises: Promise<string>[] = []
     for await (const justSyn of this.syg) {
