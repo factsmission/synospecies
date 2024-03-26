@@ -193,7 +193,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             class="label"
           >
             <span v-if="taxon.taxonConceptAuthority">
-              {{ getFormattedName(taxon.taxonNameUri) }}
+              {{ getFormattedName(taxon.taxonName.uri) }}
               <span class="gray">{{ taxon.taxonConceptAuthority }}</span>
             </span>
             <span v-else>{{ getFormattedName(taxon.taxonConceptUri) }}</span>
@@ -446,7 +446,7 @@ export default class Timeline extends Vue {
       return
     }
     const addTreatment = (index: number, t: SyncTreatment, type: TT) => {
-      const date = t.date ?? -1
+      const date = t.details.date ?? -1
       const yearIndex = this._years.findIndex(y => y !== 'sep' && y.year === date)
       if (~yearIndex) {
         // This year already exists
@@ -462,7 +462,7 @@ export default class Timeline extends Vue {
           data.length = this.result.length
           data[index] = type
           year.treatments.push({
-            creators: t.creators,
+            creators: t.details.creators,
             url: t.url,
             data
           })
@@ -476,7 +476,7 @@ export default class Timeline extends Vue {
           year: date,
           exp: false,
           treatments: [{
-            creators: t.creators,
+            creators: t.details.creators,
             url: t.url,
             data
           }]
@@ -541,7 +541,7 @@ export default class Timeline extends Vue {
     })
   }
 
-  getFormattedName (uri?: string) {
+  getFormattedName (uri = "URI MISSING") {
     const nameSection = (uri as string).substring((uri as string).lastIndexOf('/') + 1)
     // const lastSeparator = nameSection.lastIndexOf('_')
     // return nameSection.substring(0, lastSeparator)

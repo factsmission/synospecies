@@ -37,7 +37,7 @@ export default class JustifcationView extends Vue {
     return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
   }
 
-  async prosaifyInitial (j: anySyncJustification) {
+  async prosaifyInitial (j: anyJustification) {
     return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
   }
 

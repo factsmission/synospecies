@@ -41,13 +41,13 @@
       />
     </svg>
     <a :href="treat.url">
-      {{ treat.creators }}, {{ treat.date }}
+      {{ treat.details.creators }}, {{ treat.details.date }}
       <span
-        v-if="treat.title"
+        v-if="treat.details.title"
         class="title"
-      >“{{ treat.title }}”</span>
+      >“{{ treat.details.title }}”</span>
     </a>
-    <CitedMaterials :mcs="treat.materialCitations" />
+    <CitedMaterials :mcs="treat.details.materialCitations" />
   </li>
 </template>
 
