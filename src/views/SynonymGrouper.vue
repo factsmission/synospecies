@@ -407,7 +407,6 @@ SELECT DISTINCT * WHERE {
       this.syg.abort()
     }
     this.syg = new SynonymGroup(this.endpoint, this.input, this.ignoreRank)
-    console.log("NEW SYNONYMGROUP", this.input)
     const t0 = performance.now()
     const promises: Promise<string>[] = []
     for await (const justSyn of this.syg) {
