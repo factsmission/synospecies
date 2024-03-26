@@ -45,13 +45,13 @@
               ({{ date(mc) }})
             </td>
             <td v-else />
-            <td class="mc_links">
-              <a
-                v-for="uri in mc.httpUri"
-                v-if="(!mc.gbifSpecimenId || !uri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || !uri.endsWith(mc.gbifOccurrenceId))"
-                :href="uri"
-              >Link ➶</a>
-            </td>
+            <td class="mc_links"><span
+              v-for="uri in mc.httpUri"
+              :key="uri"
+            ><a
+              v-if="uri && (!mc.gbifSpecimenId || !uri.endsWith(mc.gbifSpecimenId)) && (!mc.gbifOccurrenceId || !uri.endsWith(mc.gbifOccurrenceId))"
+              :href="uri"
+            >Link ➶</a></span></td>
             <td
               v-if="mc.gbifSpecimenId || mc.gbifOccurrenceId"
               class="mc_links"
@@ -105,7 +105,7 @@ export default class CitedMaterials extends Vue {
     if (mc.typeStatus) result += `Status: ${mc.typeStatus}\n`;
     if (mc.recordedBy) result += `Recorded by ${mc.recordedBy}\n`
     for (const [key, value] of Object.entries(mc)) {
-      if (value && !(["collectionCode", "catalogNumber", "typeStatus", "recordedBy"].includes(key))) {
+      if (value && !(["collectionCode", "catalogNumber", "typeStatus", "recordedBy", "httpUri"].includes(key))) {
         result += `${unCamelCase(key)}: ${value}\n`
       }
     }
@@ -118,7 +118,7 @@ export default class CitedMaterials extends Vue {
 <style scoped lang="scss">
 .mc_links {
   padding-left: 0.4em;
-  a+a {
+  span+span {
     padding-left: 0.2em;
   }
 }

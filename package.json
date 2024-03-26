@@ -13,7 +13,7 @@
     "lint": "export NODE_OPTIONS=openssl-legacy-provider; vue-cli-service lint"
   },
   "dependencies": {
-    "@factsmission/synogroup": "^2.0.2",
+    "@factsmission/synogroup": "^2.0.5",
     "@mdi/js": "^7.2.96",
     "@retog/sparql-client": "^2.0.0-alpha",
     "@triply/yasqe": "^4.2.18",

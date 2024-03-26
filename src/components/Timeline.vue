@@ -585,6 +585,7 @@ export default class Timeline extends Vue {
   snycAnimations(e: AnimationEvent) {
     if (e.animationName.startsWith("shimmer") && e.target) {
       const a = (e.target as Element).getAnimations({ subtree: true })[0];
+      if (!a) return;
       if (!a.startTime || (a.startTime as number) > 0.01) a.startTime = 0;
     }
   }
