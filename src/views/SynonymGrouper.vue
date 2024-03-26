@@ -303,7 +303,7 @@ SELECT DISTINCT * WHERE {
       return this.endpoint.getSparqlResultSet(query)
         .then(json => json.results.bindings[0])
         .then(result => {
-          const tree = ['phylum', 'class', 'order', 'family'].map(r => result[r] ? result[r].value : '') as [string, string, string, string]
+          const tree = ['phylum', 'class', 'order', 'family'].map(r => result?.[r] ? result[r].value : '') as [string, string, string, string]
           this.trees.set(tcuri, tree)
           return tree
         })
