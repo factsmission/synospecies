@@ -1,7 +1,7 @@
-import type { JustifiedSynonym, Treatment } from '@factsmission/synogroup'
+import type { JustifiedSynonym, Treatment, TreatmentDetails, anyJustification } from '@factsmission/synogroup'
 
-export declare type SyncTreatment = Omit<Treatment, "materialCitations"> & {
-  materialCitations: MaterialCitation[]
+export declare type SyncTreatment = Omit<Treatment, "details"> & {
+  details: TreatmentDetails;
 }
 
 export declare type SyncTreatments = {
@@ -14,14 +14,10 @@ export declare type SyncTreatments = {
 export declare type anySyncJustification = {
   toString: () => string;
   precedingSynonym?: JustifiedSynonym;
-  treatment?: Treatment;
+  treatment?: SyncTreatment;
 };
 
-export declare type SyncJustifiedSynonym = {
-  taxonConceptUri: string;
-  taxonNameUri: string;
-  taxonConceptAuthority?: string;
-  justifications: anySyncJustification[];
+export declare type SyncJustifiedSynonym = Omit<Omit<JustifiedSynonym, "treatments">,"justifications"> & {
   treatments: SyncTreatments;
-  loading: boolean;
+  justifications: anyJustification[];
 };

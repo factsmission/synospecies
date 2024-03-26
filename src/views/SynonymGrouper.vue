@@ -173,7 +173,7 @@
           </table>
         </div>
         <h2 v-if="js.taxonConceptAuthority">
-          {{ shorten(js.taxonNameUri) }}
+          {{ shorten(js.taxonName.uri) }}
           <span class="muted">{{ js.taxonConceptAuthority }}</span>
         </h2>
         <h2 v-else>
@@ -232,7 +232,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import SynonymGroup, { SparqlEndpoint } from '@factsmission/synogroup'
-import type { default as syg, anyJustification, MaterialCitation, Treatment } from '@factsmission/synogroup'
+import type { default as syg, anyJustification, MaterialCitation, Treatment, TreatmentDetails } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatment, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
 import { mdiCogOutline, mdiTune } from '@mdi/js'
@@ -332,7 +332,7 @@ SELECT DISTINCT * WHERE {
     }
   }
 
-  getMaterialCitations(treat: { url: string, creators: string, date: string, title?: string }, taxonName: string): Promise<void> {
+  getMaterialCitations(treat: { url: string, creators: string, date?: number, title?: string }, taxonName: string): Promise<void> {
     const query = `
     PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
     SELECT DISTINCT *
@@ -357,8 +357,7 @@ SELECT DISTINCT * WHERE {
     return this.endpoint.getSparqlResultSet(query).then(
       (json) => {
         const resultArray: MaterialCitation[] = []
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        json.results.bindings.forEach((t: any) => {
+        json.results.bindings.forEach((t) => {
           if (!t.mc || !t.catalogNumber) return;
           const result = {
             "catalogNumber": t.catalogNumber.value,
@@ -379,9 +378,10 @@ SELECT DISTINCT * WHERE {
           }
           resultArray.push(result)
         })
+        const details: TreatmentDetails = { date: treat.date, creators: treat.creators, title: treat.title, materialCitations: resultArray };
         if (this.treatsTaxonName.has(taxonName))
-          this.treatsTaxonName.get(taxonName)?.push({ ...treat, materialCitations: resultArray } as unknown as SyncTreatment)
-        else this.treatsTaxonName.set(taxonName, [({ ...treat, materialCitations: resultArray } as unknown as SyncTreatment)])
+          this.treatsTaxonName.get(taxonName)?.push({ url: treat.url, details } as SyncTreatment)
+        else this.treatsTaxonName.set(taxonName, [({ url: treat.url, details } as SyncTreatment)])
       })
   }
 
@@ -407,53 +407,33 @@ SELECT DISTINCT * WHERE {
       this.syg.abort()
     }
     this.syg = new SynonymGroup(this.endpoint, this.input, this.ignoreRank)
+    console.log("NEW SYNONYMGROUP", this.input)
     const t0 = performance.now()
     const promises: Promise<string>[] = []
     for await (const justSyn of this.syg) {
-      const { taxonConceptUri, taxonNameUri, justifications, treatments } = justSyn
+      const { taxonConceptUri, taxonName, justifications, treatments } = justSyn
       const justs: anyJustification[] = []
       const treats: SyncTreatments = { def: [], aug: [], dpr: [], cite: [] }
       const js = { ...justSyn, justifications: justs, treatments: treats }
       this.jsArray.push(js)
 
-      const resultArr = this.result.get(taxonNameUri)
+      const resultArr = this.result.get(taxonName.uri)
       const jsPromises: Promise<void>[] = []
       if (resultArr) {
         resultArr.push(js)
       } else {
-        this.result.set(taxonNameUri, [js]);
+        this.result.set(taxonName.uri, [js]);
         // TODO new taxon name -> look for generic treatments
         jsPromises.push((async () => {
-          this.getVernacular(taxonNameUri);
+          this.getVernacular(taxonName.uri);
         })());
-        jsPromises.push(
-        (async () => {
-          const query = `PREFIX treat: <http://plazi.org/vocab/treatment#>
-PREFIX dc: <http://purl.org/dc/elements/1.1/>
-SELECT DISTINCT ?treat ?date ?title (group_concat(DISTINCT ?creator;separator="; ") as ?creators)
-WHERE {
-  ?treat a treat:Treatment ;
-    (treat:citesTaxonName|treat:treatsTaxonName) <${taxonNameUri}> ;
-    dc:creator ?creator .
-  OPTIONAL { ?treat dc:title ?title }
-  OPTIONAL {
-    ?treat treat:publishedIn ?publ .
-    ?publ dc:date ?date .
-  }
-}
-GROUP BY ?treat ?date ?title`
-          const json = await this.endpoint.getSparqlResultSet(query);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const treats = (json.results.bindings as any[])
-          for (const treat of treats) {
-            await this.getMaterialCitations({
-              url: treat["treat"].value,
-              date: treat["date"]?.value,
-              creators: treat["creators"].value,
-              title: treat["title"]?.value,
-            }, taxonNameUri);
-          }
-          })())
+        if (!this.treatsTaxonName.has(taxonName.uri)) this.treatsTaxonName.set(taxonName.uri, []);
+        for (const treat of js.taxonName.treatments.aug) {
+          (this.treatsTaxonName.get(taxonName.uri) as SyncTreatment[]).push({ ...treat, details: await treat.details });
+        }
+        for (const treat of js.taxonName.treatments.cite) {
+          (this.treatsTaxonName.get(taxonName.uri) as SyncTreatment[]).push({ ...treat, details: await treat.details });
+        }
       }
       this.getTree(js.taxonConceptUri)
       jsPromises.push(
@@ -464,15 +444,13 @@ GROUP BY ?treat ?date ?title`
         })())
 
       const handleTreatment = async (treat: Treatment, where: "def"|"aug"|"dpr"|"cite") => {
-        const sct = treat as Omit<Treatment, "materialCitations"> as SyncTreatment;
-        const mc = await treat.materialCitations;
-        sct.materialCitations = mc;
+        const sct = {...treat, details: await treat.details} as SyncTreatment;
         treats[where].push(sct);
         treats[where].sort((a,b) => {
-          const year_a = a.date || 0;
-          const year_b = b.date || 0;
+          const year_a = a.details.date || 0;
+          const year_b = b.details.date || 0;
           if (year_a == year_b) {
-            return (a.creators ?? "").localeCompare((b.creators ?? ""), undefined, { numeric: true }); // Sort alphabetically
+            return (a.details.creators ?? "").localeCompare((b.details.creators ?? ""), undefined, { numeric: true }); // Sort alphabetically
           }
           return year_a - year_b;
         })
@@ -480,26 +458,25 @@ GROUP BY ?treat ?date ?title`
 
       jsPromises.push(
         (async () => {
-          for await (const treat of treatments.def) {
+          for (const treat of treatments.def) {
             await handleTreatment(treat, "def")
           }
         })())
       jsPromises.push(
         (async () => {
-          for await (const treat of treatments.aug) {
+          for (const treat of treatments.aug) {
             await handleTreatment(treat, "aug")
           }
         })())
       jsPromises.push(
         (async () => {
-          for await (const treat of treatments.dpr) {
+          for (const treat of treatments.dpr) {
             await handleTreatment(treat, "dpr")
           }
         })())
       jsPromises.push(
         (async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          for await (const treat of (treatments as any).cite) {
+          for (const treat of treatments.cite) {
             await handleTreatment(treat, "cite")
           }
         })())
@@ -563,12 +540,11 @@ WHERE {
 }
 GROUP BY ?treat ?date`;
                 const json = await this.endpoint.getSparqlResultSet(query);
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const treats = (json.results.bindings as any[])
+                const treats = json.results.bindings
                 for (const treat of treats) {
                   await this.getMaterialCitations({
                     url: treat["treat"].value,
-                    date: treat["date"].value,
+                    date: treat["date"]?.value ? parseInt(treat["date"].value) : undefined,
                     creators: treat["creators"].value
                   }, taxonNameUri);
                 }
