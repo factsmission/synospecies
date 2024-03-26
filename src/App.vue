@@ -72,7 +72,6 @@ body {
   margin: 0;
   padding: 0;
   font-family: Inter, "Inter V", Helvetica, "Helvetica Neue", "Open Sans", "Trebuchet MS", Arial, sans-serif;
-  font-size: 14px;
 }
 #app {
   min-height: 100vh;
