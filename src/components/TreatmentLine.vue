@@ -41,7 +41,10 @@
       />
     </svg>
     <a :href="treat.url">
-      {{ treat.details.creators }}, {{ treat.details.date }}
+      <span v-if="treat.details.creators">{{ treat.details.creators }}</span>
+      <span v-else>{{ treat.url }}</span>,
+      <span v-if="treat.details.date">{{ treat.details.date }}</span>
+      <span v-else>(No Date)</span>:
       <span
         v-if="treat.details.title"
         class="title"
