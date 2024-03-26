@@ -61,7 +61,7 @@
                 :href="'https://www.gbif.org/specimen/' + mc.gbifSpecimenId"
               >Specimen</a> <a
                 v-if="mc.gbifOccurrenceId"
-                :href="'https://www.gbif.org/occurrence/' + mc.gbifSpecimenId"
+                :href="'https://www.gbif.org/occurrence/' + mc.gbifOccurrenceId"
               >Occurrence</a>
             </td>
           </tr>
