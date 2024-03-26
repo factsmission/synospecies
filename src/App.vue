@@ -71,6 +71,8 @@ html {
 body {
   margin: 0;
   padding: 0;
+  font-family: Inter, "Inter V", Helvetica, "Helvetica Neue", "Open Sans", "Trebuchet MS", Arial, sans-serif;
+  font-size: 14px;
 }
 #app {
   min-height: 100vh;
@@ -81,15 +83,12 @@ main.container {
   flex: 1 0 auto;
 }
 .container {
-  width: 65rem;
+  width: 90rem;
   max-width: 100%;
   max-width: calc(100vw - 32px);
   margin: 0 auto;
   padding: 16px 32px 0;
   border-radius: 8px;
-}
-* {
-  font-family: "Open Sans", "Trebuchet MS", Arial, Helvetica, sans-serif;
 }
 .flex-row {
   display: flex;
@@ -132,9 +131,8 @@ hr {
 .section.card_header,
 .card .card_header,
 .card .card_header>* {
-  font-family: Oswald, Arial, Helvetica, sans-serif;
-  font-weight: normal;
-  margin: -8px 0 16px 0;
+  font-weight: 700;
+  margin: 0 0 16px 0;
 }
 .card .card_body {
   margin: 0;
@@ -302,7 +300,7 @@ code *,
     font-family: 'Fira Code', monospace;
 }
 
-@media (max-width: 65rem) {
+@media (max-width: 101rem) {
   .container {
     width: 100%;
     padding-left: 0;
