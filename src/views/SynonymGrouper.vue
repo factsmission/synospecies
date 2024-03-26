@@ -323,10 +323,8 @@ SELECT DISTINCT * WHERE {
           if (bindings.length) {
             const m: Record<string, string> = {};
             for (const n of bindings) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              console.log(n, (n.n as any)["xml:lang"], n.n.value);
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              if ((n.n as any)["xml:lang"] && n.n.value) m[(n.n as any)["xml:lang"]] = n.n.value;
+              console.log(n, n.n["xml:lang"], n.n.value);
+              if (n.n["xml:lang"] && n.n.value) m[n.n["xml:lang"]] = n.n.value;
             }
             this.vernacular[tnuri] = m;
           }
@@ -334,7 +332,7 @@ SELECT DISTINCT * WHERE {
     }
   }
 
-  getMaterialCitations(treat: { url: string, creators: string, date: number, title?: string }, taxonName: string): Promise<void> {
+  getMaterialCitations(treat: { url: string, creators: string, date?: number, title?: string }, taxonName: string): Promise<void> {
     const query = `
     PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
     SELECT DISTINCT *
@@ -359,8 +357,7 @@ SELECT DISTINCT * WHERE {
     return this.endpoint.getSparqlResultSet(query).then(
       (json) => {
         const resultArray: MaterialCitation[] = []
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        json.results.bindings.forEach((t: any) => {
+        json.results.bindings.forEach((t) => {
           if (!t.mc || !t.catalogNumber) return;
           const result = {
             "catalogNumber": t.catalogNumber.value,
@@ -479,7 +476,6 @@ SELECT DISTINCT * WHERE {
         })())
       jsPromises.push(
         (async () => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           for (const treat of treatments.cite) {
             await handleTreatment(treat, "cite")
           }
@@ -544,12 +540,11 @@ WHERE {
 }
 GROUP BY ?treat ?date`;
                 const json = await this.endpoint.getSparqlResultSet(query);
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const treats = (json.results.bindings as any[])
+                const treats = json.results.bindings
                 for (const treat of treats) {
                   await this.getMaterialCitations({
                     url: treat["treat"].value,
-                    date: treat["date"].value,
+                    date: treat["date"]?.value ? parseInt(treat["date"].value) : undefined,
                     creators: treat["creators"].value
                   }, taxonNameUri);
                 }
