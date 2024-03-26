@@ -413,7 +413,7 @@ SELECT DISTINCT * WHERE {
       const { taxonConceptUri, taxonName, justifications, treatments } = justSyn
       const justs: anyJustification[] = []
       const treats: SyncTreatments = { def: [], aug: [], dpr: [], cite: [] }
-      const js = { ...justSyn, justifications: justs, treatments: treats }
+      const js = { ...justSyn, justifications: justs, treatments: treats, loading: true }
       this.jsArray.push(js)
 
       const resultArr = this.result.get(taxonName.uri)
