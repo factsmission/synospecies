@@ -1,6 +1,10 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
-  <div :class="images.length <= 2 ? 'twocol card' : images.length === 3 ? 'threecol card' : 'card'">
+  <div
+    v-if="images.length > 0"
+    :class="images.length <= 2 ? 'twocol card' : images.length === 3 ? 'threecol card' : 'card'"
+    style="margin-top: 2rem;"
+  >
     <figure
       v-for="image in (loadAll ? images : images.slice(0, 7))"
       :key="image.url"

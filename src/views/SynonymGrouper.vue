@@ -211,7 +211,6 @@
         </ul>
       </div>
     </div>
-    <hr v-if="jsArray.length">
     <image-splash
       v-if="jsArray.length"
       :taxamanager="taxamanager"
