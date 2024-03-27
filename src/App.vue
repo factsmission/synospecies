@@ -50,6 +50,8 @@
         <hr>
         This project has received funding from the European Union’s Horizon 2020 programme (grant agreement 101007492) and from the <a href="https://www.arcadiafund.org.uk/">Arcadia Fund</a>.
         <hr>
+        The Wikidata logo, Wikipedia 'W' icon, Wikispecies logo and Wikimedia Commons logo are trademarks of the <a href="https://wikimediafoundation.org/">Wikimedia Foundation</a> and are used with the permission of the Wikimedia Foundation. We are not endorsed by or affiliated with the Wikimedia Foundation. The <a href="https://commons.wikimedia.org/wiki/File:Wikispecies-logo.svg">Wikispecies logo</a> by Zephram Stark is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/deed.en">CC BY-SA 3.0</a>
+        <hr>
         This is an open source project:
         <a href="https://github.com/factsmission/synospecies">
           View the code on Github
