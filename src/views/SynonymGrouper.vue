@@ -57,10 +57,10 @@
           <div v-if="loading">
             Loading
             <dot-spinner />
-            ({{ jsArray.length }} result(s) so far)
+            (Found {{ jsArray.length }} synonym<span v-if="jsArray.length !== 1">s</span> with {{ syg?.treatments.size || 0 }} treatment<span v-if="syg?.treatments.size !== 1">s</span> so far)
           </div>
           <div v-else-if="time">
-            {{ jsArray.length }} result(s), took {{ time }}s
+            Found {{ jsArray.length }} synonym<span v-if="jsArray.length !== 1">s</span> with {{ syg?.treatments.size || 0 }} treatment<span v-if="syg?.treatments.size !== 1">s</span>, took {{ time }}s
           </div>
         </div>
         <div
