@@ -42,7 +42,7 @@
 
     <div class="plazi-footer">
       <div class="container">
-        Synospecies is created and maintained by
+        SynoSpecies is created and maintained by
         <a href="https://factsmission.com">FactsMission</a>,
         is powered by <a href="https://allegrograph.com/products/allegrograph/">Franz Inc. AllegroGraph</a> and uses the
         taxonomic treatment data provided by

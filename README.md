@@ -1,4 +1,4 @@
-# synospecies [![Build Status](https://github.com/factsmission/synospecies/actions/workflows/pages.yml/badge.svg)](https://github.com/factsmission/synospecies/actions/workflows/pages.yml)
+# SynoSpecies [![Build Status](https://github.com/factsmission/synospecies/actions/workflows/pages.yml/badge.svg)](https://github.com/factsmission/synospecies/actions/workflows/pages.yml)
 
 http://synospecies.factsmission.com/
 
@@ -9,13 +9,13 @@ Build with
 
 # About
 
-Synospecies is a tool developed by FactsMission AG to leverage the RDF data provided by Plazi. The RDF data of all
+SynoSpecies is a tool developed by FactsMission AG to leverage the RDF data provided by Plazi. The RDF data of all
 treatments is stored in an [AllegroGraph](https://allegrograph.com/) triple store allowing
-[SPARQL](https://www.w3.org/TR/sparql11-overview/) queries over the data. Synospecies allows manually writing and
+[SPARQL](https://www.w3.org/TR/sparql11-overview/) queries over the data. SynoSpecies allows manually writing and
 submitting such queries in the advanced mode and send such queries in the background when using the easier
 interface.
 
-Synospecies is an Open Source application running purely in the browser, the source code is available on [GitHub](https://github.com/factsmission/synospecies/).
+SynoSpecies is an Open Source application running purely in the browser, the source code is available on [GitHub](https://github.com/factsmission/synospecies/).
 
 ## [Plazi](http://plazi.org/)
 

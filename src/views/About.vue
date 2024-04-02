@@ -3,12 +3,12 @@
     <h1>About</h1>
     <div class="section">
       <p>
-        Synospecies is a tool developed by FactsMission AG to leverage the RDF data provided by Plazi. The RDF data of all treatments is stored in an
+        SynoSpecies is a tool developed by FactsMission AG to leverage the RDF data provided by Plazi. The RDF data of all treatments is stored in an
         <a href="https://allegrograph.com/">AllegroGraph</a> triple store allowing
-        <a href="https://www.w3.org/TR/sparql11-overview/">SPARQL</a> queries over the data. Synospecies allows manually writing and submitting such queries in the advanced mode and send such queries in the background when using the easier interface.
+        <a href="https://www.w3.org/TR/sparql11-overview/">SPARQL</a> queries over the data. SynoSpecies allows manually writing and submitting such queries in the advanced mode and send such queries in the background when using the easier interface.
       </p>
       <p>
-        Synospecies is an Open Source application running purely in the browser, the source code is available on
+        SynoSpecies is an Open Source application running purely in the browser, the source code is available on
         <a
           href="https://github.com/factsmission/synospecies/"
         >GitHub</a>.
