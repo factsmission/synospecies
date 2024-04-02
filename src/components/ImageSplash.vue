@@ -34,48 +34,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-
-type Image = {
-  url: string;
-  description?: string;
-}
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import type { FigureCitation } from '@factsmission/synogroup'
 
 @Component
 export default class ImageSplash extends Vue {
-  @Prop() taxa!: {[key: string]: any}[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-  @Prop() taxamanager!: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  // functions as a way to check whether there's a new search going on or if there's just some new taxa
-  firstTaxaUrl?: string = undefined
-  images: Image[] = []
-  loadAll = false
-  taxaAlreadyLoaded: Set<string> = new Set();
-
-  @Watch('taxa')
-  splash () {
-    if (this.taxa[0]?.url !== this.firstTaxaUrl) {
-      this.images = [];
-      this.firstTaxaUrl = this.taxa[0]?.url;
-      this.taxaAlreadyLoaded.clear();
-    }
-    this.taxa.forEach((taxon) => {
-      if (!this.taxaAlreadyLoaded.has(taxon.url)) {
-        this.taxaAlreadyLoaded.add(taxon.url);
-        this.taxamanager.getImages(taxon.url).then((images: Image[]) => {
-          images.forEach(i => {
-            if (!~this.images.findIndex(j => j.url === i.url)) {
-              this.images.push(i)
-            }
-          })
-        })
-      }
-    })
-  }
-
-  clear () {
-    this.images = []
-  }
+  @Prop() images!: FigureCitation[];
+  loadAll = false;
 }
 </script>
 

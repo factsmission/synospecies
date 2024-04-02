@@ -211,18 +211,14 @@
         </ul>
       </div>
     </div>
-    <image-splash
-      v-if="jsArray.length"
-      :taxamanager="taxamanager"
-      :taxa="jsArray.map(t => ({ url: t.taxonConceptUri }))"
-    />
+    <image-splash :images="images" />
   </main>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import SynonymGroup, { SparqlEndpoint } from '@factsmission/synogroup'
-import type { default as syg, anyJustification, MaterialCitation, Treatment, TreatmentDetails } from '@factsmission/synogroup'
+import type { default as syg, anyJustification, MaterialCitation, Treatment, TreatmentDetails, FigureCitation } from '@factsmission/synogroup'
 import type { SyncJustifiedSynonym, SyncTreatment, SyncTreatments } from '@/utilities/SynogroupSync'
 import { getEndpoint } from '@/utilities/config'
 import { mdiCogOutline, mdiTune } from '@mdi/js'
@@ -235,9 +231,6 @@ import DotSpinner from '@/components/DotSpinner.vue'
 import WikidataButtons from '@/components/WikidataButtons.vue'
 import Taxomplete from 'taxomplete'
 import CitedMaterials from '@/components/CitedMaterials.vue';
-
-// do not use this for new stuff - temporarly added to integrate ImageSplash easily
-import TaxaManager from '@/TaxaManager'
 
 @Component({
   components: {
@@ -273,14 +266,14 @@ export default class Home extends Vue {
     mdiTune
   }
 
+  images: FigureCitation[] = [];
+
   //         tc-uri : phylum  class   order   family
   trees: Map<string, [string, string, string, string]> = new Map()
 
   //                 tn-uri:       { lang : name  }
   vernacular: Record<string, Record<string, string> | null> = {};
 
-  // do not use this for new stuff - temporarly added to integrate ImageSplash easily
-  taxamanager = new TaxaManager(this.endpoint)
   async getTree (tcuri: string) {
     if (this.trees.has(tcuri)) {
       return this.trees.get(tcuri)
@@ -368,7 +361,7 @@ SELECT DISTINCT * WHERE {
           }
           resultArray.push(result)
         })
-        const details: TreatmentDetails = { date: treat.date, creators: treat.creators, title: treat.title, materialCitations: resultArray };
+        const details: TreatmentDetails = { date: treat.date, creators: treat.creators, title: treat.title, materialCitations: resultArray, figureCitations: []}; // TODO figureCitations
         if (this.treatsTaxonName.has(taxonName))
           this.treatsTaxonName.get(taxonName)?.push({ url: treat.url, details } as SyncTreatment)
         else this.treatsTaxonName.set(taxonName, [({ url: treat.url, details } as SyncTreatment)])
@@ -434,6 +427,9 @@ SELECT DISTINCT * WHERE {
 
       const handleTreatment = async (treat: Treatment, where: "def"|"aug"|"dpr"|"cite") => {
         const sct = {...treat, details: await treat.details} as SyncTreatment;
+        sct.details.figureCitations.forEach(f => {
+          if (this.images.find(i => i.url === f.url) === undefined) this.images.push(f);
+        });
         treats[where].push(sct);
         treats[where].sort((a,b) => {
           const year_a = a.details.date || 0;
