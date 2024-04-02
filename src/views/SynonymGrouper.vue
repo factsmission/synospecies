@@ -246,7 +246,6 @@ import CitedMaterials from '@/components/CitedMaterials.vue';
 })
 export default class Home extends Vue {
   @Prop() s?: string
-  respondToRouteChanges = true
   endpoint = new SparqlEndpoint(getEndpoint())
   taxomplete!: Taxomplete
   input = ''
@@ -364,6 +363,7 @@ SELECT DISTINCT * WHERE {
     this.result = new Map()
     this.treatsTaxonName = new Map()
     this.loading = true
+    this.images = [];
     if (this.syg) {
       this.syg.abort()
     }
@@ -404,9 +404,10 @@ SELECT DISTINCT * WHERE {
         })())
 
       const handleTreatment = async (treat: Treatment, where: "def"|"aug"|"dpr"|"cite") => {
+        const images = this.images; // dont push after this.images has been cleared
         const sct = {...treat, details: await treat.details} as SyncTreatment;
         sct.details.figureCitations.forEach(f => {
-          if (this.images.find(i => i.url === f.url) === undefined) this.images.push(f);
+          if (images.find(i => i.url === f.url) === undefined) images.push(f);
         });
         treats[where].push(sct);
         treats[where].sort((a,b) => {

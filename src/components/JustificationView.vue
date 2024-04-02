@@ -21,7 +21,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import type { anyJustification, JustifiedSynonym } from '@factsmission/synogroup'
-import type { anySyncJustification, SyncJustifiedSynonym } from '@/utilities/SynogroupSync'
+import type { SyncJustifiedSynonym } from '@/utilities/SynogroupSync'
 
 @Component
 export default class JustifcationView extends Vue {
