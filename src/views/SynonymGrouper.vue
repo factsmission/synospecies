@@ -293,28 +293,6 @@ SELECT DISTINCT * WHERE {
     }
   }
 
-  async getVernacular(tnuri: string): Promise<void> {
-    if (this.vernacular[tnuri] === null) {
-      return;
-    } else {
-      this.vernacular[tnuri] = null;
-      const query =
-        `SELECT DISTINCT ?n WHERE { <${tnuri}> <http://rs.tdwg.org/dwc/terms/vernacularName> ?n . }`
-      return this.endpoint.getSparqlResultSet(query)
-        .then(json => json.results.bindings)
-        .then(bindings => {
-          if (bindings.length) {
-            const m: Record<string, string> = {};
-            for (const n of bindings) {
-              console.log(n, n.n["xml:lang"], n.n.value);
-              if (n.n["xml:lang"] && n.n.value) m[n.n["xml:lang"]] = n.n.value;
-            }
-            this.vernacular[tnuri] = m;
-          }
-        })
-    }
-  }
-
   getMaterialCitations(treat: { url: string, creators: string, date?: number, title?: string }, taxonName: string): Promise<void> {
     const query = `
     PREFIX dwc: <http://rs.tdwg.org/dwc/terms/>
@@ -407,7 +385,7 @@ SELECT DISTINCT * WHERE {
         this.result.set(taxonName.uri, [js]);
         // TODO new taxon name -> look for generic treatments
         jsPromises.push((async () => {
-          this.getVernacular(taxonName.uri);
+          taxonName.vernacularNames.then(vs => this.vernacular[taxonName.uri] = vs);
         })());
         if (!this.treatsTaxonName.has(taxonName.uri)) this.treatsTaxonName.set(taxonName.uri, []);
         for (const treat of js.taxonName.treatments.aug) {
@@ -505,10 +483,7 @@ SELECT DISTINCT ?tn WHERE {
           const resultArr = this.result.get(taxonNameUri);
           if (!resultArr) {
             this.result.set(taxonNameUri, []);
-            // TODO new taxon name -> look for generic treatments
-            jsPromises.push((async () => {
-              await this.getVernacular(taxonNameUri);
-            })());
+            // TODO: vernacular names
             jsPromises.push(
               (async () => {
                 const query = `PREFIX treat: <http://plazi.org/vocab/treatment#>
