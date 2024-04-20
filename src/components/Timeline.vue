@@ -193,7 +193,7 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
             class="label"
           >
             <span v-if="taxon.taxonConceptAuthority">
-              {{ getFormattedName(taxon.taxonName.uri) }}
+              {{ taxon.taxonName.displayName || getFormattedName(taxon.taxonName.uri) }}
               <span class="gray">{{ taxon.taxonConceptAuthority }}</span>
             </span>
             <span v-else>{{ getFormattedName(taxon.taxonConceptUri) }}</span>
