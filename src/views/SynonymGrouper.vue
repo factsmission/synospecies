@@ -105,7 +105,7 @@
       <div class="flex">
         <div class="bottom-align">
           <span class="muted">{{ kingdom(taxonName[0]) }}</span>
-          {{ shorten(taxonName[0]) }}
+          {{ taxonName[1][0].taxonName.displayName || shorten(taxonName[0]) }}
           <div
             v-if="!loading && vernacular[taxonName[0]]"
             class="vernaculars"
@@ -173,7 +173,7 @@
           </table>
         </div>
         <h2 v-if="js.taxonConceptAuthority">
-          {{ shorten(js.taxonName.uri) }}
+          {{ js.taxonName.displayName || shorten(js.taxonName.uri) }}
           <span class="muted">{{ js.taxonConceptAuthority }}</span>
         </h2>
         <h2 v-else>
