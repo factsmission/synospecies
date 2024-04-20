@@ -37,10 +37,6 @@ export default class JustifcationView extends Vue {
     return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
   }
 
-  async prosaifyInitial (j: anyJustification) {
-    return [this.linkify(j.toString())].concat(j.precedingSynonym ? await this.predecessor(j.precedingSynonym) : [])
-  }
-
   linkify (str: string): string {
     const shorten = (s: string) => s.replace(/http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/([^/]*\/)?/g, '').replace(/\/|_/g, ' ')
     return str.replace(/(http:\/\/(taxon-(name|concept)|treatment)\.plazi\.org\/id\/[^ ]*)/g, (_, g) => `<a href="${g}">${shorten(g)}</a>`)
@@ -48,7 +44,7 @@ export default class JustifcationView extends Vue {
 
   @Watch('js.justifications')
   updateJustifications () {
-    (async () => (this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaifyInitial(j)))))()
+    (async () => (this.justifications = await Promise.all(this.js.justifications.map(j => this.prosaify(j)))))()
   }
 }
 </script>
