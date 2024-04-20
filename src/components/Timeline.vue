@@ -1,7 +1,7 @@
 <template>
   <!-- eslint-disable vue/require-v-for-key -->
   <div
-    v-if="taxa && _years"
+    v-if="result || _years"
     :class="collapsed ? 'card collapsed' : 'card'"
     aria-hidden="true"
   >
@@ -197,15 +197,6 @@ d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
               <span class="gray">{{ taxon.taxonConceptAuthority }}</span>
             </span>
             <span v-else>{{ getFormattedName(taxon.taxonConceptUri) }}</span>
-            <dot-spinner v-if="taxon.loading" />
-          </div>
-          <!-- OLD -->
-          <div
-            v-for="taxon in taxa"
-            :key="taxon.url"
-            class="label"
-          >
-            {{ getFormattedName(taxon.url) }}
             <dot-spinner v-if="taxon.loading" />
           </div>
         </div>
@@ -425,14 +416,6 @@ type Year = {
   components: { DotSpinner }
 })
 export default class Timeline extends Vue {
-  @Prop({ default: () => [] }) taxa!: {
-    url?: string;
-    def: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-    aug: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-    dpr: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
-    loading: boolean;
-  }[] // OLD
-
   @PropSync('years', { default: () => [] }) _years!: (Year|'sep')[];
 
   @Prop({ default: () => [] }) result!: SyncJustifiedSynonym[]
@@ -523,7 +506,7 @@ export default class Timeline extends Vue {
   legendOpen = false;
 
   aggregate (year: Year): [number, TT|"multiple"][] {
-    const length = this.result.length || this.taxa.length
+    const length = this.result.length;
     const result: (TT|false)[][] = []
     for (let i = 0; i < length; i++) {
       result[i] = year.treatments.map(a => {
@@ -589,49 +572,6 @@ export default class Timeline extends Vue {
       if (!a.startTime || (a.startTime as number) > 0.01) a.startTime = 0;
     }
   }
-
-  exampleYears = [
-    {
-      year: 1884,
-      treatments: [
-        { data: ['ass', false, false, false, false] },
-        { data: [false, 'def', false, false, false] },
-      ]
-    },
-    {
-      year: 1888,
-      treatments: [
-        { data: [false, false, false, false, 'ass'] },
-      ]
-    },
-    'sep',
-    {
-      year: 1969,
-      treatments: [
-        { data: [false, false, 'ass', false, false] },
-      ]
-    },
-    {
-      year: 1988,
-      treatments: [
-        { data: [false, false, false, 'ass', false] },
-      ]
-    },
-    'sep',
-    {
-      year: 2010,
-      treatments: [
-        { data: ['aug', 'dpr', 'dpr', 'dpr', 'dpr'], url: 'https://example.org/' },
-        { data: ['aug', 'dpr', false, false, false], url: 'https://example.org/' },
-      ]
-    },
-    {
-      year: 2012,
-      treatments: [
-        { data: [false, false, 'aug', false, false] },
-      ]
-    },
-  ]
 }
 </script>
 
