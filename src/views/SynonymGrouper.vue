@@ -392,7 +392,10 @@ SELECT DISTINCT * WHERE {
           (this.treatsTaxonName.get(taxonName.uri) as SyncTreatment[]).push({ ...treat, details: await treat.details });
         }
         for (const treat of js.taxonName.treatments.cite) {
-          (this.treatsTaxonName.get(taxonName.uri) as SyncTreatment[]).push({ ...treat, details: await treat.details });
+          if (!(this.treatsTaxonName.get(taxonName.uri) as SyncTreatment[]).find(t => t.url === treat.url)) {
+            // don't add treatments twice that both cite and treat the taxonName
+            (this.treatsTaxonName.get(taxonName.uri) as SyncTreatment[]).push({ ...treat, details: await treat.details });
+          }
         }
       }
       this.getTree(js.taxonConceptUri)
