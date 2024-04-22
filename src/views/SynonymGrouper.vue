@@ -114,33 +114,33 @@
               v-if="vernacular[taxonName[0]]?.en"
               class="muted vernacular"
               title="en"
-            >{{ vernacular[taxonName[0]]?.en }} </span>
+            >{{ vernacular[taxonName[0]]?.en.join(" / ") }} </span>
             <span
               v-if="vernacular[taxonName[0]]?.de"
               class="muted vernacular"
               title="de"
-            >{{ vernacular[taxonName[0]]?.de }} </span>
+            >{{ vernacular[taxonName[0]]?.de.join(" / ") }} </span>
             <span
               v-if="vernacular[taxonName[0]]?.es"
               class="muted vernacular"
               title="es"
-            >{{ vernacular[taxonName[0]]?.es }} </span>
+            >{{ vernacular[taxonName[0]]?.es.join(" / ") }} </span>
             <span
               v-if="vernacular[taxonName[0]]?.zh"
               class="muted vernacular"
               title="zh"
-            >{{ vernacular[taxonName[0]]?.zh }} </span>
+            >{{ vernacular[taxonName[0]]?.zh.join(" / ") }} </span>
             <span
               v-if="vernacular[taxonName[0]]?.fr"
               class="muted vernacular"
               title="fr"
-            >{{ vernacular[taxonName[0]]?.fr }} </span>
+            >{{ vernacular[taxonName[0]]?.fr.join(" / ") }} </span>
             <span
               v-for="[k, name] in Object.entries(vernacular[taxonName[0]] || {}).filter(([key, _]) => (key !== 'en' && key !== 'de' && key !== 'es' && key !== 'zh' && key !== 'fr'))"
               :key="name"
               class="muted vernacular"
               :title="k"
-            >{{ name }} </span>
+            >{{ name.join(" / ") }} </span>
           </div>
         </div>
         <wikidata-buttons :taxon-name="shorten(taxonName[0])" />
@@ -271,7 +271,7 @@ export default class Home extends Vue {
   trees: Map<string, [string, string, string, string]> = new Map()
 
   //                 tn-uri:       { lang : name  }
-  vernacular: Record<string, Record<string, string> | null> = {};
+  vernacular: Record<string, Record<string, string[]> | null> = {};
 
   async getTree (tcuri: string) {
     if (this.trees.has(tcuri)) {
