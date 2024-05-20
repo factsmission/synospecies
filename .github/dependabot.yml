@@ -11,14 +11,16 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    ignore:
-      - dependency-name: "vue"
-        versions: ["^3.0.0"]
-      - dependency-name: "vue-router"
-        versions: ["^4.0.0"]
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+    - dependency-name: "vue"
+      versions: ["^3.0.0"]
+    - dependency-name: "vue-router"
+      versions: ["^4.0.0"]
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]
