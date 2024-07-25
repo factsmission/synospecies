@@ -175,9 +175,21 @@
         <h2 v-if="js.taxonConceptAuthority">
           {{ js.taxonName.displayName || shorten(js.taxonName.uri) }}
           <span class="muted">{{ js.taxonConceptAuthority }}</span>
+          <a
+            v-for="col in js.colID"
+            :key="col"
+            :href="col"
+            class="col"
+          >{{ col.replace("https://www.catalogueoflife.org/data/taxon/", "") }}</a>
         </h2>
         <h2 v-else>
           {{ shorten(js.taxonConceptUri) }}
+          <a
+            v-for="col in js.colID"
+            :key="col"
+            :href="col"
+            class="col"
+          >{{ col.replace("https://www.catalogueoflife.org/data/taxon/", "") }}</a>
         </h2>
         <details :open="openJ">
           <summary>
@@ -735,6 +747,22 @@ main {
     h1 {
       text-align: center;
     }
+  }
+}
+
+.col {
+  display: inline-block;
+  padding: 0 2px;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 16px;
+  background: rgba(153, 153, 153, 0.17);
+  border-radius: 4px;
+  margin-inline-start: 4px;
+
+  &::before {
+    content: "CoL: ";
+    color: black;
   }
 }
 </style>
