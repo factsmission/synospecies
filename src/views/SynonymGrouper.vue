@@ -105,7 +105,7 @@
       <div class="flex">
         <div class="bottom-align">
           <span class="muted">{{ kingdom(taxonName[0]) }}</span>
-          {{ taxonName[1][0].taxonName.displayName || shorten(taxonName[0]) }}
+          {{ taxonName[1][0]?.taxonName?.displayName || shorten(taxonName[0]) }}
           <div
             v-if="!loading && vernacular[taxonName[0]]"
             class="vernaculars"
