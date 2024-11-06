@@ -1,3 +1,6 @@
+import type { SparqlEndpoint } from "@plazi/synolib";
+import Taxomplete from "taxomplete";
+
 const endpoints = {
   plazi: "https://treatment.ld.plazi.org/sparql",
   lindas: "https://lindas.admin.ch/query",
@@ -5,7 +8,7 @@ const endpoints = {
 };
 
 export class SynoForm extends HTMLElement {
-  constructor() {
+  constructor(private sparqlEndpoint: SparqlEndpoint) {
     super();
   }
 
@@ -71,7 +74,7 @@ export class SynoForm extends HTMLElement {
       : true;
     endpointLindasCachedLabel.append(
       endpointLindasCached,
-      "Lindas Cached ",
+      "Lindas ",
       endpointLindasCachedLabelUrl,
       " (Default)",
     );
@@ -86,14 +89,33 @@ export class SynoForm extends HTMLElement {
     endpointLindas.checked = ENDPOINT_URL === endpoints.lindas;
     endpointLindasLabel.append(
       endpointLindas,
-      "Lindas ",
+      "Lindas uncached ",
       endpointLindasLabelUrl,
-      " (Like default but uncached)",
     );
 
     const button = document.createElement("button");
     button.innerText = "Go";
-    button.addEventListener("click", () => {
+
+    const search = document.createElement("div");
+    search.className = "search";
+    search.append(nameInput, button);
+
+    const options = document.createElement("div");
+    options.className = "options";
+    options.append(
+      "Options: ",
+      colCheckLabel,
+      subtaxaCheckLabel,
+      sorttreatmentsCheckLabel,
+      "Server: ",
+      endpointLindasCachedLabel,
+      endpointLindasLabel,
+      endpointPlaziLabel,
+    );
+
+    this.append(search, options);
+
+    const go = () => {
       const params = new URLSearchParams({
         q: nameInput.value,
       });
@@ -109,19 +131,17 @@ export class SynoForm extends HTMLElement {
       } else if (endpointPlazi.checked) {
         params.append("server", endpoints.plazi);
       }
+      document.location.hash = "";
       document.location.search = params.toString();
+    };
+
+    button.addEventListener("click", go);
+    nameInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") go();
     });
 
-    this.append(
-      nameInput,
-      button,
-      colCheckLabel,
-      subtaxaCheckLabel,
-      sorttreatmentsCheckLabel,
-      endpointLindasCachedLabel,
-      endpointLindasLabel,
-      endpointPlaziLabel,
-    );
+    // we can only create the Taxomplete when nameInput has a parent
+    new Taxomplete(nameInput, this.sparqlEndpoint).action = go;
   }
 }
 

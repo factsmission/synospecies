@@ -3,7 +3,7 @@
 :root {
   color-scheme: light dark;
   font-family: Inter, Helvetica, "Helvetica Neue", sans-serif;
-  font-feature-settings: 'liga', 'calt', 'dlig', 'case';
+  font-feature-settings: "liga", "calt", "dlig";
   overflow-wrap: break-word;
   height: 100%;
 
@@ -51,6 +51,15 @@ a:where(:visited) {
   & img {
     display: block;
   }
+}
+
+input,
+button {
+  font-family: inherit;
+}
+
+button {
+  font-weight: 800;
 }
 
 /* REUSABLE CLASSES */
@@ -141,15 +150,63 @@ footer {
   font-size: 0.8rem;
   padding-block: 0.6rem;
 
-  & a {
+  a {
     color: inherit;
     text-decoration: underline;
   }
 }
 
 syno-form {
-  display: grid;
+  display: block;
   margin-block: 1rem;
+
+  .search {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: auto repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+
+  .awesomplete {
+    * {
+      background: var(--nav-background);
+      color: var(--text-color);
+    }
+
+    input {
+      border: 1px solid var(--text-color);
+      border-radius: 0.6rem 0 0 0.6rem;
+      height: 100%;
+      font-size: 1rem;
+      line-height: 2rem;
+      padding: 0 0.5rem;
+      width: 100%;
+    }
+  }
+
+  button {
+    background: var(--accent-mild);
+    color: var(--text-color);
+    border: 1px solid var(--accent-mild);
+    border-radius: 0 0.6rem 0.6rem 0;
+    font-size: 1rem;
+    line-height: 2rem;
+    padding: 0 1rem;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--body-background);
+    }
+  }
 }
 
 /* COPIED FROM SYNOLIB EXAMPLE */
@@ -201,7 +258,7 @@ syno-name {
   background: var(--nav-background);
   font-family: inherit;
   font-weight: normal;
-  font-feature-settings: 'liga', 'calt', 'dlig', 'case', 'ss02';
+  font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
 
   &.taxon {
     color: #4e69ae;
@@ -236,13 +293,13 @@ syno-treatment,
   transition: all 200ms;
   clear: both;
 
-  &>svg {
+  & > svg {
     height: 1rem;
     vertical-align: sub;
     margin: 0 0.2rem 0 -1.2rem;
   }
 
-  >.icon.button {
+  > .icon.button {
     float: right;
   }
 
@@ -283,7 +340,6 @@ syno-treatment,
   }
 }
 
-
 .icon.button {
   border-radius: 1rem;
   border: none;
@@ -294,7 +350,7 @@ syno-treatment,
   padding: 0;
   position: relative;
 
-  &>svg {
+  & > svg {
     height: 1rem;
     margin: 0;
   }
