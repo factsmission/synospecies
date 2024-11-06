@@ -1,0 +1,154 @@
+/* GENERAL SETTINGS */
+
+:root {
+  color-scheme: light dark;
+  font-family: Inter, Helvetica, "Helvetica Neue", sans-serif;
+  font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
+  overflow-wrap: break-word;
+  height: 100%;
+
+  --nav-background: light-dark(#f0f0f0, #000000);
+  --body-background: light-dark(#ffffff, #222222);
+  --accent-mild: light-dark(#9bc134, #476100);
+  --accent: light-dark(#476100, #9bc134);
+  --text-color: light-dark(#222222, #dddddd);
+  --text-color-muted: light-dark(#444444, #bbbbbb);
+}
+
+@supports (font-variation-settings: normal) {
+  :root {
+    font-family: InterVariable, Helvetica, "Helvetica Neue", sans-serif;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+hr {
+  margin: 0.4rem 0;
+  border: none;
+  border-top: 1px solid var(--text-color-muted);
+}
+
+noscript {
+  display: block;
+  font-size: 2rem;
+}
+
+a,
+a:where(:visited) {
+  color: var(--accent);
+  text-decoration: none;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: var(--accent-mild) !important;
+    text-decoration: underline;
+  }
+
+  & img {
+    display: block;
+  }
+}
+
+/* REUSABLE CLASSES */
+
+.identifier {
+  font-variant-alternates:
+    /* disambiguation */
+    styleset(02);
+}
+
+.center {
+  max-width: 100%;
+  max-width: 100vw;
+  margin: 0 auto;
+  padding-inline: 1rem;
+  width: 90rem;
+}
+
+/* MAIN LAYOUT */
+
+body {
+  background: var(--body-background);
+  color: var(--text-color);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  margin: 0;
+  min-height: 100%;
+  padding: 0;
+}
+
+header {
+  background-color: var(--nav-background);
+  border-bottom: 1px solid var(--accent-mild);
+  padding-block: 1rem;
+
+  & nav {
+    align-items: center;
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr auto auto auto;
+  }
+
+  & h1 {
+    margin: 0;
+  }
+
+  & a {
+    color: var(--text-color) !important;
+    justify-self: end;
+    text-decoration: none;
+
+    &.inactive {
+      padding: 0.6rem;
+    }
+
+    &.active {
+      background: var(--body-background);
+      border-radius: 1rem;
+      padding: 0.6rem;
+    }
+  }
+
+  & .logo {
+    max-width: 100%;
+
+    &.fm {
+      max-height: 24px;
+    }
+
+    &.plazi {
+      max-height: 48px;
+    }
+  }
+
+  & a:has(.fm) {
+    align-content: center;
+    background: light-dark(transparent, #dddddd);
+    height: 100%;
+  }
+
+  /* 36rem is empirically the width when it stops fitting */
+  @media (max-width: 36rem) {
+    & nav {
+      gap: 1rem;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+footer {
+  background-color: var(--nav-background);
+  border-top: 1px solid var(--accent-mild);
+  color: var(--text-color-muted);
+  font-size: 0.8rem;
+  padding-block: 0.6rem;
+
+  & a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}
