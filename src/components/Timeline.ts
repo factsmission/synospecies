@@ -31,68 +31,112 @@ export class TimelineTreatment extends LitElement {
   @property({ attribute: false })
   accessor treatment: Treatment | null = null;
   @property({ attribute: false })
+  accessor acceptedCoL: string | null = null;
+  @property({ attribute: false })
   accessor names: NameState[] = [];
 
   override render() {
-    if (this.treatment === null) return nothing;
-    console.log("updating treatment");
-    return html`<div title=${
-      until(
-        this.treatment.details.then((d) =>
-          `${d.creators} ${this.treatment?.date} “${d.title}”`
-        ),
-        this.treatment.url,
-      )
-    }>${
-      this.names.map((i) => {
-        let hasDef = false;
-        let hasAug = false;
-        let hasDpr = false;
-        let hasCite = false;
-        const result: IconName[] = [];
-        if (i.name.treatments.treats.has(this.treatment!)) {
-          result.push("aug");
-          hasAug = true;
-        } else if (i.name.treatments.cite.has(this.treatment!)) {
-          result.push("cite");
-          hasCite = true;
-        } else {
-          result.push("empty");
-        }
-        for (const authName of i.name.authorizedNames) {
-          if (authName.treatments.def.has(this.treatment!)) {
-            result.push("def");
-            hasDef = true;
-          } else if (authName.treatments.aug.has(this.treatment!)) {
+    if (this.treatment !== null) {
+      return html`<div title=${
+        until(
+          this.treatment.details.then((d) =>
+            `${d.creators} ${this.treatment?.date} “${d.title}”`
+          ),
+          this.treatment.url,
+        )
+      }>${
+        this.names.map((i) => {
+          let hasDef = false;
+          let hasAug = false;
+          let hasDpr = false;
+          let hasCite = false;
+          const result: IconName[] = [];
+          if (i.name.treatments.treats.has(this.treatment!)) {
             result.push("aug");
             hasAug = true;
-          } else if (authName.treatments.dpr.has(this.treatment!)) {
-            result.push("dpr");
-            hasDpr = true;
-          } else if (authName.treatments.cite.has(this.treatment!)) {
+          } else if (i.name.treatments.cite.has(this.treatment!)) {
             result.push("cite");
             hasCite = true;
           } else {
             result.push("empty");
           }
-        }
-        if (i.open) {
-          return html`<div class="name">${
-            result.map((i) => html`<s-icon icon=${i}></s-icon>`)
-          }</div>`;
-        }
-        const collapsed_icon: IconName = hasDef
-          ? (hasDpr ? "def_dpr" : "def")
-          : hasAug
-          ? (hasDpr ? "aug_dpr" : "aug")
-          : hasDpr
-          ? "dpr"
-          : hasCite
-          ? "cite"
-          : "empty";
-        return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
-      })
-    }</div>`;
+          for (const authName of i.name.authorizedNames) {
+            if (authName.treatments.def.has(this.treatment!)) {
+              result.push("def");
+              hasDef = true;
+            } else if (authName.treatments.aug.has(this.treatment!)) {
+              result.push("aug");
+              hasAug = true;
+            } else if (authName.treatments.dpr.has(this.treatment!)) {
+              result.push("dpr");
+              hasDpr = true;
+            } else if (authName.treatments.cite.has(this.treatment!)) {
+              result.push("cite");
+              hasCite = true;
+            } else {
+              result.push("empty");
+            }
+          }
+          if (i.open) {
+            return html`<div class="name">${
+              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
+            }</div>`;
+          }
+          const collapsed_icon: IconName = hasDef
+            ? (hasDpr ? "def_dpr" : "def")
+            : hasAug
+            ? (hasDpr ? "aug_dpr" : "aug")
+            : hasDpr
+            ? "dpr"
+            : hasCite
+            ? "cite"
+            : "empty";
+          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
+        })
+      }</div>`;
+    }
+    if (this.acceptedCoL !== null) {
+      return html`<div title=${this.acceptedCoL}>${
+        this.names.map((i) => {
+          let hasAug = false;
+          let hasDpr = false;
+          const result: IconName[] = [];
+          if (i.name.colURI === this.acceptedCoL) {
+            result.push("col_aug");
+            hasAug = true;
+          } else if (i.name.acceptedColURI === this.acceptedCoL) {
+            result.push("col_dpr");
+            hasDpr = true;
+          } else {
+            result.push("empty");
+          }
+          for (const authName of i.name.authorizedNames) {
+            if (authName.colURI === this.acceptedCoL) {
+              result.push("col_aug");
+              hasAug = true;
+            } else if (authName.acceptedColURI === this.acceptedCoL) {
+              result.push("col_dpr");
+              hasDpr = true;
+            } else {
+              result.push("empty");
+            }
+          }
+          if (i.open) {
+            return html`<div class="name">${
+              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
+            }</div>`;
+          }
+          const collapsed_icon: IconName = hasAug
+            ? (hasDpr ? "aug_dpr" : "col_aug")
+            : hasDpr
+            ? "col_dpr"
+            : "empty";
+          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
+        })
+      }</div>`;
+    }
+
+    return nothing;
   }
 }
 
@@ -112,6 +156,7 @@ export class Timeline extends LitElement {
       position: sticky;
       top: 0;
       padding: .25rem;
+      text-align: center;
 
       h2 {
         margin: 0;
@@ -211,6 +256,8 @@ export class Timeline extends LitElement {
   @property({ attribute: false })
   accessor names: NameState[] = [];
   @state()
+  protected accessor cols: string[] = [];
+  @state()
   protected accessor years: { year: string; treatments: Treatment[] }[] = [];
 
   async handleSynonyms() {
@@ -224,6 +271,17 @@ export class Timeline extends LitElement {
           (!!name.colURI || name.treatments.cite.size > 0 ||
             name.treatments.treats.size > 0));
       this.names = [...this.names, { name, open: false, openable }];
+      if (name.acceptedColURI && !this.cols.includes(name.acceptedColURI)) {
+        this.cols = [...this.cols, name.acceptedColURI].toSorted();
+      }
+      for (const authName of name.authorizedNames) {
+        if (
+          authName.acceptedColURI &&
+          !this.cols.includes(authName.acceptedColURI)
+        ) {
+          this.cols = [...this.cols, authName.acceptedColURI].toSorted();
+        }
+      }
       for (const treatment of this.synoGroup.treatments.values()) {
         const year = treatment.date ? treatment.date + "" : "N/A";
         const entry = this.years.find((y) => y.year === year);
@@ -257,14 +315,18 @@ export class Timeline extends LitElement {
       this.names.map((n, index) =>
         html`<div class="name ${
           n.open ? "open" : "closed"
-        }"><div class="unauthorized">${n.name.displayName} ${n.openable ? html`<button @click=${() => {
-          this.names = this.names.toSpliced(index, 1, {
-            ...n,
-            open: !n.open,
-          });
-        }}><s-icon icon=${
-          n.open ? "collapse" : "expand"
-        }></s-icon</button>` : n.name.authorizedNames.length > 0 ? n.name.authorizedNames[0]!.authority : nothing}</div>${
+        }"><div class="unauthorized">${n.name.displayName} ${
+          n.openable
+            ? html`<button @click=${() => {
+              this.names = this.names.toSpliced(index, 1, {
+                ...n,
+                open: !n.open,
+              });
+            }}><s-icon icon=${n.open ? "collapse" : "expand"}></s-icon</button>`
+            : n.name.authorizedNames.length > 0
+            ? n.name.authorizedNames[0]!.authority
+            : nothing
+        }</div>${
           n.name.authorizedNames.map((a) =>
             html`<div class="authorized"><span class="ditto">—“—<span> ${a.authority}</div>`
           )
@@ -274,6 +336,17 @@ export class Timeline extends LitElement {
       </div>
       <div class="treatments">
         <div class="years">${
+      this.cols.length > 0
+        ? html`<div>
+          <div class="header"><h2>CoL<h2></div>
+          <div class="grid">${
+          this.cols.map((col) =>
+            html`<s-timeline-treatment .acceptedCoL=${col} .names=${this.names}></s-timeline-treatment>`
+          )
+        }</div>
+          </div>`
+        : nothing
+    }${
       this.years.map((t) =>
         html`<div>
           <div class="header"><h2>${t.year}<h2></div>
