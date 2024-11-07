@@ -5,8 +5,9 @@ import type {
   Treatment,
 } from "@plazi/synolib";
 import { distinct } from "@std/collections/distinct";
-import { icons } from "./Icons.ts";
+import "./Icons.ts";
 import { type SynoStatus, SynoTreatment } from "./SynoTreatment.ts";
+import { html, render } from "lit";
 
 export class SynoName extends HTMLElement {
   constructor(
@@ -31,18 +32,14 @@ export class SynoName extends HTMLElement {
     title.append(" ", rank_badge);
 
     if (this.name.taxonNameURI) {
-      const name_uri = document.createElement("a");
-      name_uri.classList.add("taxon", "uri");
       const short = this.name.taxonNameURI.replace(
         "http://taxon-name.plazi.org/id/",
         "",
       );
-      name_uri.innerText = short;
-      name_uri.id = short;
-      name_uri.href = this.name.taxonNameURI;
-      name_uri.target = "_blank";
-      name_uri.innerHTML += icons.link;
-      title.append(" ", name_uri);
+      render(
+        html`<a class="taxon uri" id=${short} href=${this.name.taxonNameURI} target="_blank">${short}<s-icon icon="link"></s-icon></a>`,
+        title,
+      );
     }
 
     const vernacular = document.createElement("div");
@@ -59,24 +56,23 @@ export class SynoName extends HTMLElement {
     this.append(treatments);
 
     if (this.name.colURI) {
-      const col_uri = document.createElement("a");
-      col_uri.classList.add("col", "uri");
-      const id = this.name.colURI.replace(
+      const short = this.name.colURI.replace(
         "https://www.catalogueoflife.org/data/taxon/",
         "",
       );
-      col_uri.innerText = id;
-      col_uri.id = id;
-      col_uri.href = this.name.colURI;
-      col_uri.target = "_blank";
-      col_uri.innerHTML += icons.link;
-      title.append(" ", col_uri);
+      render(
+        html`<a class="col uri" id=${short} href=${this.name.taxonNameURI} target="_blank">${short}<s-icon icon="link"></s-icon></a>`,
+        title,
+      );
 
       const li = document.createElement("div");
       li.classList.add("treatmentline");
-      li.innerHTML = this.name.acceptedColURI !== this.name.colURI
-        ? icons.col_dpr
-        : icons.col_aug;
+      render(
+        html`<s-icon icon=${
+          this.name.acceptedColURI !== this.name.colURI ? "col_dpr" : "col_aug"
+        }></s-icon>`,
+        li,
+      );
       treatments.append(li);
 
       const creators = document.createElement("span");
@@ -89,7 +85,10 @@ export class SynoName extends HTMLElement {
 
       if (this.name.acceptedColURI !== this.name.colURI) {
         const line = document.createElement("div");
-        line.innerHTML = icons.east + icons.col_aug;
+        render(
+          html`<s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon>`,
+          line,
+        );
         names.append(line);
 
         const col_uri = document.createElement("a");
@@ -154,7 +153,7 @@ export class SynoName extends HTMLElement {
         name_uri.id = short;
         name_uri.href = authorizedName.taxonConceptURI;
         name_uri.target = "_blank";
-        name_uri.innerHTML += icons.link;
+        render(html`<s-icon icon="link"></s-icon>`, name_uri);
         authName.append(" ", name_uri);
       }
       if (authorizedName.colURI) {
@@ -168,14 +167,19 @@ export class SynoName extends HTMLElement {
         col_uri.id = id;
         col_uri.href = authorizedName.colURI;
         col_uri.target = "_blank";
-        col_uri.innerHTML += icons.link;
+        render(html`<s-icon icon="link"></s-icon>`, col_uri);
         authName.append(" ", col_uri);
 
         const li = document.createElement("div");
         li.classList.add("treatmentline");
-        li.innerHTML = authorizedName.acceptedColURI !== authorizedName.colURI
-          ? icons.col_dpr
-          : icons.col_aug;
+        render(
+          html`<s-icon icon=${
+            authorizedName.acceptedColURI !== authorizedName.colURI
+              ? "col_dpr"
+              : "col_aug"
+          }></s-icon>`,
+          li,
+        );
         treatments.append(li);
 
         const creators = document.createElement("span");
@@ -188,7 +192,10 @@ export class SynoName extends HTMLElement {
 
         if (authorizedName.acceptedColURI !== authorizedName.colURI) {
           const line = document.createElement("div");
-          line.innerHTML = icons.east + icons.col_aug;
+          render(
+            html`<s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon>`,
+            line,
+          );
           names.append(line);
 
           const col_uri = document.createElement("a");

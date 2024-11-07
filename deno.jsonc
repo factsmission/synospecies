@@ -5,7 +5,9 @@
       "dom.iterable",
       "dom.asynciterable",
       "deno.ns"
-    ]
+    ],
+    // "experimentalDecorators": false, // default for TypeScript 5.0 and up
+    // "useDefineForClassFields": true // default when "target" is "ES2022" or higher
   },
   "imports": {
     "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.0",
@@ -14,6 +16,7 @@
     "@triply/yasqe": "npm:@triply/yasqe@^4.2.28",
     "@triply/yasr": "npm:@triply/yasr@^4.2.28",
     "esbuild": "npm:esbuild@^0.24.0",
+    "lit": "npm:lit@^3.2.1",
 
     // TODO: taxomplete is hacky
     "taxomplete": "https://plazi.github.io/taxomplete/src/taxomplete.js",

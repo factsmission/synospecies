@@ -9,6 +9,7 @@ const config: esbuild.BuildOptions = {
   outdir: "./dist",
   sourcemap: true,
   bundle: true,
+  target: "es2022",
   format: "esm",
   plugins: [...denoPlugins()],
   lineLimit: 120,

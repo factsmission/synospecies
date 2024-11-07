@@ -272,6 +272,7 @@ syno-name {
     color: #177669;
   }
 
+  s-icon,
   svg {
     height: 0.8em;
     vertical-align: baseline;
@@ -293,13 +294,14 @@ syno-treatment,
   transition: all 200ms;
   clear: both;
 
-  & > svg {
-    height: 1rem;
+  &>s-icon,
+  &>svg {
+    height: 20px;
     vertical-align: sub;
     margin: 0 0.2rem 0 -1.2rem;
   }
 
-  > .icon.button {
+  >.icon.button {
     float: right;
   }
 
@@ -350,7 +352,7 @@ syno-treatment,
   padding: 0;
   position: relative;
 
-  & > svg {
+  &>svg {
     height: 1rem;
     margin: 0;
   }

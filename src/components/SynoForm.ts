@@ -50,7 +50,7 @@ export class SynoForm extends HTMLElement {
     const endpointPlaziLabel = document.createElement("label");
     const endpointPlaziLabelUrl = document.createElement("code");
     endpointPlaziLabelUrl.className = "uri";
-    endpointPlaziLabelUrl.innerText = endpoints.plazi;
+    endpointPlaziLabelUrl.innerText = endpoints.plazi.replace("https://", "");
     const endpointPlazi = document.createElement("input");
     endpointPlazi.type = "radio";
     endpointPlazi.name = "endpoint";
@@ -65,7 +65,7 @@ export class SynoForm extends HTMLElement {
     const endpointLindasCachedLabel = document.createElement("label");
     const endpointLindasCachedLabelUrl = document.createElement("code");
     endpointLindasCachedLabelUrl.className = "uri";
-    endpointLindasCachedLabelUrl.innerText = endpoints.cached;
+    endpointLindasCachedLabelUrl.innerText = endpoints.cached.replace("https://", "");
     const endpointLindasCached = document.createElement("input");
     endpointLindasCached.type = "radio";
     endpointLindasCached.name = "endpoint";
@@ -82,7 +82,7 @@ export class SynoForm extends HTMLElement {
     const endpointLindasLabel = document.createElement("label");
     const endpointLindasLabelUrl = document.createElement("code");
     endpointLindasLabelUrl.className = "uri";
-    endpointLindasLabelUrl.innerText = endpoints.lindas;
+    endpointLindasLabelUrl.innerText = endpoints.lindas.replace("https://", "");
     const endpointLindas = document.createElement("input");
     endpointLindas.type = "radio";
     endpointLindas.name = "endpoint";

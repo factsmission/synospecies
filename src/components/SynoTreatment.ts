@@ -71,10 +71,10 @@ export class SynoTreatment extends HTMLElement {
 
       if (details.treats.def.size > 0) {
         const line = document.createElement("div");
-        // line.innerHTML = status === "cite" ? icons.line : icons.east;
+        // line.innerHTML = this.status === "cite" ? icons.line : icons.east;
         line.innerHTML = icons.east;
         line.innerHTML += icons.def;
-        if (status === "def" || status === "cite") {
+        if (this.status === "def" || this.status === "cite") {
           line.classList.add("hidden");
         }
         names.append(line);
@@ -100,10 +100,10 @@ export class SynoTreatment extends HTMLElement {
       }
       if (details.treats.aug.size > 0 || details.treats.treattn.size > 0) {
         const line = document.createElement("div");
-        // line.innerHTML = status === "cite" ? icons.line : icons.east;
+        // line.innerHTML = this.status === "cite" ? icons.line : icons.east;
         line.innerHTML = icons.east;
         line.innerHTML += icons.aug;
-        if (status === "aug" || status === "cite") {
+        if (this.status === "aug" || this.status === "cite") {
           line.classList.add("hidden");
         }
         names.append(line);
@@ -147,10 +147,10 @@ export class SynoTreatment extends HTMLElement {
       }
       if (details.treats.dpr.size > 0) {
         const line = document.createElement("div");
-        // line.innerHTML = status === "cite" ? icons.line : icons.west;
+        // line.innerHTML = this.status === "cite" ? icons.line : icons.west;
         line.innerHTML = icons.west;
         line.innerHTML += icons.dpr;
-        if (status === "dpr" || status === "cite") {
+        if (this.status === "dpr" || this.status === "cite") {
           line.classList.add("hidden");
         }
         names.append(line);
@@ -177,7 +177,7 @@ export class SynoTreatment extends HTMLElement {
       if (details.treats.citetc.size > 0 || details.treats.citetn.size > 0) {
         const line = document.createElement("div");
         line.innerHTML = icons.empty + icons.cite;
-        // if (status === "dpr" || status === "cite") {
+        // if (this.status === "dpr" || this.status === "cite") {
         line.classList.add("hidden");
         // }
         names.append(line);
