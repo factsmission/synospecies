@@ -65,7 +65,10 @@ export class SynoForm extends HTMLElement {
     const endpointLindasCachedLabel = document.createElement("label");
     const endpointLindasCachedLabelUrl = document.createElement("code");
     endpointLindasCachedLabelUrl.className = "uri";
-    endpointLindasCachedLabelUrl.innerText = endpoints.cached.replace("https://", "");
+    endpointLindasCachedLabelUrl.innerText = endpoints.cached.replace(
+      "https://",
+      "",
+    );
     const endpointLindasCached = document.createElement("input");
     endpointLindasCached.type = "radio";
     endpointLindasCached.name = "endpoint";

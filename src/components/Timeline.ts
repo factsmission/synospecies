@@ -15,7 +15,12 @@ export class TimelineTreatment extends LitElement {
       border-radius: .5rem;
       display: grid;
       padding: .25rem;
+
+      &.multiple {
+        background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
+      }
     }
+
     
     .name {
       display: grid;
@@ -29,20 +34,21 @@ export class TimelineTreatment extends LitElement {
   `;
 
   @property({ attribute: false })
-  accessor treatment: Treatment | null = null;
+  accessor treatments: Treatment[] = [];
   @property({ attribute: false })
-  accessor acceptedCoL: string | null = null;
+  accessor acceptedCoL: string[] = [];
   @property({ attribute: false })
   accessor names: NameState[] = [];
 
   override render() {
-    if (this.treatment !== null) {
+    if (this.treatments.length === 1) {
+      const treatment = this.treatments[0];
       return html`<div title=${
         until(
-          this.treatment.details.then((d) =>
-            `${d.creators} ${this.treatment?.date} “${d.title}”`
+          treatment.details.then((d) =>
+            `${d.creators} ${treatment?.date} “${d.title}”`
           ),
-          this.treatment.url,
+          treatment.url,
         )
       }>${
         this.names.map((i) => {
@@ -51,26 +57,26 @@ export class TimelineTreatment extends LitElement {
           let hasDpr = false;
           let hasCite = false;
           const result: IconName[] = [];
-          if (i.name.treatments.treats.has(this.treatment!)) {
+          if (i.name.treatments.treats.has(treatment)) {
             result.push("aug");
             hasAug = true;
-          } else if (i.name.treatments.cite.has(this.treatment!)) {
+          } else if (i.name.treatments.cite.has(treatment)) {
             result.push("cite");
             hasCite = true;
           } else {
             result.push("empty");
           }
           for (const authName of i.name.authorizedNames) {
-            if (authName.treatments.def.has(this.treatment!)) {
+            if (authName.treatments.def.has(treatment)) {
               result.push("def");
               hasDef = true;
-            } else if (authName.treatments.aug.has(this.treatment!)) {
+            } else if (authName.treatments.aug.has(treatment)) {
               result.push("aug");
               hasAug = true;
-            } else if (authName.treatments.dpr.has(this.treatment!)) {
+            } else if (authName.treatments.dpr.has(treatment)) {
               result.push("dpr");
               hasDpr = true;
-            } else if (authName.treatments.cite.has(this.treatment!)) {
+            } else if (authName.treatments.cite.has(treatment)) {
               result.push("cite");
               hasCite = true;
             } else {
@@ -95,26 +101,136 @@ export class TimelineTreatment extends LitElement {
         })
       }</div>`;
     }
-    if (this.acceptedCoL !== null) {
-      return html`<div title=${this.acceptedCoL}>${
+    if (this.treatments.length > 1) {
+      const tSet = new Set(this.treatments);
+      return html`<div class="multiple" title=${this.treatments.length}>${
+        this.names.map((i) => {
+          let hasDef = false;
+          let hasAug = false;
+          let hasDpr = false;
+          let hasCite = false;
+          const result: IconName[] = [];
+          if (!i.name.treatments.treats.isDisjointFrom(tSet)) {
+            result.push("aug");
+            hasAug = true;
+          } else if (!i.name.treatments.cite.isDisjointFrom(tSet)) {
+            result.push("cite");
+            hasCite = true;
+          } else {
+            result.push("empty");
+          }
+          for (const authName of i.name.authorizedNames) {
+            let pushed = false;
+            if (!authName.treatments.def.isDisjointFrom(tSet)) {
+              result.push("def");
+              hasDef = true;
+              pushed = true;
+            }
+            if (!authName.treatments.aug.isDisjointFrom(tSet)) {
+              if (!pushed) result.push("aug");
+              else result.splice(-1, 1, "multiple");
+              hasAug = true;
+              pushed = true;
+            }
+            if (!authName.treatments.dpr.isDisjointFrom(tSet)) {
+              if (!pushed) result.push("dpr");
+              else result.splice(-1, 1, "multiple");
+              hasDpr = true;
+              pushed = true;
+            }
+            if (!authName.treatments.cite.isDisjointFrom(tSet)) {
+              if (!pushed) result.push("cite");
+              hasCite = true;
+              pushed = true;
+            }
+            if (!pushed) {
+              result.push("empty");
+            }
+          }
+          if (i.open) {
+            return html`<div class="name">${
+              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
+            }</div>`;
+          }
+          const collapsed_icon: IconName = hasDef
+            ? (hasDpr || hasAug ? "multiple" : "def")
+            : hasAug
+            ? (hasDpr ? "multiple" : "aug")
+            : hasDpr
+            ? "dpr"
+            : hasCite
+            ? "cite"
+            : "empty";
+          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
+        })
+      }</div>`;
+    }
+    if (this.acceptedCoL.length === 1) {
+      const col = this.acceptedCoL[0];
+      return html`<div title=${col}>${
         this.names.map((i) => {
           let hasAug = false;
           let hasDpr = false;
           const result: IconName[] = [];
-          if (i.name.colURI === this.acceptedCoL) {
+          if (i.name.colURI === col) {
             result.push("col_aug");
             hasAug = true;
-          } else if (i.name.acceptedColURI === this.acceptedCoL) {
+          } else if (i.name.acceptedColURI === col) {
             result.push("col_dpr");
             hasDpr = true;
           } else {
             result.push("empty");
           }
           for (const authName of i.name.authorizedNames) {
-            if (authName.colURI === this.acceptedCoL) {
+            if (authName.colURI === col) {
               result.push("col_aug");
               hasAug = true;
-            } else if (authName.acceptedColURI === this.acceptedCoL) {
+            } else if (authName.acceptedColURI === col) {
+              result.push("col_dpr");
+              hasDpr = true;
+            } else {
+              result.push("empty");
+            }
+          }
+          if (i.open) {
+            return html`<div class="name">${
+              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
+            }</div>`;
+          }
+          const collapsed_icon: IconName = hasAug
+            ? (hasDpr ? "aug_dpr" : "col_aug")
+            : hasDpr
+            ? "col_dpr"
+            : "empty";
+          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
+        })
+      }</div>`;
+    }
+    if (this.acceptedCoL.length > 1) {
+      const colSet = new Set(this.acceptedCoL);
+      return html`<div title=${colSet.size} class="multiple">${
+        this.names.map((i) => {
+          let hasAug = false;
+          let hasDpr = false;
+          const result: IconName[] = [];
+          if (i.name.colURI && colSet.has(i.name.colURI)) {
+            result.push("col_aug");
+            hasAug = true;
+          } else if (
+            i.name.acceptedColURI && colSet.has(i.name.acceptedColURI)
+          ) {
+            result.push("col_dpr");
+            hasDpr = true;
+          } else {
+            result.push("empty");
+          }
+          for (const authName of i.name.authorizedNames) {
+            if (authName.colURI && colSet.has(authName.colURI)) {
+              result.push("col_aug");
+              hasAug = true;
+            } else if (
+              authName.acceptedColURI && colSet.has(authName.acceptedColURI)
+            ) {
               result.push("col_dpr");
               hasDpr = true;
             } else {
@@ -147,16 +263,23 @@ export class Timeline extends LitElement {
       background: var(--nav-background);
       border-radius: 1rem;
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: max-content 1fr;
       margin: 1rem 0;
-      overflow: hidden;
+      overflow: auto;
+      max-height: 90vh;
     }
 
     .header {
+      background: var(--nav-background);
+      background-opacity: 50%;
+      display: grid;
       position: sticky;
       top: 0;
       padding: .25rem;
-      text-align: center;
+      text-align: right;
+      grid-template-columns: auto auto;
+      justify-content: safe center
+      gap: .25rem;
 
       h2 {
         margin: 0;
@@ -166,7 +289,17 @@ export class Timeline extends LitElement {
     }
 
     .names {
-        border-right: 1px solid gray;
+      background: var(--nav-background);
+      background-opacity: 50%;
+      border-right: 1px solid gray;
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      text-overflow: ellipsis;
+      text-wrap: nowrap;
+      min-width: min(24rem, 40vw);
+      max-width: 60vw;
+      overflow: hidden;
     }
 
     .list {
@@ -192,40 +325,40 @@ export class Timeline extends LitElement {
         grid-template-columns: 1fr auto;
         gap: .25rem;
       }
+    }
 
-      button {
-        border-radius: 1rem;
-        border: none;
-        background: none;
-        width: 1rem;
+    button {
+      border-radius: 1rem;
+      border: none;
+      background: none;
+      width: 1rem;
+      height: 1rem;
+      padding: 0;
+      margin: .25rem;
+      position: relative;
+
+      &>svg {
         height: 1rem;
-        padding: 0;
-        margin: .25rem;
-        position: relative;
+        margin: 0;
+      }
 
-        &>svg {
-          height: 1rem;
-          margin: 0;
-        }
+      &::before {
+        content: "";
+        position: absolute;
+        top: -0.5rem;
+        bottom: -0.5rem;
+        left: -0.5rem;
+        right: -0.5rem;
+        border-radius: 100%;
+      }
 
-        &::before {
-          content: "";
-          position: absolute;
-          top: -0.5rem;
-          bottom: -0.5rem;
-          left: -0.5rem;
-          right: -0.5rem;
-          border-radius: 100%;
-        }
-
-        &:hover::before {
-          background: #ededed8c;
-        }
+      &:hover::before {
+        background: #ededed8c;
       }
     }
 
     .treatments {
-      overflow-x: scroll;
+      /* overflow-x: scroll; */
 
       h2 {
         font-size: 0.8rem;
@@ -246,6 +379,7 @@ export class Timeline extends LitElement {
       grid-auto-flow: column;
       grid-auto-columns: min-content;
       padding: .25rem;
+      justify-content: safe center
     }
   `;
 
@@ -256,9 +390,15 @@ export class Timeline extends LitElement {
   @property({ attribute: false })
   accessor names: NameState[] = [];
   @state()
+  protected accessor colExpanded: boolean = false;
+  @state()
   protected accessor cols: string[] = [];
   @state()
-  protected accessor years: { year: string; treatments: Treatment[] }[] = [];
+  protected accessor years: {
+    year: string;
+    treatments: Treatment[];
+    open: boolean;
+  }[] = [];
 
   async handleSynonyms() {
     if (this.synoGroup === null) {
@@ -293,7 +433,7 @@ export class Timeline extends LitElement {
             );
           }
         } else {
-          this.years.push({ year, treatments: [treatment] });
+          this.years.push({ year, open: false, treatments: [treatment] });
           this.years = this.years.toSorted((a, b) =>
             a.year.localeCompare(b.year)
           );
@@ -310,7 +450,7 @@ export class Timeline extends LitElement {
     }
     return html`
       <div class="names">
-        <div class="header"><h2>Timeline<h2></div>
+        <div class="header"><h2>Timeline</h2></div>
         <div class="list">${
       this.names.map((n, index) =>
         html`<div class="name ${
@@ -337,23 +477,49 @@ export class Timeline extends LitElement {
       <div class="treatments">
         <div class="years">${
       this.cols.length > 0
-        ? html`<div>
-          <div class="header"><h2>CoL<h2></div>
+        ? html`
+          <div>
+            <div class="header"><h2>CoL</h2>${
+          this.cols.length > 1
+            ? html`<button @click=${() =>
+              this.colExpanded = !this.colExpanded}><s-icon icon=${
+              this.colExpanded ? "collapse" : "expand"
+            }></s-icon</button>`
+            : nothing
+        }
+          </div>
           <div class="grid">${
-          this.cols.map((col) =>
-            html`<s-timeline-treatment .acceptedCoL=${col} .names=${this.names}></s-timeline-treatment>`
-          )
+          this.colExpanded
+            ? this.cols.map((col) =>
+              html`<s-timeline-treatment .acceptedCoL=${[
+                col,
+              ]} .names=${this.names}></s-timeline-treatment>`
+            )
+            : html`<s-timeline-treatment .acceptedCoL=${this.cols} .names=${this.names}></s-timeline-treatment>`
         }</div>
           </div>`
         : nothing
     }${
-      this.years.map((t) =>
+      this.years.map((t, index) =>
         html`<div>
-          <div class="header"><h2>${t.year}<h2></div>
+          <div class="header"><h2>${t.year}</h2>${
+          t.treatments.length > 1
+            ? html`<button @click=${() => {
+              this.years = this.years.toSpliced(index, 1, {
+                ...t,
+                open: !t.open,
+              });
+            }}><s-icon icon=${t.open ? "collapse" : "expand"}></s-icon</button>`
+            : nothing
+        }</div>
           <div class="grid">${
-          t.treatments.map((treat) =>
-            html`<s-timeline-treatment .treatment=${treat} .names=${this.names}></s-timeline-treatment>`
-          )
+          t.open
+            ? t.treatments.map((treat) =>
+              html`<s-timeline-treatment .treatments=${[
+                treat,
+              ]} .names=${this.names}></s-timeline-treatment>`
+            )
+            : html`<s-timeline-treatment .treatments=${t.treatments} .names=${this.names}></s-timeline-treatment>`
         }</div>
           </div>`
       )
