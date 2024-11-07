@@ -219,7 +219,11 @@ export class Timeline extends LitElement {
       return;
     }
     for await (const name of this.synoGroup) {
-      this.names = [...this.names, { name, open: false, openable: true }];
+      const openable = name.authorizedNames.length > 0 &&
+        (name.authorizedNames.length > 1 ||
+          (!!name.colURI || name.treatments.cite.size > 0 ||
+            name.treatments.treats.size > 0));
+      this.names = [...this.names, { name, open: false, openable }];
       for (const treatment of this.synoGroup.treatments.values()) {
         const year = treatment.date ? treatment.date + "" : "N/A";
         const entry = this.years.find((y) => y.year === year);
@@ -253,14 +257,14 @@ export class Timeline extends LitElement {
       this.names.map((n, index) =>
         html`<div class="name ${
           n.open ? "open" : "closed"
-        }"><div class="unauthorized">${n.name.displayName} <button @click=${() => {
+        }"><div class="unauthorized">${n.name.displayName} ${n.openable ? html`<button @click=${() => {
           this.names = this.names.toSpliced(index, 1, {
             ...n,
             open: !n.open,
           });
         }}><s-icon icon=${
           n.open ? "collapse" : "expand"
-        }></s-icon</button></div>${
+        }></s-icon</button>` : n.name.authorizedNames.length > 0 ? n.name.authorizedNames[0]!.authority : nothing}</div>${
           n.name.authorizedNames.map((a) =>
             html`<div class="authorized"><span class="ditto">—“—<span> ${a.authority}</div>`
           )
