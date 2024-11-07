@@ -1,16 +1,10 @@
-import type {
-  Name,
-  SynonymGroup,
-  Treatment,
-  TreatmentDetails,
-} from "@plazi/synolib";
+import type { Name, SynonymGroup, Treatment } from "@plazi/synolib";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { repeat } from "lit/directives/repeat.js";
 import { until } from "lit/directives/until.js";
-import { Icon, icons } from "./Icons.ts";
+import { Icon, IconName } from "./Icons.ts";
 
-type NameState = { name: Name; open: boolean };
+type NameState = { name: Name; open: boolean; openable: boolean };
 type NameIcons = { collapsed: Icon; all: Icon[]; open: boolean };
 
 @customElement("s-timeline-treatment")
@@ -51,30 +45,52 @@ export class TimelineTreatment extends LitElement {
       )
     }>${
       this.names.map((i) => {
-        const result: (keyof typeof icons)[] = [];
+        let hasDef = false;
+        let hasAug = false;
+        let hasDpr = false;
+        let hasCite = false;
+        const result: IconName[] = [];
         if (i.name.treatments.treats.has(this.treatment!)) {
           result.push("aug");
+          hasAug = true;
         } else if (i.name.treatments.cite.has(this.treatment!)) {
           result.push("cite");
+          hasCite = true;
         } else {
           result.push("empty");
         }
         for (const authName of i.name.authorizedNames) {
           if (authName.treatments.def.has(this.treatment!)) {
             result.push("def");
+            hasDef = true;
           } else if (authName.treatments.aug.has(this.treatment!)) {
             result.push("aug");
+            hasAug = true;
           } else if (authName.treatments.dpr.has(this.treatment!)) {
             result.push("dpr");
+            hasDpr = true;
           } else if (authName.treatments.cite.has(this.treatment!)) {
             result.push("cite");
+            hasCite = true;
           } else {
             result.push("empty");
           }
         }
-        return html`<div title=${i.name.displayName} class="name ${
-          i.open ? "open" : "closed"
-        }">${result.map((i) => html`<s-icon icon=${i}></s-icon>`)}</div>`;
+        if (i.open) {
+          return html`<div class="name">${
+            result.map((i) => html`<s-icon icon=${i}></s-icon>`)
+          }</div>`;
+        }
+        const collapsed_icon: IconName = hasDef
+          ? (hasDpr ? "def_dpr" : "def")
+          : hasAug
+          ? (hasDpr ? "aug_dpr" : "aug")
+          : hasDpr
+          ? "dpr"
+          : hasCite
+          ? "cite"
+          : "empty";
+        return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
       })
     }</div>`;
   }
@@ -89,6 +105,7 @@ export class Timeline extends LitElement {
       display: grid;
       grid-template-columns: auto 1fr;
       margin: 1rem 0;
+      overflow: hidden;
     }
 
     .header {
@@ -98,7 +115,7 @@ export class Timeline extends LitElement {
 
       h2 {
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1rem;
         line-height: 1.5rem;
       }
     }
@@ -114,11 +131,51 @@ export class Timeline extends LitElement {
 
     .name {
       display: grid;
-      grid-auto-rows: 1.5rem;
       line-height: 1.5rem;
 
       & + & {
         border-top: 1px solid gray;
+      }
+
+      &.closed .authorized {
+        height: 0;
+        overflow-y: hidden;
+      }
+      
+      .unauthorized {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: .25rem;
+      }
+
+      button {
+        border-radius: 1rem;
+        border: none;
+        background: none;
+        width: 1rem;
+        height: 1rem;
+        padding: 0;
+        margin: .25rem;
+        position: relative;
+
+        &>svg {
+          height: 1rem;
+          margin: 0;
+        }
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: -0.5rem;
+          bottom: -0.5rem;
+          left: -0.5rem;
+          right: -0.5rem;
+          border-radius: 100%;
+        }
+
+        &:hover::before {
+          background: #ededed8c;
+        }
       }
     }
 
@@ -162,7 +219,7 @@ export class Timeline extends LitElement {
       return;
     }
     for await (const name of this.synoGroup) {
-      this.names = [...this.names, { name, open: true }];
+      this.names = [...this.names, { name, open: false, openable: true }];
       for (const treatment of this.synoGroup.treatments.values()) {
         const year = treatment.date ? treatment.date + "" : "N/A";
         const entry = this.years.find((y) => y.year === year);
@@ -193,10 +250,17 @@ export class Timeline extends LitElement {
       <div class="names">
         <div class="header"><h2>Timeline<h2></div>
         <div class="list">${
-      this.names.map((n) =>
+      this.names.map((n, index) =>
         html`<div class="name ${
           n.open ? "open" : "closed"
-        }"><div class="unauthorized">${n.name.displayName}</div>${
+        }"><div class="unauthorized">${n.name.displayName} <button @click=${() => {
+          this.names = this.names.toSpliced(index, 1, {
+            ...n,
+            open: !n.open,
+          });
+        }}><s-icon icon=${
+          n.open ? "collapse" : "expand"
+        }></s-icon</button></div>${
           n.name.authorizedNames.map((a) =>
             html`<div class="authorized"><span class="ditto">—“—<span> ${a.authority}</div>`
           )
