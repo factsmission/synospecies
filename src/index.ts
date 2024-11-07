@@ -2,6 +2,7 @@ import { SparqlEndpoint, SynonymGroup } from "@plazi/synolib";
 
 import "./components/SynoForm.ts";
 import { SynoName } from "./components/SynoName.ts";
+import { Timeline } from "./components/Timeline.ts";
 
 const params = new URLSearchParams(document.location.search);
 const HIDE_COL_ONLY_SYNONYMS = !params.has("show_col");
@@ -34,6 +35,10 @@ async function main(name: string) {
     HIDE_COL_ONLY_SYNONYMS,
     START_WITH_SUBTAXA,
   );
+
+  const timeline = new Timeline();
+  timeline.synoGroup = synoGroup;
+  root.append(timeline);
 
   for await (const name of synoGroup) {
     const element = new SynoName(name, synoGroup, SORT_TREATMENTS_BY_TYPE);

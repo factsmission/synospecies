@@ -37,14 +37,14 @@ export class SynoForm extends HTMLElement {
     subtaxaCheckLabel.innerText = "Include subatxa of search term.";
     const subtaxaCheck = document.createElement("input");
     subtaxaCheck.type = "checkbox";
-    subtaxaCheck.checked = NAME ? START_WITH_SUBTAXA : true;
+    subtaxaCheck.checked = NAME ? START_WITH_SUBTAXA : false;
     subtaxaCheckLabel.prepend(subtaxaCheck);
 
     const sorttreatmentsCheckLabel = document.createElement("label");
     sorttreatmentsCheckLabel.innerText = "Sort treatments by type.";
     const sorttreatmentsCheck = document.createElement("input");
     sorttreatmentsCheck.type = "checkbox";
-    sorttreatmentsCheck.checked = NAME ? SORT_TREATMENTS_BY_TYPE : true;
+    sorttreatmentsCheck.checked = NAME ? SORT_TREATMENTS_BY_TYPE : false;
     sorttreatmentsCheckLabel.prepend(sorttreatmentsCheck);
 
     const endpointPlaziLabel = document.createElement("label");
