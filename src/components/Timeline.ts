@@ -451,7 +451,7 @@ export class Timeline extends LitElement {
       if (sameName) sameName.homonym = true;
       this.names = [...this.names, {
         name,
-        open: false,
+        open: openable && name.authorizedNames.length <= 3,
         openable,
         homonym: !!sameName,
       }];
@@ -567,7 +567,14 @@ export class Timeline extends LitElement {
                 col,
               ]} .names=${this.names}></s-timeline-treatment>`
             )
-            : html`<s-timeline-treatment .acceptedCoL=${this.cols} .names=${this.names}></s-timeline-treatment>`
+            : html`<s-timeline-treatment
+              .acceptedCoL=${this.cols}
+              .names=${this.names}
+              @click=${(e: Event) => {
+              if (e.target === e.currentTarget) {
+                this.colExpanded = !this.colExpanded;
+              }
+            }}></s-timeline-treatment>`
         }</div>
           </div>`
         : nothing
