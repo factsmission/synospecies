@@ -506,7 +506,7 @@ export class Timeline extends LitElement {
           ) ?? n.name.taxonNameURI?.replace(
             "http://taxon-name.plazi.org/id/",
             "#",
-          )
+          ) ?? "#"
         }>${
           n.homonym
             ? (n.name.kingdom === "Animalia" || n.name.kingdom === "Plantae"
@@ -539,7 +539,7 @@ export class Timeline extends LitElement {
               ) ?? a.taxonConceptURI?.replace(
                 "http://taxon-concept.plazi.org/id/",
                 "#",
-              )
+              ) ?? "#"
             }"><span class="ditto">—“—</span> ${a.authority}</a>`
           )
         }</div>`
