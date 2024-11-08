@@ -29,7 +29,10 @@ export class SynoName extends HTMLElement {
     const rank_badge = document.createElement("span");
     rank_badge.classList.add("rank");
     rank_badge.innerText = this.name.rank;
-    title.append(" ", rank_badge);
+    const kingdom_badge = document.createElement("span");
+    kingdom_badge.classList.add("rank");
+    kingdom_badge.innerText = this.name.kingdom || "Missing Kingdom";
+    title.append(" ", kingdom_badge, " ", rank_badge);
 
     if (this.name.taxonNameURI) {
       const short = this.name.taxonNameURI.replace(

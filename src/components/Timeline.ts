@@ -4,7 +4,12 @@ import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import { Icon, IconName } from "./Icons.ts";
 
-type NameState = { name: Name; open: boolean; openable: boolean };
+type NameState = {
+  name: Name;
+  open: boolean;
+  openable: boolean;
+  homonym: boolean;
+};
 type NameIcons = { collapsed: Icon; all: Icon[]; open: boolean };
 
 @customElement("s-timeline-treatment")
@@ -308,6 +313,10 @@ export class Timeline extends LitElement {
       max-width: min(48rem, 60vw);
       overflow: hidden;
 
+      .header {
+        z-index: 15;
+      }
+
       * {
         max-width: 100%;
         text-overflow: ellipsis;
@@ -324,6 +333,14 @@ export class Timeline extends LitElement {
       display: grid;
       grid-template-columns: 100%;
       line-height: 1.5rem;
+
+      a {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
+        gap: .25rem;
+        align-items: center;
+      }
 
       & + & {
         border-top: 1px solid var(--text-color-muted);
@@ -428,7 +445,16 @@ export class Timeline extends LitElement {
         (name.authorizedNames.length > 1 ||
           (!!name.colURI || name.treatments.cite.size > 0 ||
             name.treatments.treats.size > 0));
-      this.names = [...this.names, { name, open: false, openable }];
+      const sameName = this.names.find((n) =>
+        n.name.displayName === name.displayName
+      );
+      if (sameName) sameName.homonym = true;
+      this.names = [...this.names, {
+        name,
+        open: false,
+        openable,
+        homonym: !!sameName,
+      }];
       if (name.acceptedColURI && !this.cols.includes(name.acceptedColURI)) {
         this.cols = [...this.cols, name.acceptedColURI].toSorted();
       }
@@ -481,14 +507,28 @@ export class Timeline extends LitElement {
             "http://taxon-name.plazi.org/id/",
             "#",
           )
-        }>${n.name.displayName} ${!n.openable && n.name.authorizedNames.length === 1 ? n.name.authorizedNames[0].authority : nothing}</a> ${
+        }>${
+          n.homonym
+            ? (n.name.kingdom === "Animalia" || n.name.kingdom === "Plantae"
+              ? html`<s-icon icon=${n.name.kingdom}></s-icon>`
+              : n.name.kingdom
+              ? html`(${n.name.kingdom}) `
+              : html`<s-icon icon="unknown"></s-icon>`)
+            : ""
+        }<i>${n.name.displayName}</i>${
+          !n.openable && n.name.authorizedNames.length === 1
+            ? " " + n.name.authorizedNames[0].authority
+            : ""
+        }</a> ${
           n.openable
             ? html`<button @click=${() => {
               this.names = this.names.toSpliced(index, 1, {
                 ...n,
                 open: !n.open,
               });
-            }}><s-icon icon=${n.open ? "collapse" : "expand"}></s-icon></button>`
+            }}><s-icon icon=${
+              n.open ? "collapse" : "expand"
+            }></s-icon></button>`
             : nothing
         }</div>${
           n.name.authorizedNames.map((a) =>
@@ -516,7 +556,7 @@ export class Timeline extends LitElement {
             ? html`<button @click=${() =>
               this.colExpanded = !this.colExpanded}><s-icon icon=${
               this.colExpanded ? "collapse" : "expand"
-            }></s-icon</button>`
+            }></s-icon></button>`
             : nothing
         }
           </div>
@@ -555,10 +595,12 @@ export class Timeline extends LitElement {
               .treatments=${t.treatments}
               .names=${this.names}
               @click=${(e: Event) => {
-              if (e.target === e.currentTarget) this.years = this.years.toSpliced(index, 1, {
-                ...t,
-                open: !t.open,
-              });
+              if (e.target === e.currentTarget) {
+                this.years = this.years.toSpliced(index, 1, {
+                  ...t,
+                  open: !t.open,
+                });
+              }
             }}
             ></s-timeline-treatment>`
         }</div>
