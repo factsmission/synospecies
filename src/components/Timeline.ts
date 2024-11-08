@@ -27,6 +27,15 @@ export class TimelineTreatment extends LitElement {
       }
     }
 
+    .row {
+      min-width: 1rem;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: max-content;
+      justify-content: safe center;
+      align-items: center;
+    }
+
     .name {
       display: grid;
       grid-auto-rows: 24px;
@@ -110,63 +119,83 @@ export class TimelineTreatment extends LitElement {
       const tSet = new Set(this.treatments);
       return html`<div class="multiple" title=${this.treatments.length}>${
         this.names.map((i) => {
-          let hasDef = false;
-          let hasAug = false;
-          let hasDpr = false;
-          let hasCite = false;
-          const result: IconName[] = [];
-          if (!i.name.treatments.treats.isDisjointFrom(tSet)) {
-            result.push("aug");
-            hasAug = true;
-          } else if (!i.name.treatments.cite.isDisjointFrom(tSet)) {
-            result.push("cite");
-            hasCite = true;
-          } else {
-            result.push("empty");
-          }
+          const result = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
+          result[0].aug = i.name.treatments.treats.intersection(tSet).size;
+          result[0].cite = i.name.treatments.cite.intersection(tSet).size;
           for (const authName of i.name.authorizedNames) {
-            let pushed = false;
-            if (!authName.treatments.def.isDisjointFrom(tSet)) {
-              result.push("def");
-              hasDef = true;
-              pushed = true;
-            }
-            if (!authName.treatments.aug.isDisjointFrom(tSet)) {
-              if (!pushed) result.push("aug");
-              else result.splice(-1, 1, "multiple");
-              hasAug = true;
-              pushed = true;
-            }
-            if (!authName.treatments.dpr.isDisjointFrom(tSet)) {
-              if (!pushed) result.push("dpr");
-              else result.splice(-1, 1, "multiple");
-              hasDpr = true;
-              pushed = true;
-            }
-            if (!authName.treatments.cite.isDisjointFrom(tSet)) {
-              if (!pushed) result.push("cite");
-              hasCite = true;
-              pushed = true;
-            }
-            if (!pushed) {
-              result.push("empty");
-            }
+            const res = {
+              def: authName.treatments.def.intersection(tSet).size,
+              aug: authName.treatments.aug.intersection(tSet).size,
+              dpr: authName.treatments.dpr.intersection(tSet).size,
+              cite: authName.treatments.cite.intersection(tSet).size,
+            };
+            result.push(res);
           }
           if (i.open) {
             return html`<div class="name">${
-              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
+              result.map(({ def, aug, dpr, cite }) =>
+                html`<div class="row">${
+                  def > 1
+                    ? html`${def}<s-icon icon="def"></s-icon>`
+                    : def === 1
+                    ? html`<s-icon icon="def"></s-icon>`
+                    : nothing
+                }${
+                  aug > 1
+                    ? html` ${aug}<s-icon icon="aug"></s-icon>`
+                    : aug === 1
+                    ? html`<s-icon icon="aug"></s-icon>`
+                    : nothing
+                }${
+                  dpr > 1
+                    ? html` ${dpr}<s-icon icon="dpr"></s-icon>`
+                    : dpr === 1
+                    ? html`<s-icon icon="dpr"></s-icon>`
+                    : nothing
+                }${
+                  cite > 1
+                    ? html` ${cite}<s-icon icon="cite"></s-icon>`
+                    : cite === 1
+                    ? html`<s-icon icon="cite"></s-icon>`
+                    : nothing
+                }</div>`
+              )
             }</div>`;
           }
-          const collapsed_icon: IconName = hasDef
-            ? (hasDpr || hasAug ? "multiple" : "def")
-            : hasAug
-            ? (hasDpr ? "multiple" : "aug")
-            : hasDpr
-            ? "dpr"
-            : hasCite
-            ? "cite"
-            : "empty";
-          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
+          const acc = { def: 0, aug: 0, dpr: 0, cite: 0 };
+          result.map(
+            ({ def, aug, dpr, cite }) => {
+              acc.def += def;
+              acc.aug += aug;
+              acc.dpr += dpr;
+              acc.cite += cite;
+            },
+          );
+          return html`<div class="name"><div class="row">${
+            acc.def > 1
+              ? html`${acc.def}<s-icon icon="def"></s-icon>`
+              : acc.def === 1
+              ? html`<s-icon icon="def"></s-icon>`
+              : nothing
+          }${
+            acc.aug > 1
+              ? html` ${acc.aug}<s-icon icon="aug"></s-icon>`
+              : acc.aug === 1
+              ? html`<s-icon icon="aug"></s-icon>`
+              : nothing
+          }${
+            acc.dpr > 1
+              ? html` ${acc.dpr}<s-icon icon="dpr"></s-icon>`
+              : acc.dpr === 1
+              ? html`<s-icon icon="dpr"></s-icon>`
+              : nothing
+          }${
+            acc.cite > 1
+              ? html` ${acc.cite}<s-icon icon="cite"></s-icon>`
+              : acc.cite === 1
+              ? html`<s-icon icon="cite"></s-icon>`
+              : nothing
+          }</div></div>`;
         })
       }</div>`;
     }
