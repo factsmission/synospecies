@@ -40,7 +40,7 @@ jobs:
           cd next
           deno task build
           mkdir ../dist/next
-          cp -r dist/ ../dist/next/
+          cp -r dist/* ../dist/next/
 
       ## Upload Artefact
       - uses: actions/upload-pages-artifact@v3
