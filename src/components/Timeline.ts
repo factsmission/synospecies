@@ -10,7 +10,8 @@ type NameIcons = { collapsed: Icon; all: Icon[]; open: boolean };
 @customElement("s-timeline-treatment")
 export class TimelineTreatment extends LitElement {
   static override styles = css`
-    :host > div {
+    :host > div,
+    :host > a {
       background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
       border-radius: .5rem;
       display: grid;
@@ -21,14 +22,13 @@ export class TimelineTreatment extends LitElement {
       }
     }
 
-    
     .name {
       display: grid;
       grid-auto-rows: 24px;
       align-items: center;
 
       & + & {
-        border-top: 1px solid gray;
+        border-top: 1px solid var(--text-color-muted);
       }
     }
   `;
@@ -43,7 +43,7 @@ export class TimelineTreatment extends LitElement {
   override render() {
     if (this.treatments.length === 1) {
       const treatment = this.treatments[0];
-      return html`<div title=${
+      return html`<a href=${treatment.url} target="_blank" title=${
         until(
           treatment.details.then((d) =>
             `${d.creators} ${treatment?.date} “${d.title}”`
@@ -99,7 +99,7 @@ export class TimelineTreatment extends LitElement {
             : "empty";
           return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
         })
-      }</div>`;
+      }</a>`;
     }
     if (this.treatments.length > 1) {
       const tSet = new Set(this.treatments);
@@ -167,7 +167,9 @@ export class TimelineTreatment extends LitElement {
     }
     if (this.acceptedCoL.length === 1) {
       const col = this.acceptedCoL[0];
-      return html`<div title=${col}>${
+      return html`<a href=${col} target="_blank" title=${
+        col.replace("https://www.catalogueoflife.org/data/taxon/", "")
+      }>${
         this.names.map((i) => {
           let hasAug = false;
           let hasDpr = false;
@@ -204,7 +206,7 @@ export class TimelineTreatment extends LitElement {
             : "empty";
           return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
         })
-      }</div>`;
+      }</a>`;
     }
     if (this.acceptedCoL.length > 1) {
       const colSet = new Set(this.acceptedCoL);
@@ -269,6 +271,11 @@ export class Timeline extends LitElement {
       max-height: 90vh;
     }
 
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     .header {
       background: var(--nav-background);
       background-opacity: 50%;
@@ -291,15 +298,21 @@ export class Timeline extends LitElement {
     .names {
       background: var(--nav-background);
       background-opacity: 50%;
-      border-right: 1px solid gray;
+      border-right: 1px solid var(--text-color-muted);
       position: sticky;
       left: 0;
       z-index: 10;
       text-overflow: ellipsis;
       text-wrap: nowrap;
       min-width: min(24rem, 40vw);
-      max-width: 60vw;
+      max-width: min(48rem, 60vw);
       overflow: hidden;
+
+      * {
+        max-width: 100%;
+        text-overflow: ellipsis;
+        // overflow: hidden;
+      }
     }
 
     .list {
@@ -309,10 +322,11 @@ export class Timeline extends LitElement {
 
     .name {
       display: grid;
+      grid-template-columns: 100%;
       line-height: 1.5rem;
 
       & + & {
-        border-top: 1px solid gray;
+        border-top: 1px solid var(--text-color-muted);
       }
 
       &.closed .authorized {
@@ -324,6 +338,10 @@ export class Timeline extends LitElement {
         display: grid;
         grid-template-columns: 1fr auto;
         gap: .25rem;
+      }
+
+      .ditto {
+        color:  var(--text-color-muted);
       }
     }
 
@@ -455,20 +473,34 @@ export class Timeline extends LitElement {
       this.names.map((n, index) =>
         html`<div class="name ${
           n.open ? "open" : "closed"
-        }"><div class="unauthorized">${n.name.displayName} ${
+        }"><div class="unauthorized"><a href=${
+          n.name.colURI?.replace(
+            "https://www.catalogueoflife.org/data/taxon/",
+            "#",
+          ) ?? n.name.taxonNameURI?.replace(
+            "http://taxon-name.plazi.org/id/",
+            "#",
+          )
+        }>${n.name.displayName} ${!n.openable && n.name.authorizedNames.length === 1 ? n.name.authorizedNames[0].authority : nothing}</a> ${
           n.openable
             ? html`<button @click=${() => {
               this.names = this.names.toSpliced(index, 1, {
                 ...n,
                 open: !n.open,
               });
-            }}><s-icon icon=${n.open ? "collapse" : "expand"}></s-icon</button>`
-            : n.name.authorizedNames.length > 0
-            ? n.name.authorizedNames[0]!.authority
+            }}><s-icon icon=${n.open ? "collapse" : "expand"}></s-icon></button>`
             : nothing
         }</div>${
           n.name.authorizedNames.map((a) =>
-            html`<div class="authorized"><span class="ditto">—“—<span> ${a.authority}</div>`
+            html`<a class="authorized" href=${
+              a.colURI?.replace(
+                "https://www.catalogueoflife.org/data/taxon/",
+                "#",
+              ) ?? a.taxonConceptURI?.replace(
+                "http://taxon-concept.plazi.org/id/",
+                "#",
+              )
+            }"><span class="ditto">—“—</span> ${a.authority}</a>`
           )
         }</div>`
       )
@@ -519,7 +551,16 @@ export class Timeline extends LitElement {
                 treat,
               ]} .names=${this.names}></s-timeline-treatment>`
             )
-            : html`<s-timeline-treatment .treatments=${t.treatments} .names=${this.names}></s-timeline-treatment>`
+            : html`<s-timeline-treatment
+              .treatments=${t.treatments}
+              .names=${this.names}
+              @click=${(e: Event) => {
+              if (e.target === e.currentTarget) this.years = this.years.toSpliced(index, 1, {
+                ...t,
+                open: !t.open,
+              });
+            }}
+            ></s-timeline-treatment>`
         }</div>
           </div>`
       )
