@@ -55,7 +55,7 @@ export class Icon extends LitElement {
   static override styles = css`
     :host {
       display: inline-block;
-      height: 1em;
+      height: 1rem;
     }
     svg {
       display: block;

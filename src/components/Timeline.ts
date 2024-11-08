@@ -21,6 +21,8 @@ export class TimelineTreatment extends LitElement {
       border-radius: .5rem;
       display: grid;
       padding: .25rem;
+      min-width: 1rem;
+      font-size: 0.8rem;
 
       &.multiple {
         background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
@@ -28,7 +30,6 @@ export class TimelineTreatment extends LitElement {
     }
 
     .row {
-      min-width: 1rem;
       display: grid;
       grid-auto-flow: column;
       grid-auto-columns: max-content;
