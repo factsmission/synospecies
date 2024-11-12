@@ -2,15 +2,15 @@ import type { Name, SynonymGroup, Treatment } from "@plazi/synolib";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
-import { Icon, IconName } from "./Icons.ts";
+import { IconName } from "./Icons.ts";
 
 type NameState = {
   name: Name;
   open: boolean;
   openable: boolean;
   homonym: boolean;
+  date: number;
 };
-type NameIcons = { collapsed: Icon; all: Icon[]; open: boolean };
 
 @customElement("s-timeline-treatment")
 export class TimelineTreatment extends LitElement {
@@ -320,7 +320,7 @@ export class Timeline extends LitElement {
       padding: .25rem;
       text-align: right;
       grid-template-columns: auto auto;
-      justify-content: safe center
+      justify-content: safe center;
       gap: .25rem;
 
       h2 {
@@ -479,12 +479,38 @@ export class Timeline extends LitElement {
         n.name.displayName === name.displayName
       );
       if (sameName) sameName.homonym = true;
+      let date = Infinity;
+      name.treatments.treats.forEach((t) => {
+        if (t.date && t.date < date) date = t.date;
+      });
+      name.treatments.cite.forEach((t) => {
+        if (t.date && t.date < date) date = t.date;
+      });
+      name.authorizedNames.forEach((a) => {
+        a.treatments.def.forEach((t) => {
+          if (t.date && t.date < date) date = t.date;
+        });
+        a.treatments.aug.forEach((t) => {
+          if (t.date && t.date < date) date = t.date;
+        });
+        a.treatments.dpr.forEach((t) => {
+          if (t.date && t.date < date) date = t.date;
+        });
+        a.treatments.cite.forEach((t) => {
+          if (t.date && t.date < date) date = t.date;
+        });
+      });
       this.names = [...this.names, {
         name,
         open: openable && name.authorizedNames.length <= 3,
         openable,
         homonym: !!sameName,
-      }];
+        date,
+      }].sort((a, b) =>
+        a.date !== b.date
+          ? a.date - b.date
+          : a.name.displayName.localeCompare(b.name.displayName)
+      );
       if (name.acceptedColURI && !this.cols.includes(name.acceptedColURI)) {
         this.cols = [...this.cols, name.acceptedColURI].toSorted();
       }
