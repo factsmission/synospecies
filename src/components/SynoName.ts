@@ -7,6 +7,7 @@ import type {
 import { distinct } from "@std/collections/distinct";
 import "./Icons.ts";
 import { type SynoStatus, SynoTreatment } from "./SynoTreatment.ts";
+import "./WikidataButtons.ts";
 import { html, render } from "lit";
 
 export class SynoName extends HTMLElement {
@@ -20,11 +21,14 @@ export class SynoName extends HTMLElement {
 
   connectedCallback() {
     if (this.innerHTML) return;
+    const title_wrapper = document.createElement("div");
+    title_wrapper.className = "header"
     const title = document.createElement("h2");
     const name_title = document.createElement("i");
     name_title.innerText = this.name.displayName;
     title.append(name_title);
-    this.append(title);
+    title_wrapper.append(title);
+    this.append(title_wrapper);
 
     const rank_badge = document.createElement("span");
     rank_badge.classList.add("rank");
@@ -132,6 +136,11 @@ export class SynoName extends HTMLElement {
     justification.innerText = "...?";
     justify(this.name).then((just) => justification.title = `This ${just}`);
     title.append(" ", justification);
+
+    render(
+      html`<s-wikidata displayname=${this.name.displayName}></s-wikidata>`,
+      title_wrapper,
+    );
 
     for (const authorizedName of this.name.authorizedNames) {
       const authName = document.createElement("h3");

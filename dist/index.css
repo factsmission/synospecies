@@ -211,6 +211,17 @@ syno-form {
   }
 }
 
+
+syno-name {
+  .header {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: .25rem;
+  }
+}
+
 /* COPIED FROM SYNOLIB EXAMPLE */
 
 img {

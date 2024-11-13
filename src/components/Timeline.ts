@@ -321,7 +321,6 @@ export class Timeline extends LitElement {
       text-align: right;
       grid-template-columns: auto auto;
       justify-content: safe center;
-      gap: .25rem;
 
       h2 {
         margin: 0;
