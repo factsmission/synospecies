@@ -11,9 +11,6 @@
     "npm:@triply/yasqe@^4.2.28": "4.2.28_@triply+yasgui@4.2.28",
     "npm:@triply/yasr@^4.2.28": "4.2.28_@triply+yasgui@4.2.28",
     "npm:@types/node@*": "22.5.4",
-    "npm:@zazuko/yasgui@^4.4.0": "4.4.0",
-    "npm:@zazuko/yasqe@^4.4.0": "4.4.0",
-    "npm:@zazuko/yasr@^4.4.0": "4.4.0",
     "npm:awesomplete@^1.1.5": "1.1.7",
     "npm:esbuild-sass-plugin@^3.3.1": "3.3.1_esbuild@0.24.0_sass-embedded@1.80.7",
     "npm:esbuild@0.24": "0.24.0",
@@ -136,16 +133,6 @@
         "@fortawesome/fontawesome-common-types"
       ]
     },
-    "@json2csv/formatters@7.0.6": {
-      "integrity": "sha512-hjIk1H1TR4ydU5ntIENEPgoMGW+Q7mJ+537sDFDbsk+Y3EPl2i4NfFVjw0NJRgT+ihm8X30M67mA8AS6jPidSA=="
-    },
-    "@json2csv/plainjs@7.0.6": {
-      "integrity": "sha512-4Md7RPDCSYpmW1HWIpWBOqCd4vWfIqm53S3e/uzQ62iGi7L3r34fK/8nhOMEe+/eVfCx8+gdSCt1d74SlacQHw==",
-      "dependencies": [
-        "@json2csv/formatters",
-        "@streamparser/json"
-      ]
-    },
     "@lit-labs/ssr-dom-shim@1.2.1": {
       "integrity": "sha512-wx4aBmgeGvFmOKucFKY+8VFJSYZxs9poN3SDNQFF6lT6NrQUnHiPB2PWz2sc4ieEcAaYYzN+1uWahEeTq2aRIQ=="
     },
@@ -216,9 +203,6 @@
         "node-addon-api"
       ]
     },
-    "@streamparser/json@0.0.20": {
-      "integrity": "sha512-VqAAkydywPpkw63WQhPVKCD3SdwXuihCUVZbbiY3SfSTGQyHmwRoq27y4dmJdZuJwd5JIlQoMPyGvMbUPY0RKQ=="
-    },
     "@tarekraafat/autocomplete.js@7.2.0": {
       "integrity": "sha512-p1aEcKC/WHpVBuFyRhXq/ie+mgO4QqCNEsdVIPUBgmNqmxV4dVfqYEpk///9vvKyranUUvrlVu4e2tdzAaXKIg=="
     },
@@ -270,8 +254,8 @@
         "codemirror",
         "colors",
         "column-resizer",
-        "datatables.net@1.13.11",
-        "datatables.net-dt@1.13.11",
+        "datatables.net",
+        "datatables.net-dt",
         "dompurify",
         "jquery",
         "json2csv",
@@ -298,70 +282,8 @@
         "undici-types"
       ]
     },
-    "@types/node@22.9.0": {
-      "integrity": "sha512-vuyHg81vvWA1Z1ELfvLko2c8f34gyA0zaic0+Rllc5lbCnbSyuvb2Oxpm6TAUAC/2xZN3QGqxBNggD1nNR2AfQ==",
-      "dependencies": [
-        "undici-types"
-      ]
-    },
     "@types/trusted-types@2.0.7": {
       "integrity": "sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw=="
-    },
-    "@zazuko/yasgui-utils@4.4.0": {
-      "integrity": "sha512-4DpLEbi/6EOH8WFmA1+OwhmJ+Ay+rUyF+wGmA1EcoVsTOMlJ06P4KZmyskayoPtV9l060lryzefAllGyjdZ5mA==",
-      "dependencies": [
-        "@types/node@22.9.0",
-        "dompurify",
-        "store"
-      ]
-    },
-    "@zazuko/yasgui@4.4.0": {
-      "integrity": "sha512-PI1PYaEvwVwo5Wc0j3IZIpOo+3ZBc81SlTQXakee/52gK7Lut1Z0FJinRw8K39dkBC40pbPeALA6XCn7Z8+nsA==",
-      "dependencies": [
-        "@tarekraafat/autocomplete.js",
-        "@types/lodash-es",
-        "@zazuko/yasgui-utils",
-        "@zazuko/yasqe",
-        "@zazuko/yasr",
-        "autosuggest-highlight",
-        "blueimp-md5",
-        "choices.js",
-        "dompurify",
-        "es6-object-assign",
-        "jsuri",
-        "lodash-es",
-        "sortablejs"
-      ]
-    },
-    "@zazuko/yasqe@4.4.0": {
-      "integrity": "sha512-0eHqIVS7v3WGiZHvF7ZLTmypad7qrloiT9t+c0y4kMADnJdAPY0X1H7AV0rSxVSpFH0OrDRH3L0xfhBQMstCPw==",
-      "dependencies": [
-        "@types/lodash-es",
-        "@zazuko/yasgui-utils",
-        "codemirror",
-        "lodash-es",
-        "query-string"
-      ]
-    },
-    "@zazuko/yasr@4.4.0": {
-      "integrity": "sha512-3gDCi6ttcPZG6vBi0WzmFWFKEk1WRkIYKnLN5w4/8cb+/phgqF+rfGZumkbfscnhBxwDE+cTIp5ehxx5HXbCgQ==",
-      "dependencies": [
-        "@fortawesome/free-solid-svg-icons",
-        "@json2csv/plainjs",
-        "@types/lodash-es",
-        "@zazuko/yasgui-utils",
-        "@zazuko/yasqe",
-        "codemirror",
-        "colors",
-        "column-resizer",
-        "datatables.net@2.1.8",
-        "datatables.net-dt@2.1.8",
-        "dompurify",
-        "jquery",
-        "lodash-es",
-        "n3",
-        "papaparse"
-      ]
     },
     "abort-controller@3.0.0": {
       "integrity": "sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==",
@@ -460,25 +382,12 @@
     "datatables.net-dt@1.13.11": {
       "integrity": "sha512-4GpS4OFLwIMfhb5UdJh6bEnh0E52jIJOlx7KLKs1pSce/xpHjvcmucbUWNaEndQIpHXtIxmVPoqcDB0ZbiVB+A==",
       "dependencies": [
-        "datatables.net@1.13.11",
-        "jquery"
-      ]
-    },
-    "datatables.net-dt@2.1.8": {
-      "integrity": "sha512-/ScKmyKIpKXzjOJrnJLOWMf2jOQfrYjayNMhUyeMzf3jKhNevHNvImU9MQ/Bab9yheKLjHLL24IgnshAvRFrng==",
-      "dependencies": [
-        "datatables.net@2.1.8",
+        "datatables.net",
         "jquery"
       ]
     },
     "datatables.net@1.13.11": {
       "integrity": "sha512-AE6RkMXziRaqzPcu/pl3SJXeRa6fmXQG/fVjuRESujvkzqDCYEeKTTpPMuVJSGYJpPi32WGSphVNNY1G4nSN/g==",
-      "dependencies": [
-        "jquery"
-      ]
-    },
-    "datatables.net@2.1.8": {
-      "integrity": "sha512-47ULt+U4bcjbuGTpTlT6SnCuSFVRBxxdWa6X3NfvTObBJ2BZU0o+JUIl05wQ6cABNIavjbAV51gpgvFsMHL9zA==",
       "dependencies": [
         "jquery"
       ]
@@ -1041,9 +950,9 @@
       "jsr:@luca/esbuild-deno-loader@0.11",
       "jsr:@plazi/synolib@3.1.1",
       "jsr:@std/collections@^1.0.9",
-      "npm:@zazuko/yasgui@^4.4.0",
-      "npm:@zazuko/yasqe@^4.4.0",
-      "npm:@zazuko/yasr@^4.4.0",
+      "npm:@triply/yasgui@^4.2.28",
+      "npm:@triply/yasqe@^4.2.28",
+      "npm:@triply/yasr@^4.2.28",
       "npm:awesomplete@^1.1.5",
       "npm:esbuild-sass-plugin@^3.3.1",
       "npm:esbuild@0.24",

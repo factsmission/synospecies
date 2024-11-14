@@ -1,11 +1,3 @@
-import { customElement } from "lit/decorators.js";
-import { html, LitElement } from "lit";
-
-// @ts-types="yasgui/src/index.ts"
-import { type PartialConfig } from "yasgui";
-// import "yasgui/build/yasgui.min.css";
-
-// @ts-types="yasqe/build/ts/src/index.d.ts"
 // @ts-types="yasqe/src/index.d.ts"
 import Yasqe from "yasqe";
 import "yasqe/build/yasqe.min.css";
@@ -36,7 +28,7 @@ const resultsPrefixes = {
   fabio: "http://purl.org/spar/fabio/",
 };
 
-const config: PartialConfig = {
+const config = {
   autofocus: true,
   copyEndpointOnNewTab: true,
   autoAddOnInit: true,
