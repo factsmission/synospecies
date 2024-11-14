@@ -168,10 +168,13 @@ export class Timeline extends LitElement {
   @state()
   protected accessor open = false;
 
+  private queryed: string | undefined = undefined;
+
   private endpoint = new SparqlEndpoint("https://query.wikidata.org/sparql");
 
   getData() {
-    if (!this.displayName) return;
+    if (!this.displayName || this.queryed === this.displayName) return;
+    this.queryed = this.displayName;
     const query = `
 SELECT DISTINCT ?item ?gbif (group_concat(?page;separator="|") as ?pages)
 WHERE {

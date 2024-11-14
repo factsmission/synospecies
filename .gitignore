@@ -1,5 +1,7 @@
 /dist/*.js
 /dist/*.js.map
+/dist/advanced.css
+/dist/advanced.css.map
 
 .DS_Store
 node_modules
