@@ -8,262 +8,236 @@ import { distinct } from "@std/collections/distinct";
 import "./Icons.ts";
 import { type SynoStatus, SynoTreatment } from "./SynoTreatment.ts";
 import "./WikidataButtons.ts";
-import { html, render } from "lit";
+import { css, html, LitElement, nothing } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { until } from "lit/directives/until.js";
 
-export class SynoName extends HTMLElement {
-  constructor(
-    private name: Name,
-    private synoGroup: SynonymGroup,
-    private SORT_TREATMENTS_BY_TYPE: boolean,
-  ) {
-    super();
-  }
+const shortUrl = (url: string) =>
+  url
+    .replace("https://www.catalogueoflife.org/data/taxon/", "")
+    .replace("http://taxon-concept.plazi.org/id/", "")
+    .replace("http://taxon-name.plazi.org/id/", "");
 
-  connectedCallback() {
-    if (this.innerHTML) return;
-    const title_wrapper = document.createElement("div");
-    title_wrapper.className = "header"
-    const title = document.createElement("h2");
-    const name_title = document.createElement("i");
-    name_title.innerText = this.name.displayName;
-    title.append(name_title);
-    title_wrapper.append(title);
-    this.append(title_wrapper);
+@customElement("syno-authname")
+export class SynoAuthName extends LitElement {
+  static override styles = css`
+  .ditto {
+    color:  var(--text-color-muted);
+  }`; // TODO
 
-    const rank_badge = document.createElement("span");
-    rank_badge.classList.add("rank");
-    rank_badge.innerText = this.name.rank;
-    const kingdom_badge = document.createElement("span");
-    kingdom_badge.classList.add("rank");
-    kingdom_badge.innerText = this.name.kingdom || "Missing Kingdom";
-    title.append(" ", kingdom_badge, " ", rank_badge);
+  @property({ attribute: false })
+  accessor synoGroup: SynonymGroup | null = null;
+  @property({ attribute: false })
+  accessor authorizedName: AuthorizedName | null = null;
 
-    if (this.name.taxonNameURI) {
-      const short = this.name.taxonNameURI.replace(
-        "http://taxon-name.plazi.org/id/",
-        "",
-      );
-      render(
-        html`<a class="taxon uri" id=${short} href=${this.name.taxonNameURI} target="_blank">${short}<s-icon icon="link"></s-icon></a>`,
-        title,
-      );
+  override render() {
+    if (!this.synoGroup || !this.authorizedName) return nothing;
+
+    const treatments_array: { trt: Treatment; status: SynoStatus }[] = [];
+
+    for (const trt of this.authorizedName.treatments.def) {
+      treatments_array.push({ trt, status: "def" });
+    }
+    for (const trt of this.authorizedName.treatments.aug) {
+      treatments_array.push({ trt, status: "aug" });
+    }
+    for (const trt of this.authorizedName.treatments.dpr) {
+      treatments_array.push({ trt, status: "dpr" });
+    }
+    for (const trt of this.authorizedName.treatments.cite) {
+      treatments_array.push({ trt, status: "cite" });
     }
 
-    const vernacular = document.createElement("div");
-    vernacular.classList.add("vernacular");
-    this.name.vernacularNames.then((names) => {
-      if (names.size > 0) {
-        vernacular.innerText = "“" +
-          distinct([...names.values()].flat()).join("”, “") + "”";
-      }
+    treatments_array.sort((a, b) => {
+      if (a.trt.date && b.trt.date) return a.trt.date - b.trt.date;
+      if (a.trt.date) return 1;
+      if (b.trt.date) return -1;
+      return 0;
     });
-    this.append(vernacular);
 
-    const treatments = document.createElement("ul");
-    this.append(treatments);
-
-    if (this.name.colURI) {
-      const short = this.name.colURI.replace(
-        "https://www.catalogueoflife.org/data/taxon/",
-        "",
-      );
-      render(
-        html`<a class="col uri" id=${short} href=${this.name.taxonNameURI} target="_blank">${short}<s-icon icon="link"></s-icon></a>`,
-        title,
-      );
-
-      const li = document.createElement("div");
-      li.classList.add("treatmentline");
-      render(
-        html`<s-icon icon=${
-          this.name.acceptedColURI !== this.name.colURI ? "col_dpr" : "col_aug"
-        }></s-icon>`,
-        li,
-      );
-      treatments.append(li);
-
-      const creators = document.createElement("span");
-      creators.innerText = "Catalogue of Life";
-      li.append(creators);
-
-      const names = document.createElement("div");
-      names.classList.add("indent");
-      li.append(names);
-
-      if (this.name.acceptedColURI !== this.name.colURI) {
-        const line = document.createElement("div");
-        render(
-          html`<s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon>`,
-          line,
-        );
-        names.append(line);
-
-        const col_uri = document.createElement("a");
-        col_uri.classList.add("col", "uri");
-        const id = this.name.acceptedColURI!.replace(
-          "https://www.catalogueoflife.org/data/taxon/",
-          "",
-        );
-        col_uri.innerText = id;
-        col_uri.href = `#${id}`;
-        col_uri.title = "show name";
-        line.append(col_uri);
-        this.synoGroup.findName(this.name.acceptedColURI!).then((n) => {
-          if ((n as AuthorizedName).authority) {
-            col_uri.innerText = n.displayName + " " +
-              (n as AuthorizedName).authority;
-          } else col_uri.innerText = n.displayName;
-        }, () => {
-          col_uri.removeAttribute("href");
-        });
-      }
+    // TODO organize styles better
+    return html`
+        <link rel="stylesheet" href="index.css" />
+        <h3>
+          <i class="ditto">${this.authorizedName.displayName}</i>
+          ${this.authorizedName.authority}
+            ${
+      this.authorizedName.taxonConceptURI
+        ? html`<a class="taxon uri" id=${
+          encodeURIComponent(this.authorizedName.taxonConceptURI)
+        } href=${this.authorizedName.taxonConceptURI} target="_blank">${
+          shortUrl(this.authorizedName.taxonConceptURI)
+        }<s-icon icon="link"></s-icon></a>`
+        : nothing
+    }${
+      this.authorizedName.colURI
+        ? html`<a class="taxon uri" id=${
+          encodeURIComponent(this.authorizedName.colURI)
+        } href=${this.authorizedName.colURI} target="_blank">${
+          shortUrl(this.authorizedName.colURI)
+        }<s-icon icon="link"></s-icon></a>`
+        : nothing
     }
-    if (
-      this.name.treatments.treats.size > 0 || this.name.treatments.cite.size > 0
-    ) {
-      for (const trt of this.name.treatments.treats) {
-        const li = new SynoTreatment(trt, "aug", this.synoGroup);
-        treatments.append(li);
-      }
-      for (const trt of this.name.treatments.cite) {
-        const li = new SynoTreatment(trt, "cite", this.synoGroup);
-        treatments.append(li);
-      }
+        </h3>
+        <ul>
+        ${
+      this.authorizedName.colURI
+        ? html`<div class="treatmentline">
+            <s-icon icon=${
+          this.authorizedName.acceptedColURI !== this.authorizedName.colURI
+            ? "col_dpr"
+            : "col_aug"
+        }></s-icon>
+              Catalogue of Life
+              <div class="indent">${
+          this.authorizedName.acceptedColURI !== this.authorizedName.colURI
+            ? html`<div><s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon><a
+                  href="#${
+              encodeURIComponent(this.authorizedName.acceptedColURI!)
+            }" title="show name">${
+              until(
+                this.synoGroup.findName(this.authorizedName.acceptedColURI!)
+                  .then((n) =>
+                    (n as AuthorizedName).authority
+                      ? n.displayName + " " + (n as AuthorizedName).authority
+                      : n.displayName
+                  ),
+                shortUrl(this.authorizedName.acceptedColURI!),
+              )
+            }</a></div>`
+            : nothing
+        }</div>
+            </div>`
+        : nothing
+    }${
+      treatments_array.map(({ trt, status }) =>
+        new SynoTreatment(trt, status, this.synoGroup!)
+      )
     }
-
-    const justification = document.createElement("abbr");
-    justification.classList.add("justification");
-    justification.innerText = "...?";
-    justify(this.name).then((just) => justification.title = `This ${just}`);
-    title.append(" ", justification);
-
-    render(
-      html`<s-wikidata displayname=${this.name.displayName}></s-wikidata>`,
-      title_wrapper,
-    );
-
-    for (const authorizedName of this.name.authorizedNames) {
-      const authName = document.createElement("h3");
-      const name_title = document.createElement("i");
-      name_title.innerText = authorizedName.displayName;
-      name_title.classList.add("gray");
-      authName.append(name_title);
-      authName.append(" ", authorizedName.authority);
-      this.append(authName);
-
-      const treatments = document.createElement("ul");
-      this.append(treatments);
-
-      if (authorizedName.taxonConceptURI) {
-        const name_uri = document.createElement("a");
-        name_uri.classList.add("taxon", "uri");
-        const short = authorizedName.taxonConceptURI.replace(
-          "http://taxon-concept.plazi.org/id/",
-          "",
-        );
-        name_uri.innerText = short;
-        name_uri.id = short;
-        name_uri.href = authorizedName.taxonConceptURI;
-        name_uri.target = "_blank";
-        render(html`<s-icon icon="link"></s-icon>`, name_uri);
-        authName.append(" ", name_uri);
-      }
-      if (authorizedName.colURI) {
-        const col_uri = document.createElement("a");
-        col_uri.classList.add("col", "uri");
-        const id = authorizedName.colURI.replace(
-          "https://www.catalogueoflife.org/data/taxon/",
-          "",
-        );
-        col_uri.innerText = id;
-        col_uri.id = id;
-        col_uri.href = authorizedName.colURI;
-        col_uri.target = "_blank";
-        render(html`<s-icon icon="link"></s-icon>`, col_uri);
-        authName.append(" ", col_uri);
-
-        const li = document.createElement("div");
-        li.classList.add("treatmentline");
-        render(
-          html`<s-icon icon=${
-            authorizedName.acceptedColURI !== authorizedName.colURI
-              ? "col_dpr"
-              : "col_aug"
-          }></s-icon>`,
-          li,
-        );
-        treatments.append(li);
-
-        const creators = document.createElement("span");
-        creators.innerText = "Catalogue of Life";
-        li.append(creators);
-
-        const names = document.createElement("div");
-        names.classList.add("indent");
-        li.append(names);
-
-        if (authorizedName.acceptedColURI !== authorizedName.colURI) {
-          const line = document.createElement("div");
-          render(
-            html`<s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon>`,
-            line,
-          );
-          names.append(line);
-
-          const col_uri = document.createElement("a");
-          col_uri.classList.add("col", "uri");
-          const id = authorizedName.acceptedColURI!.replace(
-            "https://www.catalogueoflife.org/data/taxon/",
-            "",
-          );
-          col_uri.innerText = id;
-          col_uri.href = `#${id}`;
-          col_uri.title = "show name";
-          line.append(" ", col_uri);
-          this.synoGroup.findName(authorizedName.acceptedColURI!).then((n) => {
-            col_uri.classList.remove("uri");
-            if ((n as AuthorizedName).authority) {
-              col_uri.innerText = n.displayName + " " +
-                (n as AuthorizedName).authority;
-            } else col_uri.innerText = n.displayName;
-          }, () => {
-            col_uri.removeAttribute("href");
-          });
-        }
-      }
-
-      const treatments_array: { trt: Treatment; status: SynoStatus }[] = [];
-
-      for (const trt of authorizedName.treatments.def) {
-        treatments_array.push({ trt, status: "def" });
-      }
-      for (const trt of authorizedName.treatments.aug) {
-        treatments_array.push({ trt, status: "aug" });
-      }
-      for (const trt of authorizedName.treatments.dpr) {
-        treatments_array.push({ trt, status: "dpr" });
-      }
-      for (const trt of authorizedName.treatments.cite) {
-        treatments_array.push({ trt, status: "cite" });
-      }
-
-      if (!this.SORT_TREATMENTS_BY_TYPE) {
-        treatments_array.sort((a, b) => {
-          if (a.trt.date && b.trt.date) return a.trt.date - b.trt.date;
-          if (a.trt.date) return 1;
-          if (b.trt.date) return -1;
-          return 0;
-        });
-      }
-
-      for (const { trt, status } of treatments_array) {
-        const li = new SynoTreatment(trt, status, this.synoGroup);
-        treatments.append(li);
-      }
-    }
+    </ul>`;
   }
 }
-customElements.define("syno-name", SynoName);
+
+@customElement("syno-name")
+export class SynoName extends LitElement {
+  static override styles = css`
+  .header {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: .25rem;
+  }`; // TODO
+
+  @property({ attribute: false })
+  accessor synoGroup: SynonymGroup | null = null;
+  @property({ attribute: false })
+  accessor name: Name | null = null;
+
+  override render() {
+    if (!this.synoGroup || !this.name) return nothing;
+
+    const treatments_array: { trt: Treatment; status: SynoStatus }[] = [];
+
+    for (const trt of this.name.treatments.treats) {
+      treatments_array.push({ trt, status: "aug" });
+    }
+    for (const trt of this.name.treatments.cite) {
+      treatments_array.push({ trt, status: "cite" });
+    }
+
+    treatments_array.sort((a, b) => {
+      if (a.trt.date && b.trt.date) return a.trt.date - b.trt.date;
+      if (a.trt.date) return 1;
+      if (b.trt.date) return -1;
+      return 0;
+    });
+
+    // TODO organize styles better
+    return html`
+    <link rel="stylesheet" href="index.css" />
+    <div class="header">
+      <h2>
+        <i>${this.name.displayName}</i>
+        <span class="rank">${this.name.kingdom || "Missing Kingdom"}</span>
+        <span class="rank">${this.name.rank}</span>
+    ${
+      this.name.taxonNameURI
+        ? html`<a class="taxon uri" id=${
+          encodeURIComponent(this.name.taxonNameURI)
+        } href=${this.name.taxonNameURI} target="_blank">${
+          shortUrl(this.name.taxonNameURI)
+        }<s-icon icon="link"></s-icon></a>`
+        : nothing
+    }${
+      this.name.colURI
+        ? html`<a class="taxon uri" id=${
+          encodeURIComponent(this.name.colURI)
+        } href=${this.name.colURI} target="_blank">${
+          shortUrl(this.name.colURI)
+        }<s-icon icon="link"></s-icon></a>`
+        : nothing
+    }
+        <abbr class="justification" title="${
+      until(
+        justify(this.name).then((just) => `This ${just}`),
+        "Justification loading...",
+      )
+    }">...?</abbr>
+      </h2>
+      <s-wikidata displayname=${this.name.displayName}></s-wikidata>
+    </div>
+    <div class="vernacular">${
+      until(
+        this.name.vernacularNames.then((names) => {
+          if (names.size > 0) {
+            return "“" +
+              distinct([...names.values()].flat()).join("”, “") + "”";
+          }
+        }),
+        nothing,
+      )
+    }</div>
+    <ul>
+    ${
+      this.name.colURI
+        ? html`<div class="treatmentline">
+        <s-icon icon=${
+          this.name.acceptedColURI !== this.name.colURI ? "col_dpr" : "col_aug"
+        }></s-icon>
+          Catalogue of Life
+          <div class="indent">${
+          this.name.acceptedColURI !== this.name.colURI
+            ? html`<div><s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon><a
+              href="#${
+              encodeURIComponent(this.name.acceptedColURI!)
+            }" title="show name">${
+              until(
+                this.synoGroup.findName(this.name.acceptedColURI!).then((n) =>
+                  (n as AuthorizedName).authority
+                    ? n.displayName + " " + (n as AuthorizedName).authority
+                    : n.displayName
+                ),
+                shortUrl(this.name.acceptedColURI!),
+              )
+            }</a></div>`
+            : nothing
+        }</div>
+        </div>`
+        : nothing
+    }${
+      treatments_array.map(({ trt, status }) =>
+        new SynoTreatment(trt, status, this.synoGroup!)
+      )
+    }
+    </ul>
+    ${
+      this.name.authorizedNames.map((authorizedName) =>
+        html`<syno-authname .synoGroup=${this.synoGroup} .authorizedName=${authorizedName}></syno-authname>`
+      )
+    }`;
+  }
+}
 
 async function justify(name: Name): Promise<string> {
   if (name.justification.searchTerm) {

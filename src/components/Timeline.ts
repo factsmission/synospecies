@@ -1,16 +1,9 @@
-import type { Name, SynonymGroup, Treatment } from "@plazi/synolib";
+import type { SynonymGroup, Treatment } from "@plazi/synolib";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import { IconName } from "./Icons.ts";
-
-type NameState = {
-  name: Name;
-  open: boolean;
-  openable: boolean;
-  homonym: boolean;
-  date: number;
-};
+import { type NameState } from "../types.ts";
 
 @customElement("s-timeline-treatment")
 export class TimelineTreatment extends LitElement {
@@ -448,105 +441,35 @@ export class Timeline extends LitElement {
   `;
 
   @property({ attribute: false })
-  accessor synoGroup: SynonymGroup | null = null;
-  @state()
-  protected accessor isWaiting = false;
-  @property({ attribute: false })
   accessor names: NameState[] = [];
-  @state()
-  protected accessor colExpanded: boolean = false;
-  @state()
-  protected accessor cols: string[] = [];
-  @state()
-  protected accessor years: {
+  @property({ attribute: false })
+  accessor cols: string[] = [];
+  @property({ attribute: false })
+  accessor years: {
     year: string;
     treatments: Treatment[];
     open: boolean;
   }[] = [];
 
-  async handleSynonyms() {
-    if (this.synoGroup === null) {
-      alert("Uh Oh!");
-      return;
-    }
-    for await (const name of this.synoGroup) {
-      const openable = name.authorizedNames.length > 0 &&
-        (name.authorizedNames.length > 1 ||
-          (!!name.colURI || name.treatments.cite.size > 0 ||
-            name.treatments.treats.size > 0));
-      const sameName = this.names.find((n) =>
-        n.name.displayName === name.displayName
-      );
-      if (sameName) sameName.homonym = true;
-      let date = Infinity;
-      name.treatments.treats.forEach((t) => {
-        if (t.date && t.date < date) date = t.date;
-      });
-      name.treatments.cite.forEach((t) => {
-        if (t.date && t.date < date) date = t.date;
-      });
-      name.authorizedNames.forEach((a) => {
-        a.treatments.def.forEach((t) => {
-          if (t.date && t.date < date) date = t.date;
-        });
-        a.treatments.aug.forEach((t) => {
-          if (t.date && t.date < date) date = t.date;
-        });
-        a.treatments.dpr.forEach((t) => {
-          if (t.date && t.date < date) date = t.date;
-        });
-        a.treatments.cite.forEach((t) => {
-          if (t.date && t.date < date) date = t.date;
-        });
-      });
-      this.names = [...this.names, {
-        name,
-        open: openable && name.authorizedNames.length <= 3,
-        openable,
-        homonym: !!sameName,
-        date,
-      }].sort((a, b) =>
-        a.date !== b.date
-          ? a.date - b.date
-          : a.name.displayName.localeCompare(b.name.displayName)
-      );
-      if (name.acceptedColURI && !this.cols.includes(name.acceptedColURI)) {
-        this.cols = [...this.cols, name.acceptedColURI].toSorted();
-      }
-      for (const authName of name.authorizedNames) {
-        if (
-          authName.acceptedColURI &&
-          !this.cols.includes(authName.acceptedColURI)
-        ) {
-          this.cols = [...this.cols, authName.acceptedColURI].toSorted();
-        }
-      }
-      for (const treatment of this.synoGroup.treatments.values()) {
-        const year = treatment.date ? treatment.date + "" : "N/A";
-        const entry = this.years.find((y) => y.year === year);
-        if (entry) {
-          if (!entry.treatments.includes(treatment)) {
-            entry.treatments.push(treatment);
-            this.years = this.years.toSorted((a, b) =>
-              a.year.localeCompare(b.year)
-            );
-          }
-        } else {
-          this.years.push({ year, open: false, treatments: [treatment] });
-          this.years = this.years.toSorted((a, b) =>
-            a.year.localeCompare(b.year)
-          );
-        }
-      }
-    }
+  @state()
+  protected accessor colExpanded: boolean = false;
+
+  private async toggle_open_name(index: number, n: NameState) {
+    const name: NameState = { ...n, open: !n.open };
+    await this.updateComplete;
+    this.dispatchEvent(
+      new CustomEvent<{ index: number; name: NameState }>(
+        "toggle-open-name",
+        {
+          bubbles: true,
+          composed: true,
+          detail: { index, name },
+        },
+      ),
+    );
   }
 
   override render() {
-    if (this.synoGroup === null) return nothing;
-    if (!this.isWaiting) {
-      this.isWaiting = true;
-      this.handleSynonyms();
-    }
     return html`
       <div class="names">
         <div class="header"><h2>Timeline</h2></div>
@@ -576,12 +499,8 @@ export class Timeline extends LitElement {
             : ""
         }</a> ${
           n.openable
-            ? html`<button @click=${() => {
-              this.names = this.names.toSpliced(index, 1, {
-                ...n,
-                open: !n.open,
-              });
-            }}><s-icon icon=${
+            ? html`<button @click=${() =>
+              this.toggle_open_name(index, n)}><s-icon icon=${
               n.open ? "collapse" : "expand"
             }></s-icon></button>`
             : nothing

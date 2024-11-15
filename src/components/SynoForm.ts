@@ -40,12 +40,12 @@ export class SynoForm extends HTMLElement {
     subtaxaCheck.checked = NAME ? START_WITH_SUBTAXA : false;
     subtaxaCheckLabel.prepend(subtaxaCheck);
 
-    const sorttreatmentsCheckLabel = document.createElement("label");
-    sorttreatmentsCheckLabel.innerText = "Sort treatments by type.";
-    const sorttreatmentsCheck = document.createElement("input");
-    sorttreatmentsCheck.type = "checkbox";
-    sorttreatmentsCheck.checked = NAME ? SORT_TREATMENTS_BY_TYPE : false;
-    sorttreatmentsCheckLabel.prepend(sorttreatmentsCheck);
+    // const sorttreatmentsCheckLabel = document.createElement("label");
+    // sorttreatmentsCheckLabel.innerText = "Sort treatments by type.";
+    // const sorttreatmentsCheck = document.createElement("input");
+    // sorttreatmentsCheck.type = "checkbox";
+    // sorttreatmentsCheck.checked = NAME ? SORT_TREATMENTS_BY_TYPE : false;
+    // sorttreatmentsCheckLabel.prepend(sorttreatmentsCheck);
 
     const endpointPlaziLabel = document.createElement("label");
     const endpointPlaziLabelUrl = document.createElement("code");
@@ -103,13 +103,16 @@ export class SynoForm extends HTMLElement {
     search.className = "search";
     search.append(nameInput, button);
 
+    const label = document.createElement("span");
+    label.innerText = "(Options applied on next search)";
+
     const options = document.createElement("div");
     options.className = "options";
     options.append(
       "Options: ",
       colCheckLabel,
       subtaxaCheckLabel,
-      sorttreatmentsCheckLabel,
+      label,
       "Server: ",
       endpointLindasCachedLabel,
       endpointLindasLabel,
@@ -124,9 +127,9 @@ export class SynoForm extends HTMLElement {
       });
       if (colCheck.checked) params.append("show_col", "");
       if (subtaxaCheck.checked) params.append("subtaxa", "");
-      if (sorttreatmentsCheck.checked) {
-        params.append("sort_treatments_by_type", "");
-      }
+      // if (sorttreatmentsCheck.checked) {
+      //   params.append("sort_treatments_by_type", "");
+      // }
       if (endpointLindasCached.checked) {
         params.append("server", endpoints.cached);
       } else if (endpointLindas.checked) {

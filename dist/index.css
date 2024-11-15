@@ -12,7 +12,7 @@
   --accent-mild: light-dark(#9bc134, #476100);
   --accent: light-dark(#476100, #9bc134);
   --text-color: light-dark(#222222, #dddddd);
-  --text-color-muted: light-dark(#444444, #808080);
+  --text-color-muted: light-dark(#666666, #808080);
 }
 
 @supports (font-variation-settings: normal) {
@@ -208,17 +208,6 @@ syno-form {
       border-color: var(--accent);
       color: var(--body-background);
     }
-  }
-}
-
-
-syno-name {
-  .header {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 1fr;
-    align-items: center;
-    gap: .25rem;
   }
 }
 
