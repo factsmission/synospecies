@@ -245,9 +245,9 @@ export class SynoMain extends LitElement {
       this.names.length === 1 ? "1 name" : `${this.names.length} names`
     } with ${
       this.synoGroup.treatments.size === 1
-        ? "1 name"
+        ? "1 treatment"
         : `${this.synoGroup.treatments.size} treatments`
-    } treatments${
+    }${
       this.timeEnd === null
         ? ` so far)`
         : `. This took ${(this.timeEnd - this.timeStart) / 1000} seconds.`

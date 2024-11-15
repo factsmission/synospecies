@@ -22,6 +22,7 @@ export class TimelineTreatment extends LitElement {
       display: grid;
       padding: 0 .25rem;
       min-width: 1rem;
+      min-height: 100%;
       font-size: 0.8rem;
       text-decoration: none;
     }
@@ -87,7 +88,7 @@ export class TimelineTreatment extends LitElement {
     );
     const style = html`<style>:host {
       grid-row-start: ${firstName === -1 ? 1 : firstName + 1};
-      grid-row-end: ${lastName === -1 ? -1 : lastName + 1};
+      grid-row-end: ${lastName === -1 ? -1 : lastName + 2};
     }</style>`;
 
     const aug_icon = this.icons.acceptedCoL || this.isCoL ? "col_aug" : "aug";
