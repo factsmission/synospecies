@@ -506,8 +506,6 @@ export class Timeline extends LitElement {
   @state()
   protected accessor colExpanded: boolean = false;
 
-  // TODO handle expansion of years the same way!
-
   private async toggle_open_name(index: number, n: NameState) {
     const name: NameState = { ...n, open: !n.open };
     await this.updateComplete;
@@ -518,6 +516,20 @@ export class Timeline extends LitElement {
           bubbles: true,
           composed: true,
           detail: { index, name },
+        },
+      ),
+    );
+  }
+
+  private async toggle_open_year(index: number, open: boolean) {
+    await this.updateComplete;
+    this.dispatchEvent(
+      new CustomEvent<{ index: number; open: boolean }>(
+        "toggle-open-year",
+        {
+          bubbles: true,
+          composed: true,
+          detail: { index, open },
         },
       ),
     );
@@ -629,12 +641,10 @@ export class Timeline extends LitElement {
         html`<div>
           <div class="header"><h2>${t.year}</h2>${
           t.treatments.length > 1
-            ? html`<button @click=${() => {
-              this.years = this.years.toSpliced(index, 1, {
-                ...t,
-                open: !t.open,
-              });
-            }}><s-icon icon=${t.open ? "collapse" : "expand"}></s-icon</button>`
+            ? html`<button @click=${() =>
+              this.toggle_open_year(index, !t.open)}><s-icon icon=${
+              t.open ? "collapse" : "expand"
+            }></s-icon</button>`
             : nothing
         }</div>
           <s-timeline-year
@@ -643,10 +653,7 @@ export class Timeline extends LitElement {
               .open=${t.open}
               @click=${(e: Event) => {
           if (e.target === e.currentTarget) {
-            this.years = this.years.toSpliced(index, 1, {
-              ...t,
-              open: !t.open,
-            });
+            this.toggle_open_year(index, !t.open);
           }
         }}></s-timeline-year>
           </div>`

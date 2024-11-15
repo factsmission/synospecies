@@ -189,6 +189,14 @@ export class SynoMain extends LitElement {
         (e as CustomEvent<{ index: number; name: NameState }>).detail;
       this.names = this.names.toSpliced(index, 1, name);
     });
+    this.addEventListener("toggle-open-year", (e: Event) => {
+      const { index, open } =
+        (e as CustomEvent<{ index: number; open: boolean }>).detail;
+      this.years = this.years.toSpliced(index, 1, {
+        ...this.years[index],
+        open,
+      });
+    });
   }
 
   override render() {
