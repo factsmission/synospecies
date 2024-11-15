@@ -380,7 +380,7 @@ export class Timeline extends LitElement {
       text-overflow: ellipsis;
       text-wrap: nowrap;
       min-width: min(24rem, 40vw);
-      max-width: min(48rem, 60vw);
+      max-width: min(48rem, calc(100vw - 12rem));
       overflow: hidden;
 
       .header {
@@ -389,14 +389,13 @@ export class Timeline extends LitElement {
 
       * {
         max-width: 100%;
-        text-overflow: ellipsis;
-        // overflow: hidden;
       }
     }
 
     .list {
       display: grid;
       padding: .25rem;
+      grid-template-columns: 100%;
     }
 
     .name {
