@@ -1,25 +1,34 @@
 import type { Treatment } from "@plazi/synolib";
-import { css, html, LitElement, nothing } from "lit";
+import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import { IconName } from "./Icons.ts";
 import { type NameState } from "../types.ts";
 
+type Cell = { def: number; aug: number; dpr: number; cite: number };
+
+type NameIcons = {
+  collapsed: Cell;
+  expanded: Cell[];
+};
+
 @customElement("s-timeline-treatment")
 export class TimelineTreatment extends LitElement {
   static override styles = css`
-    :host > div,
     :host > a {
-      background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
+      background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
+      color: var(--text-color);
       border-radius: .5rem;
       display: grid;
-      padding: .25rem;
+      padding: 0 .25rem;
       min-width: 1rem;
       font-size: 0.8rem;
+      text-decoration: none;
+    }
 
-      &.multiple {
-        background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
-      }
+
+    :host > a[href] {
+      background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
     }
 
     .row {
@@ -31,13 +40,148 @@ export class TimelineTreatment extends LitElement {
     }
 
     .name {
+      align-items: center;
       display: grid;
       grid-auto-rows: 24px;
-      align-items: center;
+      padding: .125rem 0;
 
       & + & {
-        border-top: 1px solid var(--text-color-muted);
+        /* border-top: 1px solid var(--text-color-muted); */
+        border-top: 1px solid var(--body-background);
       }
+
+      &:first-child {
+        padding-top: 0;
+      }
+
+      &:last-child {
+        padding-bottom: 0;
+      }
+    }
+  `;
+
+  @property({ attribute: false })
+  accessor names: NameState[] = [];
+
+  @property({ attribute: false })
+  accessor isCoL = false;
+
+  @property({ attribute: false })
+  accessor icons:
+    | ({
+      icons: NameIcons[];
+      treatment?: Treatment;
+      acceptedCoL?: string;
+    })
+    | null = null;
+
+  override render() {
+    if (!this.icons) return nothing;
+    const firstName = this.icons.icons.findIndex((i) =>
+      i.collapsed.aug + i.collapsed.def + i.collapsed.dpr +
+          i.collapsed.cite > 0
+    );
+    const lastName = this.icons.icons.findLastIndex((i) =>
+      i.collapsed.aug + i.collapsed.def + i.collapsed.dpr +
+          i.collapsed.cite > 0
+    );
+    const style = html`<style>:host {
+      grid-row-start: ${firstName === -1 ? 1 : firstName + 1};
+      grid-row-end: ${lastName === -1 ? -1 : lastName + 1};
+    }</style>`;
+
+    const aug_icon = this.icons.acceptedCoL || this.isCoL ? "col_aug" : "aug";
+    const dpr_icon = this.icons.acceptedCoL || this.isCoL ? "col_dpr" : "dpr";
+
+    return html`${style}<a
+      href=${this.icons.acceptedCoL || this.icons.treatment?.url || nothing}
+      target="_blank"
+      title=${
+      this.icons.acceptedCoL?.replace(
+        "https://www.catalogueoflife.org/data/taxon/",
+        "",
+      ) || (this.icons.treatment
+        ? until(
+          this.icons.treatment?.details.then((d) =>
+            `${d.creators} ${this.icons!.treatment!.date} “${d.title}”`
+          ),
+          this.icons.treatment!.url,
+        )
+        : nothing)
+    }>${
+      this.icons.icons.slice(firstName, lastName + 1).map((icon, index) => {
+        if (this.names[index + firstName].open) {
+          return html`<div class="name">${
+            icon.expanded.map(({ def, aug, dpr, cite }) =>
+              html`<div class="row">${
+                def > 1
+                  ? html`${def}<s-icon icon="def"></s-icon>`
+                  : def === 1
+                  ? html`<s-icon icon="def"></s-icon>`
+                  : nothing
+              }${
+                aug > 1
+                  ? html` ${aug}<s-icon icon="${aug_icon}"></s-icon>`
+                  : aug === 1
+                  ? html`<s-icon icon="${aug_icon}"></s-icon>`
+                  : nothing
+              }${
+                dpr > 1
+                  ? html` ${dpr}<s-icon icon="${dpr_icon}"></s-icon>`
+                  : dpr === 1
+                  ? html`<s-icon icon="${dpr_icon}"></s-icon>`
+                  : nothing
+              }${
+                cite > 1
+                  ? html` ${cite}<s-icon icon="cite"></s-icon>`
+                  : cite === 1
+                  ? html`<s-icon icon="cite"></s-icon>`
+                  : nothing
+              }</div>`
+            )
+          }</div>`;
+        }
+        return html`<div class="name"><div class="row">${
+          icon.collapsed.def > 1
+            ? html`${icon.collapsed.def}<s-icon icon="def"></s-icon>`
+            : icon.collapsed.def === 1
+            ? html`<s-icon icon="def"></s-icon>`
+            : nothing
+        }${
+          icon.collapsed.aug > 1
+            ? html` ${icon.collapsed.aug}<s-icon icon="${aug_icon}"></s-icon>`
+            : icon.collapsed.aug === 1
+            ? html`<s-icon icon="${aug_icon}"></s-icon>`
+            : nothing
+        }${
+          icon.collapsed.dpr > 1
+            ? html` ${icon.collapsed.dpr}<s-icon icon="${dpr_icon}"></s-icon>`
+            : icon.collapsed.dpr === 1
+            ? html`<s-icon icon="${dpr_icon}"></s-icon>`
+            : nothing
+        }${
+          icon.collapsed.cite > 1
+            ? html` ${icon.collapsed.cite}<s-icon icon="cite"></s-icon>`
+            : icon.collapsed.cite === 1
+            ? html`<s-icon icon="cite"></s-icon>`
+            : nothing
+        }</div></div>`;
+      })
+    }</a>`;
+  }
+}
+
+@customElement("s-timeline-year")
+export class TimelineYear extends LitElement {
+  static override styles = css`
+    :host {
+      display: grid;
+      gap: calc(.25rem + 1px) .25rem;
+      grid-auto-flow: column dense;
+      grid-auto-columns: min-content;
+      padding: .25rem;
+      justify-content: safe center;
+      justify-items: center;
     }
   `;
 
@@ -48,241 +192,140 @@ export class TimelineTreatment extends LitElement {
   @property({ attribute: false })
   accessor names: NameState[] = [];
 
-  override render() {
-    if (this.treatments.length === 1) {
-      const treatment = this.treatments[0];
-      return html`<a href=${treatment.url} target="_blank" title=${
-        until(
-          treatment.details.then((d) =>
-            `${d.creators} ${treatment?.date} “${d.title}”`
-          ),
-          treatment.url,
-        )
-      }>${
-        this.names.map((i) => {
-          let hasDef = false;
-          let hasAug = false;
-          let hasDpr = false;
-          let hasCite = false;
-          const result: IconName[] = [];
-          if (i.name.treatments.treats.has(treatment)) {
-            result.push("aug");
-            hasAug = true;
-          } else if (i.name.treatments.cite.has(treatment)) {
-            result.push("cite");
-            hasCite = true;
-          } else {
-            result.push("empty");
+  @property()
+  accessor open = false;
+
+  /** one entry per treatment, then one entry per name */
+  @state()
+  accessor icons: ({
+    icons: NameIcons[];
+    treatment?: Treatment;
+    acceptedCoL?: string;
+  })[] = [];
+  @state()
+  accessor groupIcons: {
+    icons: NameIcons[];
+  } = { icons: [] };
+
+  override willUpdate(_changedProperties: PropertyValues<this>) {
+    if (this.treatments.length) {
+      this.icons = this.treatments.map((treatment) => {
+        const icons = this.names.map((ns) => {
+          const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
+          if (ns.name.treatments.treats.has(treatment)) {
+            expanded[0].aug = 1;
+          } else if (ns.name.treatments.cite.has(treatment)) {
+            expanded[0].cite = 1;
           }
-          for (const authName of i.name.authorizedNames) {
-            if (authName.treatments.def.has(treatment)) {
-              result.push("def");
-              hasDef = true;
-            } else if (authName.treatments.aug.has(treatment)) {
-              result.push("aug");
-              hasAug = true;
-            } else if (authName.treatments.dpr.has(treatment)) {
-              result.push("dpr");
-              hasDpr = true;
-            } else if (authName.treatments.cite.has(treatment)) {
-              result.push("cite");
-              hasCite = true;
-            } else {
-              result.push("empty");
-            }
+          for (const authName of ns.name.authorizedNames) {
+            expanded.push({
+              def: authName.treatments.def.has(treatment) ? 1 : 0,
+              aug: authName.treatments.aug.has(treatment) ? 1 : 0,
+              dpr: authName.treatments.dpr.has(treatment) ? 1 : 0,
+              cite: authName.treatments.cite.has(treatment) ? 1 : 0,
+            });
           }
-          if (i.open) {
-            return html`<div class="name">${
-              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
-            }</div>`;
-          }
-          const collapsed_icon: IconName = hasDef
-            ? (hasDpr ? "def_dpr" : "def")
-            : hasAug
-            ? (hasDpr ? "aug_dpr" : "aug")
-            : hasDpr
-            ? "dpr"
-            : hasCite
-            ? "cite"
-            : "empty";
-          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
-        })
-      }</a>`;
-    }
-    if (this.treatments.length > 1) {
-      const tSet = new Set(this.treatments);
-      return html`<div class="multiple" title=${this.treatments.length}>${
-        this.names.map((i) => {
-          const result = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
-          result[0].aug = i.name.treatments.treats.intersection(tSet).size;
-          result[0].cite = i.name.treatments.cite.intersection(tSet).size;
-          for (const authName of i.name.authorizedNames) {
-            const res = {
-              def: authName.treatments.def.intersection(tSet).size,
-              aug: authName.treatments.aug.intersection(tSet).size,
-              dpr: authName.treatments.dpr.intersection(tSet).size,
-              cite: authName.treatments.cite.intersection(tSet).size,
-            };
-            result.push(res);
-          }
-          if (i.open) {
-            return html`<div class="name">${
-              result.map(({ def, aug, dpr, cite }) =>
-                html`<div class="row">${
-                  def > 1
-                    ? html`${def}<s-icon icon="def"></s-icon>`
-                    : def === 1
-                    ? html`<s-icon icon="def"></s-icon>`
-                    : nothing
-                }${
-                  aug > 1
-                    ? html` ${aug}<s-icon icon="aug"></s-icon>`
-                    : aug === 1
-                    ? html`<s-icon icon="aug"></s-icon>`
-                    : nothing
-                }${
-                  dpr > 1
-                    ? html` ${dpr}<s-icon icon="dpr"></s-icon>`
-                    : dpr === 1
-                    ? html`<s-icon icon="dpr"></s-icon>`
-                    : nothing
-                }${
-                  cite > 1
-                    ? html` ${cite}<s-icon icon="cite"></s-icon>`
-                    : cite === 1
-                    ? html`<s-icon icon="cite"></s-icon>`
-                    : nothing
-                }</div>`
-              )
-            }</div>`;
-          }
-          const acc = { def: 0, aug: 0, dpr: 0, cite: 0 };
-          result.map(
+          const collapsed = { def: 0, aug: 0, dpr: 0, cite: 0 };
+          expanded.forEach(
             ({ def, aug, dpr, cite }) => {
-              acc.def += def;
-              acc.aug += aug;
-              acc.dpr += dpr;
-              acc.cite += cite;
+              // using bitwise or to limit count to be in [0,1]
+              collapsed.def |= def;
+              collapsed.aug |= aug;
+              collapsed.dpr |= dpr;
+              if (collapsed.aug || collapsed.aug || collapsed.dpr) {
+                collapsed.cite = 0;
+              } else {
+                collapsed.cite |= cite;
+              }
             },
           );
-          return html`<div class="name"><div class="row">${
-            acc.def > 1
-              ? html`${acc.def}<s-icon icon="def"></s-icon>`
-              : acc.def === 1
-              ? html`<s-icon icon="def"></s-icon>`
-              : nothing
-          }${
-            acc.aug > 1
-              ? html` ${acc.aug}<s-icon icon="aug"></s-icon>`
-              : acc.aug === 1
-              ? html`<s-icon icon="aug"></s-icon>`
-              : nothing
-          }${
-            acc.dpr > 1
-              ? html` ${acc.dpr}<s-icon icon="dpr"></s-icon>`
-              : acc.dpr === 1
-              ? html`<s-icon icon="dpr"></s-icon>`
-              : nothing
-          }${
-            acc.cite > 1
-              ? html` ${acc.cite}<s-icon icon="cite"></s-icon>`
-              : acc.cite === 1
-              ? html`<s-icon icon="cite"></s-icon>`
-              : nothing
-          }</div></div>`;
-        })
-      }</div>`;
-    }
-    if (this.acceptedCoL.length === 1) {
-      const col = this.acceptedCoL[0];
-      return html`<a href=${col} target="_blank" title=${
-        col.replace("https://www.catalogueoflife.org/data/taxon/", "")
-      }>${
-        this.names.map((i) => {
-          let hasAug = false;
-          let hasDpr = false;
-          const result: IconName[] = [];
-          if (i.name.colURI === col) {
-            result.push("col_aug");
-            hasAug = true;
-          } else if (i.name.acceptedColURI === col) {
-            result.push("col_dpr");
-            hasDpr = true;
-          } else {
-            result.push("empty");
+
+          return { expanded, collapsed };
+        });
+        return { icons, treatment };
+      });
+    } else if (this.acceptedCoL.length) {
+      this.icons = this.acceptedCoL.map((col) => {
+        const icons = this.names.map((ns) => {
+          const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
+          if (ns.name.colURI === col) {
+            expanded[0].dpr = 1;
+          } else if (ns.name.acceptedColURI === col) {
+            expanded[0].aug = 1;
           }
-          for (const authName of i.name.authorizedNames) {
+          for (const authName of ns.name.authorizedNames) {
             if (authName.colURI === col) {
-              result.push("col_aug");
-              hasAug = true;
+              expanded.push({ def: 0, aug: 0, dpr: 1, cite: 0 });
             } else if (authName.acceptedColURI === col) {
-              result.push("col_dpr");
-              hasDpr = true;
+              expanded.push({ def: 0, aug: 1, dpr: 0, cite: 0 });
             } else {
-              result.push("empty");
+              expanded.push({ def: 0, aug: 0, dpr: 0, cite: 0 });
             }
           }
-          if (i.open) {
-            return html`<div class="name">${
-              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
-            }</div>`;
-          }
-          const collapsed_icon: IconName = hasAug
-            ? (hasDpr ? "aug_dpr" : "col_aug")
-            : hasDpr
-            ? "col_dpr"
-            : "empty";
-          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
-        })
-      }</a>`;
-    }
-    if (this.acceptedCoL.length > 1) {
-      const colSet = new Set(this.acceptedCoL);
-      return html`<div title=${colSet.size} class="multiple">${
-        this.names.map((i) => {
-          let hasAug = false;
-          let hasDpr = false;
-          const result: IconName[] = [];
-          if (i.name.colURI && colSet.has(i.name.colURI)) {
-            result.push("col_aug");
-            hasAug = true;
-          } else if (
-            i.name.acceptedColURI && colSet.has(i.name.acceptedColURI)
-          ) {
-            result.push("col_dpr");
-            hasDpr = true;
-          } else {
-            result.push("empty");
-          }
-          for (const authName of i.name.authorizedNames) {
-            if (authName.colURI && colSet.has(authName.colURI)) {
-              result.push("col_aug");
-              hasAug = true;
-            } else if (
-              authName.acceptedColURI && colSet.has(authName.acceptedColURI)
-            ) {
-              result.push("col_dpr");
-              hasDpr = true;
-            } else {
-              result.push("empty");
-            }
-          }
-          if (i.open) {
-            return html`<div class="name">${
-              result.map((i) => html`<s-icon icon=${i}></s-icon>`)
-            }</div>`;
-          }
-          const collapsed_icon: IconName = hasAug
-            ? (hasDpr ? "aug_dpr" : "col_aug")
-            : hasDpr
-            ? "col_dpr"
-            : "empty";
-          return html`<div class="name"><s-icon icon=${collapsed_icon}></s-icon></div>`;
-        })
-      }</div>`;
+          const collapsed = { def: 0, aug: 0, dpr: 0, cite: 0 };
+          expanded.forEach(
+            ({ aug, dpr }) => {
+              // using bitwise or to limit count to be in [0,1]
+              // collapsed.def |= def;
+              collapsed.aug |= aug;
+              collapsed.dpr |= dpr;
+              // collapsed.cite |= cite;
+            },
+          );
+
+          return { expanded, collapsed };
+        });
+        return { icons, acceptedCoL: col };
+      });
     }
 
-    return nothing;
+    const groupIcons: NameIcons[] = [];
+    for (let index = 0; index < this.names.length; index++) {
+      const collapsed = { def: 0, aug: 0, dpr: 0, cite: 0 };
+      const expanded: Cell[] = [];
+
+      this.icons.forEach(({ icons }) => {
+        collapsed.def += icons[index].collapsed.def;
+        collapsed.aug += icons[index].collapsed.aug;
+        collapsed.dpr += icons[index].collapsed.dpr;
+        collapsed.cite += icons[index].collapsed.cite;
+
+        icons[index].expanded.forEach(
+          ({ def, aug, dpr, cite }, ei) => {
+            if (!expanded[ei]) {
+              expanded[ei] = { def: 0, aug: 0, dpr: 0, cite: 0 };
+            }
+            expanded[ei].def += def;
+            expanded[ei].aug += aug;
+            expanded[ei].dpr += dpr;
+            expanded[ei].cite += cite;
+          },
+        );
+      });
+
+      groupIcons.push({ collapsed, expanded });
+    }
+
+    this.groupIcons = { icons: groupIcons };
+  }
+
+  override render() {
+    if (
+      this.open || this.treatments.length === 1 || this.acceptedCoL.length === 1
+    ) {
+      return html`${
+        this.icons.map((t) =>
+          html`<s-timeline-treatment .names=${this.names} .icons=${t} ></s-timeline-treatment>`
+        )
+      }`;
+    } else {
+      return html`<s-timeline-treatment
+        title=${this.treatments.length || this.acceptedCoL.length}
+        .names=${this.names} .icons=${this.groupIcons} .isCoL=${
+        this.acceptedCoL.length > 0
+      }
+      ></s-timeline-treatment>`;
+    }
   }
 }
 
@@ -348,13 +391,14 @@ export class Timeline extends LitElement {
 
     .list {
       display: grid;
-      padding: .5rem .25rem;
+      padding: .25rem;
     }
 
     .name {
       display: grid;
       grid-template-columns: 100%;
       line-height: 1.5rem;
+      padding: .125rem 0;
 
       a {
         display: grid;
@@ -366,6 +410,14 @@ export class Timeline extends LitElement {
 
       & + & {
         border-top: 1px solid var(--text-color-muted);
+      }
+
+      &:first-child {
+        padding-top: 0;
+      }
+
+      &:last-child {
+        padding-bottom: 0;
       }
 
       &.closed .authorized {
@@ -380,7 +432,7 @@ export class Timeline extends LitElement {
       }
 
       .ditto {
-        color:  var(--text-color-muted);
+        color: var(--text-color-muted);
       }
     }
 
@@ -432,8 +484,8 @@ export class Timeline extends LitElement {
 
     .grid {
       display: grid;
-      gap: .25rem;
-      grid-auto-flow: column;
+      gap: calc(.25rem + 1px) .25rem;
+      grid-auto-flow: column dense;
       grid-auto-columns: min-content;
       padding: .25rem;
       justify-content: safe center
@@ -454,6 +506,8 @@ export class Timeline extends LitElement {
   @state()
   protected accessor colExpanded: boolean = false;
 
+  // TODO handle expansion of years the same way!
+
   private async toggle_open_name(index: number, n: NameState) {
     const name: NameState = { ...n, open: !n.open };
     await this.updateComplete;
@@ -470,7 +524,32 @@ export class Timeline extends LitElement {
   }
 
   override render() {
+    let sofar = 0.25;
+    const gradient: string[] = this.names.map((name, index) => {
+      const height = (name.open ? name.name.authorizedNames.length + 1 : 1) *
+        1.5;
+      const space = `transparent calc(${sofar}rem + ${index * 5 - 2}px)`;
+      sofar += height;
+      return space +
+        ` calc(${sofar}rem + ${
+          index * 5 + 2
+        }px), var(--text-color-muted) calc(${sofar}rem + ${
+          index * 5 + 2
+        }px) calc(${sofar}rem + ${
+          index * 5 + 3
+        }px), transparent calc(${sofar}rem + ${index * 5 + 3}px)`;
+    });
+    gradient.pop();
+
     return html`
+      <style>s-timeline-year {
+      background: linear-gradient(${gradient.join(", ")});
+      grid-template-rows: ${
+      this.names.map((name) =>
+        (name.open ? name.name.authorizedNames.length + 1 : 1) * 1.5 + "rem"
+      ).join(" ")
+    }
+      }</style>
       <div class="names">
         <div class="header"><h2>Timeline</h2></div>
         <div class="list">${
@@ -534,22 +613,15 @@ export class Timeline extends LitElement {
             : nothing
         }
           </div>
-          <div class="grid">${
-          this.colExpanded
-            ? this.cols.map((col) =>
-              html`<s-timeline-treatment .acceptedCoL=${[
-                col,
-              ]} .names=${this.names}></s-timeline-treatment>`
-            )
-            : html`<s-timeline-treatment
+          <s-timeline-year
               .acceptedCoL=${this.cols}
               .names=${this.names}
+              .open=${this.colExpanded}
               @click=${(e: Event) => {
-              if (e.target === e.currentTarget) {
-                this.colExpanded = !this.colExpanded;
-              }
-            }}></s-timeline-treatment>`
-        }</div>
+          if (e.target === e.currentTarget) {
+            this.colExpanded = !this.colExpanded;
+          }
+        }}></s-timeline-year>
           </div>`
         : nothing
     }${
@@ -565,26 +637,18 @@ export class Timeline extends LitElement {
             }}><s-icon icon=${t.open ? "collapse" : "expand"}></s-icon</button>`
             : nothing
         }</div>
-          <div class="grid">${
-          t.open
-            ? t.treatments.map((treat) =>
-              html`<s-timeline-treatment .treatments=${[
-                treat,
-              ]} .names=${this.names}></s-timeline-treatment>`
-            )
-            : html`<s-timeline-treatment
+          <s-timeline-year
               .treatments=${t.treatments}
               .names=${this.names}
+              .open=${t.open}
               @click=${(e: Event) => {
-              if (e.target === e.currentTarget) {
-                this.years = this.years.toSpliced(index, 1, {
-                  ...t,
-                  open: !t.open,
-                });
-              }
-            }}
-            ></s-timeline-treatment>`
-        }</div>
+          if (e.target === e.currentTarget) {
+            this.years = this.years.toSpliced(index, 1, {
+              ...t,
+              open: !t.open,
+            });
+          }
+        }}></s-timeline-year>
           </div>`
       )
     }</div>

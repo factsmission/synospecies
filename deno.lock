@@ -950,7 +950,6 @@
       "jsr:@luca/esbuild-deno-loader@0.11",
       "jsr:@plazi/synolib@3.1.1",
       "jsr:@std/collections@^1.0.9",
-      "npm:@triply/yasgui@^4.2.28",
       "npm:@triply/yasqe@^4.2.28",
       "npm:@triply/yasr@^4.2.28",
       "npm:awesomplete@^1.1.5",
