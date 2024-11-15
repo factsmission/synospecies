@@ -249,17 +249,22 @@ export class TimelineYear extends LitElement {
         const icons = this.names.map((ns) => {
           const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
           if (ns.name.colURI === col) {
-            expanded[0].dpr = 1;
-          } else if (ns.name.acceptedColURI === col) {
-            expanded[0].aug = 1;
-          }
-          for (const authName of ns.name.authorizedNames) {
-            if (authName.colURI === col) {
-              expanded.push({ def: 0, aug: 0, dpr: 1, cite: 0 });
-            } else if (authName.acceptedColURI === col) {
-              expanded.push({ def: 0, aug: 1, dpr: 0, cite: 0 });
+            if (ns.name.acceptedColURI === col) {
+              expanded[0].aug = 1;
             } else {
-              expanded.push({ def: 0, aug: 0, dpr: 0, cite: 0 });
+              expanded[0].dpr = 1;
+            }
+          } else {
+            for (const authName of ns.name.authorizedNames) {
+              if (authName.colURI === col) {
+                if (authName.acceptedColURI === col) {
+                  expanded.push({ def: 0, aug: 1, dpr: 0, cite: 0 });
+                } else {
+                  expanded.push({ def: 0, aug: 0, dpr: 1, cite: 0 });
+                }
+              } else {
+                expanded.push({ def: 0, aug: 0, dpr: 0, cite: 0 });
+              }
             }
           }
           const collapsed = { def: 0, aug: 0, dpr: 0, cite: 0 };
