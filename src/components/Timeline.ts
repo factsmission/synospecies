@@ -15,10 +15,12 @@ type NameIcons = {
 @customElement("s-timeline-treatment")
 export class TimelineTreatment extends LitElement {
   static override styles = css`
+    * { box-sizing: border-box; }
+
     :host > a {
       background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
       color: var(--text-color);
-      border-radius: .5rem;
+      border-radius: .75rem;
       display: grid;
       padding: 0 .25rem;
       min-width: .5rem;
@@ -27,6 +29,9 @@ export class TimelineTreatment extends LitElement {
       text-decoration: none;
     }
 
+    :host > a.col {
+      border-radius: .5rem;
+    }
 
     :host > a[href] {
       background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
@@ -96,7 +101,9 @@ export class TimelineTreatment extends LitElement {
 
     return html`${style}<a
       href=${this.icons.acceptedCoL || this.icons.treatment?.url || nothing}
-      target="_blank"
+      target="_blank" class=${
+      this.icons.acceptedCoL || this.isCoL ? "col" : nothing
+    }
       title=${
       this.icons.acceptedCoL?.replace(
         "https://www.catalogueoflife.org/data/taxon/",
@@ -175,6 +182,8 @@ export class TimelineTreatment extends LitElement {
 @customElement("s-timeline-year")
 export class TimelineYear extends LitElement {
   static override styles = css`
+    * { box-sizing: border-box; }
+
     :host {
       display: grid;
       gap: 5px .25rem;
@@ -338,6 +347,8 @@ export class TimelineYear extends LitElement {
 @customElement("s-timeline")
 export class Timeline extends LitElement {
   static override styles = css`
+    * { box-sizing: border-box; }
+
     :host {
       background: var(--nav-background);
       border-radius: 1rem;
@@ -402,14 +413,14 @@ export class Timeline extends LitElement {
     .name {
       display: grid;
       grid-template-columns: 100%;
-      line-height: 1.5rem;
+      line-height: 24px;
       padding: 2px 0;
 
       a {
         display: grid;
         grid-auto-flow: column;
         grid-auto-columns: max-content;
-        gap: .25rem;
+        gap: 0 .25rem;
         align-items: center;
       }
 
@@ -425,6 +436,10 @@ export class Timeline extends LitElement {
         padding-bottom: 0;
       }
 
+      &>* {
+        height: 24px;
+      }
+
       &.closed .authorized {
         height: 0;
         overflow-y: hidden;
@@ -433,7 +448,7 @@ export class Timeline extends LitElement {
       .unauthorized {
         display: grid;
         grid-template-columns: 1fr auto;
-        gap: .25rem;
+        gap: 0 .25rem;
       }
 
       .ditto {
@@ -551,10 +566,10 @@ export class Timeline extends LitElement {
         ` calc(${sofar}rem + ${
           index * 5 + 2
         }px), var(--text-color-muted) calc(${sofar}rem + ${
-          index * 5 + 2
+          index * 5
         }px) calc(${sofar}rem + ${
           index * 5 + 3
-        }px), transparent calc(${sofar}rem + ${index * 5 + 3}px)`;
+        }px), transparent calc(${sofar}rem + ${index * 5 + 2}px)`;
     });
     gradient.pop();
 
