@@ -19,7 +19,7 @@ const sortAlphabetical = (a: NameState, b: NameState) =>
 const sortOldest = (a: NameState, b: NameState) =>
   a.dateOld !== b.dateOld ? a.dateOld - b.dateOld : sortAlphabetical(a, b);
 const sortNewest = (a: NameState, b: NameState) =>
-  a.dateNew !== b.dateNew ? a.dateNew - b.dateNew : sortAlphabetical(a, b);
+  a.dateNew !== b.dateNew ? b.dateNew - a.dateNew : sortAlphabetical(a, b);
 
 const sortName = (order: sortOrder) => {
   switch (order) {
@@ -227,6 +227,7 @@ export class SynoMain extends LitElement {
       this.sortOrder = sortOrder.Newest;
     }}
       >Newest Treatment</label>
+      (Date of defining treatment may be inferred from the authority)
     </div>
     <div>${
       this.timeEnd === null
