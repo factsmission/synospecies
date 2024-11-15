@@ -1,4 +1,4 @@
-import type { SynonymGroup, Treatment } from "@plazi/synolib";
+import type { Treatment } from "@plazi/synolib";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";

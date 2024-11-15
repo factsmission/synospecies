@@ -18,7 +18,6 @@ export class SynoForm extends HTMLElement {
     const params = new URLSearchParams(document.location.search);
     const SHOW_COL = params.has("show_col");
     const START_WITH_SUBTAXA = params.has("subtaxa");
-    const SORT_TREATMENTS_BY_TYPE = params.has("sort_treatments_by_type");
     const ENDPOINT_URL = params.get("server");
     const NAME = params.get("q");
 
