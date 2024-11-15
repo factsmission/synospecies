@@ -21,7 +21,7 @@ export class TimelineTreatment extends LitElement {
       border-radius: .5rem;
       display: grid;
       padding: 0 .25rem;
-      min-width: 1rem;
+      min-width: .5rem;
       min-height: 100%;
       font-size: 0.8rem;
       text-decoration: none;
@@ -44,7 +44,7 @@ export class TimelineTreatment extends LitElement {
       align-items: center;
       display: grid;
       grid-auto-rows: 24px;
-      padding: .125rem 0;
+      padding: 2px 0;
 
       & + & {
         /* border-top: 1px solid var(--text-color-muted); */
@@ -177,7 +177,7 @@ export class TimelineYear extends LitElement {
   static override styles = css`
     :host {
       display: grid;
-      gap: calc(.25rem + 1px) .25rem;
+      gap: 5px .25rem;
       grid-auto-flow: column dense;
       grid-auto-columns: min-content;
       padding: .25rem;
@@ -249,16 +249,16 @@ export class TimelineYear extends LitElement {
       this.icons = this.acceptedCoL.map((col) => {
         const icons = this.names.map((ns) => {
           const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
-          if (ns.name.colURI === col) {
-            if (ns.name.acceptedColURI === col) {
+          if (ns.name.colURI && ns.name.acceptedColURI === col) {
+            if (ns.name.colURI === col) {
               expanded[0].aug = 1;
             } else {
               expanded[0].dpr = 1;
             }
           } else {
             for (const authName of ns.name.authorizedNames) {
-              if (authName.colURI === col) {
-                if (authName.acceptedColURI === col) {
+              if (authName.colURI && authName.acceptedColURI === col) {
+                if (authName.colURI === col) {
                   expanded.push({ def: 0, aug: 1, dpr: 0, cite: 0 });
                 } else {
                   expanded.push({ def: 0, aug: 0, dpr: 1, cite: 0 });
@@ -403,7 +403,7 @@ export class Timeline extends LitElement {
       display: grid;
       grid-template-columns: 100%;
       line-height: 1.5rem;
-      padding: .125rem 0;
+      padding: 2px 0;
 
       a {
         display: grid;
@@ -489,7 +489,7 @@ export class Timeline extends LitElement {
 
     .grid {
       display: grid;
-      gap: calc(.25rem + 1px) .25rem;
+      gap: 5px .25rem;
       grid-auto-flow: column dense;
       grid-auto-columns: min-content;
       padding: .25rem;
