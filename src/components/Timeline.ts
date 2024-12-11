@@ -357,6 +357,8 @@ export class Timeline extends LitElement {
       margin: 1rem 0;
       overflow: auto;
       max-height: 90vh;
+
+      --l: linear-gradient(var(--text-color-muted) 0px 1px, transparent 1px 2px);
     }
 
     a {
@@ -413,36 +415,27 @@ export class Timeline extends LitElement {
     .name {
       display: grid;
       grid-template-columns: 100%;
-      line-height: 24px;
-      padding: 2px 0;
-
-      a {
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: max-content;
-        gap: 0 .25rem;
-        align-items: center;
-      }
-
-      & + & {
-        border-top: 1px solid var(--text-color-muted);
-      }
+      grid-template-rows: 27px;
+      grid-auto-rows: 24px;
+      align-items: center;
+      padding-bottom: 2px;
 
       &:first-child {
-        padding-top: 0;
+        grid-template-rows: 24px;
+      }
+
+      & + & .unauthorized {
+        border-top: 1px solid var(--text-color-muted);
+        padding-top: 2px;
+        height: 27px;
       }
 
       &:last-child {
         padding-bottom: 0;
       }
 
-      &>* {
-        height: 24px;
-      }
-
       &.closed .authorized {
-        height: 0;
-        overflow-y: hidden;
+        display: none;
       }
       
       .unauthorized {
@@ -453,6 +446,14 @@ export class Timeline extends LitElement {
 
       .ditto {
         color: var(--text-color-muted);
+      }
+
+      a {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
+        gap: 0 .25rem;
+        align-items: center;
       }
     }
 
@@ -556,26 +557,20 @@ export class Timeline extends LitElement {
   }
 
   override render() {
-    let sofar = 0.25;
-    const gradient: string[] = this.names.map((name, index) => {
+    let sofar = 4; // css px
+    const dividers: string[] = this.names.map((name, index) => {
       const height = (name.open ? name.name.authorizedNames.length + 1 : 1) *
-        1.5;
-      const space = `transparent calc(${sofar}rem + ${index * 5 - 2}px)`;
+        24;
       sofar += height;
-      return space +
-        ` calc(${sofar}rem + ${
-          index * 5 + 2
-        }px), var(--text-color-muted) calc(${sofar}rem + ${
-          index * 5
-        }px) calc(${sofar}rem + ${
-          index * 5 + 3
-        }px), transparent calc(${sofar}rem + ${index * 5 + 2}px)`;
+      return `${index * 5 + 2 + sofar}px`;
     });
-    gradient.pop();
+    dividers.pop();
 
     return html`
       <style>s-timeline-year {
-      background: linear-gradient(${gradient.join(", ")});
+      background-image: ${"var(--l),".repeat(this.names.length).slice(0, -10)};
+      background-position-y: ${dividers.join(",")};
+      background-repeat: no-repeat;
       grid-template-rows: ${
       this.names.map((name) =>
         (name.open ? name.name.authorizedNames.length + 1 : 1) * 1.5 + "rem"
