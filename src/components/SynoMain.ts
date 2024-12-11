@@ -39,8 +39,6 @@ const params = new URLSearchParams(document.location.search);
 
 @customElement("syno-main")
 export class SynoMain extends LitElement {
-  static override styles = css``; // TODO
-
   @property({ attribute: false })
   accessor synoGroup: SynonymGroup | null = null;
 
@@ -206,9 +204,7 @@ export class SynoMain extends LitElement {
       this.handleSynonyms();
     }
 
-    // TODO organize styles better
     return html`
-    <link rel="stylesheet" href="index.css" />
     <div class="option">
       Sort Names:
       <label><input type="radio" name="sort"
@@ -264,5 +260,9 @@ export class SynoMain extends LitElement {
           html`<syno-name .synoGroup=${this.synoGroup} .name=${name.name}></syno-name>`,
       )}
     `;
+  }
+
+  protected override createRenderRoot() {
+    return this;
   }
 }

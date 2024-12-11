@@ -584,13 +584,11 @@ export class Timeline extends LitElement {
         html`<div class="name ${
           n.open ? "open" : "closed"
         }"><div class="unauthorized"><a href=${
-          n.name.colURI?.replace(
-            "https://www.catalogueoflife.org/data/taxon/",
-            "#",
-          ) ?? n.name.taxonNameURI?.replace(
-            "http://taxon-name.plazi.org/id/",
-            "#",
-          ) ?? "#"
+          n.name.colURI
+            ? "#" + encodeURIComponent(n.name.colURI)
+            : n.name.taxonNameURI
+            ? "#" + encodeURIComponent(n.name.taxonNameURI)
+            : nothing
         }>${
           n.homonym
             ? (n.name.kingdom === "Animalia" || n.name.kingdom === "Plantae"
@@ -613,13 +611,11 @@ export class Timeline extends LitElement {
         }</div>${
           n.name.authorizedNames.map((a) =>
             html`<a class="authorized" href=${
-              a.colURI?.replace(
-                "https://www.catalogueoflife.org/data/taxon/",
-                "#",
-              ) ?? a.taxonConceptURI?.replace(
-                "http://taxon-concept.plazi.org/id/",
-                "#",
-              ) ?? "#"
+              a.colURI
+                ? "#" + encodeURIComponent(a.colURI)
+                : a.taxonConceptURI
+                ? "#" + encodeURIComponent(a.taxonConceptURI)
+                : nothing
             }"><span class="ditto">—“—</span> ${a.authority}</a>`
           )
         }</div>`

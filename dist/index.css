@@ -8,6 +8,7 @@
   height: 100%;
 
   --nav-background: light-dark(#f0f0f0, #000000);
+  --highlight-background: light-dark(#f1ffca, #3c4620);
   --body-background: light-dark(#ffffff, #222222);
   --accent-mild: light-dark(#9bc134, #476100);
   --accent: light-dark(#476100, #9bc134);
@@ -18,6 +19,14 @@
 @supports (font-variation-settings: normal) {
   :root {
     font-family: InterVariable, Inter, Helvetica, "Helvetica Neue", sans-serif;
+  }
+}
+
+@keyframes high-light {
+
+  10%,
+  50% {
+    background: var(--highlight-background);
   }
 }
 
@@ -227,6 +236,19 @@ svg {
 syno-name {
   display: block;
   margin: 1rem 0;
+  border-radius: 0.8rem;
+
+  &:has(:target) {
+    animation: 2s ease-in-out high-light;
+  }
+
+  .header {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: .25rem;
+  }
 }
 
 .rank,
@@ -249,6 +271,10 @@ syno-name {
   &:not(:last-child):not(.uri)::after {
     content: ",";
   }
+}
+
+.ditto {
+  color: var(--text-color-muted);
 }
 
 .uri:not(:empty) {
@@ -296,14 +322,14 @@ syno-treatment,
   transition: all 200ms;
   clear: both;
 
-  & > s-icon,
-  & > svg {
+  &>s-icon,
+  &>svg {
     height: 20px;
     vertical-align: sub;
     margin: 0 0.2rem 0 -1.2rem;
   }
 
-  > .icon.button {
+  >.icon.button {
     float: right;
   }
 
@@ -354,7 +380,7 @@ syno-treatment,
   padding: 0;
   position: relative;
 
-  & > svg {
+  &>svg {
     height: 1rem;
     margin: 0;
   }

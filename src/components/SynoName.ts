@@ -20,11 +20,6 @@ const shortUrl = (url: string) =>
 
 @customElement("syno-authname")
 export class SynoAuthName extends LitElement {
-  static override styles = css`
-  .ditto {
-    color:  var(--text-color-muted);
-  }`; // TODO
-
   @property({ attribute: false })
   accessor synoGroup: SynonymGroup | null = null;
   @property({ attribute: false })
@@ -55,9 +50,7 @@ export class SynoAuthName extends LitElement {
       return 0;
     });
 
-    // TODO organize styles better
     return html`
-        <link rel="stylesheet" href="index.css" />
         <h3>
           <i class="ditto">${this.authorizedName.displayName}</i>
           ${this.authorizedName.authority}
@@ -116,19 +109,14 @@ export class SynoAuthName extends LitElement {
     }
     </ul>`;
   }
+
+  protected override createRenderRoot() {
+    return this;
+  }
 }
 
 @customElement("syno-name")
 export class SynoName extends LitElement {
-  static override styles = css`
-  .header {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 1fr;
-    align-items: center;
-    gap: .25rem;
-  }`; // TODO
-
   @property({ attribute: false })
   accessor synoGroup: SynonymGroup | null = null;
   @property({ attribute: false })
@@ -153,9 +141,7 @@ export class SynoName extends LitElement {
       return 0;
     });
 
-    // TODO organize styles better
     return html`
-    <link rel="stylesheet" href="index.css" />
     <div class="header">
       <h2>
         <i>${this.name.displayName}</i>
@@ -236,6 +222,10 @@ export class SynoName extends LitElement {
         html`<syno-authname .synoGroup=${this.synoGroup} .authorizedName=${authorizedName}></syno-authname>`
       )
     }`;
+  }
+
+  protected override createRenderRoot() {
+    return this;
   }
 }
 
