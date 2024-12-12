@@ -314,7 +314,6 @@ ul {
   margin: 0;
 }
 
-syno-treatment,
 .treatmentline {
   display: block;
   position: relative;
@@ -374,9 +373,10 @@ syno-treatment,
   border-radius: 1rem;
   border: none;
   background: none;
-  width: 1rem;
+  /* width: 1rem; */
   height: 1rem;
-  display: inline-block;
+  display: inline-grid;
+  grid-auto-flow: column;
   padding: 0;
   position: relative;
 
@@ -392,7 +392,7 @@ syno-treatment,
     bottom: -1rem;
     left: -1rem;
     right: -1rem;
-    border-radius: 100%;
+    border-radius: 2rem;
   }
 
   &:hover::before {

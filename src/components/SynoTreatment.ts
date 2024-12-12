@@ -1,9 +1,187 @@
 import type { AuthorizedName, SynonymGroup, Treatment } from "@plazi/synolib";
-import { icons } from "./Icons.ts";
+import { css, html, LitElement, nothing } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { until } from "lit/directives/until.js";
+import { Icon, icons } from "./Icons.ts";
 
-export type SynoStatus = "def" | "aug" | "dpr" | "cite" | "unknown";
+export type SynoStatus = "def" | "aug" | "dpr" | "cite";
 
-export class SynoTreatment extends HTMLElement {
+const shortUrl = (url: string) =>
+  url
+    .replace("https://www.catalogueoflife.org/data/taxon/", "")
+    .replace("http://taxon-concept.plazi.org/id/", "")
+    .replace("http://taxon-name.plazi.org/id/", "");
+
+@customElement("syno-treatment")
+export class SynoTreatment extends LitElement {
+  static override styles = css`
+    :host {
+      line-height: 20px;
+      padding: 4px;
+      margin: 4px 0 4px -20px;
+      display: block;
+    }
+
+    s-icon {
+      display: block;
+    }
+
+    .head {
+      display: grid;
+      grid-template-columns: 16px 1fr auto auto;
+      grid-template-rows: 20px auto;
+      gap: 0 4px;
+      align-items: center;
+
+      &>div {
+        grid-row-end: span 2;
+      }
+    }
+    
+    .counts {
+      display: flex;
+      align-items: center;
+    }
+    
+    .details {
+      margin: 4px 0 0 20px;
+
+      .row {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: 20px auto;
+        gap: 0 4px;
+        align-items: center;
+
+        &>div {
+          grid-row-end: span 2;
+        }
+      }
+    }
+
+    button {
+      border-radius: 1rem;
+      border: none;
+      background: none;
+      padding: 0;
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: -1rem;
+        bottom: -1rem;
+        left: -1rem;
+        right: -1rem;
+        border-radius: 2rem;
+      }
+
+      &:hover::before {
+        background: #ededed8c;
+      }
+    }
+
+    .uri:not(:empty) {
+      font-size: 0.75rem;
+      line-height: 1em;
+      padding: 0 4px;
+      border-radius: 4px;
+      background: var(--nav-background);
+      font-family: inherit;
+      font-weight: normal;
+      font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
+      text-decoration: none;
+
+      &.taxon {
+        color: #4e69ae;
+      }
+
+      &.treatment {
+        color: var(--text-color-muted);
+      }
+
+      &.col {
+        color: #177669;
+      }
+
+      s-icon,
+      svg {
+        display: inline-block;
+        height: 0.8em;
+        vertical-align: baseline;
+        margin: 0 -0.1em 0 0.2em;
+      }
+    }
+`;
+
+  @property({ attribute: false })
+  accessor synoGroup: SynonymGroup | null = null;
+
+  @property({ attribute: false })
+  accessor trt: Treatment | null = null;
+
+  @property({ attribute: false })
+  accessor status: SynoStatus | null = null;
+
+  @state()
+  accessor open = false;
+
+  override render() {
+    return html`
+      <div class="head">
+        <s-icon icon=${this.status || "unknown"}></s-icon>
+        <div>
+          ${this.trt?.date ?? html`<i>No Date</i>`}:
+          ${
+      until(
+        this.trt?.details.then((d) => d.creators),
+        html`<progress></progress>`,
+      )
+    }
+          <i>${
+      until(this.trt?.details.then((d) => `“${d.title}”`), nothing)
+    }</i>
+          <a target="_blank" href=${this.trt?.url} class="treatment uri">
+            ${this.trt?.url.replace("http://treatment.plazi.org/id/", "")}
+            <s-icon icon="link"></s-icon>
+          </a>
+        </div>
+        <span class="counts">
+          ${
+      until(
+        this.trt?.details.then((d) =>
+          html`${
+            d.figureCitations.length > 0
+              ? html`${d.figureCitations.length}<s-icon icon="image"></s-icon>`
+              : nothing
+          }${
+            d.materialCitations.length > 0
+              ? html`${d.materialCitations.length}<s-icon icon="material"></s-icon>`
+              : nothing
+          }`
+        ),
+        nothing,
+      )
+    }
+        </span>
+        <button @click=${(e: Event) => {
+      e.stopPropagation();
+      this.open = !this.open;
+    }}><s-icon icon=${this.open ? "collapse" : "expand"}></s-icon></button>
+      </div>
+      ${
+      this.open
+        ? html`
+        <div class="details">
+          ...
+        </div>`
+        : nothing
+    }
+    `;
+  }
+}
+
+export class SynoTreatmentOld extends HTMLElement {
   constructor(
     private trt: Treatment,
     private status: SynoStatus,
@@ -38,19 +216,19 @@ export class SynoTreatment extends HTMLElement {
     const spinner = document.createElement("progress");
     this.append(": ", spinner);
 
+    this.append(button);
+
+    const names = document.createElement("div");
+    names.classList.add("indent", "details");
+    this.append(names);
+
     const url = document.createElement("a");
     url.classList.add("treatment", "uri");
     url.href = this.trt.url;
     url.target = "_blank";
     url.innerText = this.trt.url.replace("http://treatment.plazi.org/id/", "");
     url.innerHTML += icons.link;
-    this.append(" ", url);
-
-    this.append(button);
-
-    const names = document.createElement("div");
-    names.classList.add("indent", "details");
-    this.append(names);
+    names.append(url);
 
     this.trt.details.then((details) => {
       const creators = document.createElement("span");
@@ -254,4 +432,3 @@ export class SynoTreatment extends HTMLElement {
     });
   }
 }
-customElements.define("syno-treatment", SynoTreatment);

@@ -103,9 +103,13 @@ export class SynoAuthName extends LitElement {
             </div>`
         : nothing
     }${
-      treatments_array.map(({ trt, status }) =>
-        new SynoTreatment(trt, status, this.synoGroup!)
-      )
+      treatments_array.map(({ trt, status }) => {
+        const t = new SynoTreatment();
+        t.trt = trt;
+        t.status = status;
+        t.synoGroup = this.synoGroup!;
+        return t;
+      })
     }
     </ul>`;
   }
@@ -212,9 +216,13 @@ export class SynoName extends LitElement {
         </div>`
         : nothing
     }${
-      treatments_array.map(({ trt, status }) =>
-        new SynoTreatment(trt, status, this.synoGroup!)
-      )
+      treatments_array.map(({ trt, status }) => {
+        const t = new SynoTreatment();
+        t.trt = trt;
+        t.status = status;
+        t.synoGroup = this.synoGroup!;
+        return t;
+      })
     }
     </ul>
     ${
