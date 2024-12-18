@@ -251,6 +251,11 @@ syno-name {
   }
 }
 
+syno-treatment.open {
+  background: var(--highlight-background);
+  padding: 4px;
+}
+
 .rank,
 .justification {
   font-size: 0.8rem;
@@ -350,22 +355,6 @@ ul {
       max-height: 200rem;
       overflow: auto;
     }
-  }
-}
-
-.figures {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-  grid-template-rows: masonry;
-  margin: 0.2rem 0 0.2rem 2.2rem;
-  gap: 1rem;
-
-  & figure {
-    margin: 0;
-  }
-
-  & figcaption {
-    font-size: 0.4rem;
   }
 }
 

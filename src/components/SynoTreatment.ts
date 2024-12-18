@@ -16,10 +16,11 @@ const shortUrl = (url: string) =>
 export class SynoTreatment extends LitElement {
   static override styles = css`
     :host {
-      line-height: 20px;
-      padding: 4px;
-      margin: 4px 0 4px -20px;
+      border-radius: 8px;
       display: block;
+      margin-block: 4px;
+      margin-left: -20px;
+      padding: 0 4px;
     }
 
     s-icon {
@@ -28,6 +29,7 @@ export class SynoTreatment extends LitElement {
 
     .head {
       display: grid;
+      line-height: 20px;
       grid-template-columns: 16px 1fr auto auto;
       grid-template-rows: 20px auto;
       gap: 0 4px;
@@ -37,25 +39,44 @@ export class SynoTreatment extends LitElement {
         grid-row-end: span 2;
       }
     }
-    
+
     .counts {
       display: flex;
       align-items: center;
     }
-    
+
     .details {
       margin: 4px 0 0 20px;
 
       .row {
         display: grid;
-        grid-template-columns: auto 1fr;
-        grid-template-rows: 20px auto;
+        line-height: 16px;
+        font-size: 0.75em;
+        grid-template-columns: auto auto 1fr;
+        grid-template-rows: 16px auto;
         gap: 0 4px;
         align-items: center;
 
         &>div {
           grid-row-end: span 2;
+
+          &>span {
+            font-weight: 600;
+            text-transform: uppercase;
+          }
         }
+      }
+
+      .row + .row {
+        margin-top: 4px;
+      }
+
+      .row.hidden {
+        display: none;
+      }
+
+      &.open .row.hidden {
+        display: grid;
       }
     }
 
@@ -78,6 +99,16 @@ export class SynoTreatment extends LitElement {
 
       &:hover::before {
         background: #ededed8c;
+      }
+    }
+
+    .taxon,
+    .col {
+      color: var(--text-color-muted);
+      font-size: 0.75rem;
+
+      &:not(:last-child):not(.uri)::after {
+        content: ",";
       }
     }
 
@@ -112,6 +143,44 @@ export class SynoTreatment extends LitElement {
         margin: 0 -0.1em 0 0.2em;
       }
     }
+
+    .figures {
+      display: grid;
+      color: var(--text-color-muted);
+      grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+      grid-template-rows: masonry;
+      gap: 12px 4px;
+
+      & figure {
+        margin: 0;
+      }
+
+      & figcaption {
+        font-size: 0.4rem;
+        line-height: normal;
+      }
+
+      & img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+    }
+
+    .blue {
+      color: #1e88e5;
+    }
+
+    .green {
+      color: #388e3c;
+    }
+
+    .red {
+      color: #e53935;
+    }
+
+    .gray {
+      color: #666666;
+    }
 `;
 
   @property({ attribute: false })
@@ -127,6 +196,7 @@ export class SynoTreatment extends LitElement {
   accessor open = false;
 
   override render() {
+    this.classList.toggle("open", this.open);
     return html`
       <div class="head">
         <s-icon icon=${this.status || "unknown"}></s-icon>
@@ -169,234 +239,143 @@ export class SynoTreatment extends LitElement {
       this.open = !this.open;
     }}><s-icon icon=${this.open ? "collapse" : "expand"}></s-icon></button>
       </div>
+      <div class="details ${this.open ? "open" : ""}">
       ${
-      this.open
-        ? html`
-        <div class="details">
-          ...
-        </div>`
-        : nothing
+      until(
+        this.trt?.details.then((details) =>
+          html`${
+            details.treats.def.size
+              ? html`<div class="row ${
+                this.status === "def" || this.status === "cite" ? "hidden" : ""
+              }"><s-icon icon="def"></s-icon><div><span class="green">Defines:</span>${
+                details.treats.def.values().map((n) => {
+                  const short = n.replace(
+                    "http://taxon-concept.plazi.org/id/",
+                    "",
+                  );
+                  return until(
+                    this.synoGroup?.findName(n).then((nn) => {
+                      if ((nn as AuthorizedName).authority) {
+                        return html` <a class="taxon" href="#${short}">${
+                          nn.displayName + " " +
+                          (nn as AuthorizedName).authority
+                        }</a>`;
+                      } else {
+                        return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
+                      }
+                    }),
+                    html` <a class="taxon uri">${short}</a>`,
+                  );
+                })
+              }</div></div>`
+              : nothing
+          }${
+            details.treats.aug.size > 0 || details.treats.treattn.size > 0
+              ? html`<div class="row ${
+                this.status === "aug" || this.status === "cite" ? "hidden" : ""
+              }"><s-icon icon="aug"></s-icon><div><span class="blue">Treats:</span>${
+                details.treats.aug.union(details.treats.treattn).values().map(
+                  (n) => {
+                    const short = n.replace(
+                      "http://taxon-concept.plazi.org/id/",
+                      "",
+                    ).replace(
+                      "http://taxon-name.plazi.org/id/",
+                      "",
+                    );
+                    return until(
+                      this.synoGroup?.findName(n).then((nn) => {
+                        if ((nn as AuthorizedName).authority) {
+                          return html` <a class="taxon" href="#${short}">${
+                            nn.displayName + " " +
+                            (nn as AuthorizedName).authority
+                          }</a>`;
+                        } else {
+                          return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
+                        }
+                      }),
+                      html` <a class="taxon uri">${short}</a>`,
+                    );
+                  },
+                )
+              }</div></div>`
+              : nothing
+          }${
+            details.treats.dpr.size
+              ? html`<div class="row ${
+                this.status === "dpr" || this.status === "cite" ? "hidden" : ""
+              }"><s-icon icon="dpr"></s-icon><div><span class="red">Deprecates:</span>${
+                details.treats.dpr.values().map((n) => {
+                  const short = n.replace(
+                    "http://taxon-concept.plazi.org/id/",
+                    "",
+                  );
+                  return until(
+                    this.synoGroup?.findName(n).then((nn) => {
+                      if ((nn as AuthorizedName).authority) {
+                        return html` <a class="taxon" href="#${short}">${
+                          nn.displayName + " " +
+                          (nn as AuthorizedName).authority
+                        }</a>`;
+                      } else {
+                        return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
+                      }
+                    }),
+                    html` <a class="taxon uri">${short}</a>`,
+                  );
+                })
+              }</div></div>`
+              : nothing
+          }${
+            details.treats.citetc.size > 0 || details.treats.citetn.size > 0
+              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><span class="gray">Cites:</span>${
+                details.treats.citetc.union(details.treats.citetn).values().map(
+                  (n) => {
+                    const short = n.replace(
+                      "http://taxon-concept.plazi.org/id/",
+                      "",
+                    ).replace(
+                      "http://taxon-name.plazi.org/id/",
+                      "",
+                    );
+                    return until(
+                      this.synoGroup?.findName(n).then((nn) => {
+                        if ((nn as AuthorizedName).authority) {
+                          return html` <a class="taxon" href="#${short}">${
+                            nn.displayName + " " +
+                            (nn as AuthorizedName).authority
+                          }</a>`;
+                        } else {
+                          return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
+                        }
+                      }),
+                      html` <a class="taxon uri">${short}</a>`,
+                    );
+                  },
+                )
+              }</div></div>`
+              : nothing
+          }${
+            details.figureCitations.length > 0
+              ? html`<div class="row hidden"><s-icon icon="image"></s-icon><div class="figures">${
+                details.figureCitations.map((figure) => html`
+                  <figure>
+                    <img src=${figure.url} loading="lazy" alt=${figure.description ?? "Cited Figure without caption"}>
+                    <figcaption>${figure.description ?? ""}</figcaption>
+                  </figure>`)
+              }</div></div>`
+              : nothing
+          }`
+        ),
+        html`<progress></progress>`,
+      )
     }
+      </div>
     `;
   }
 }
 
-export class SynoTreatmentOld extends HTMLElement {
-  constructor(
-    private trt: Treatment,
-    private status: SynoStatus,
-    private synoGroup: SynonymGroup,
-  ) {
-    super();
-  }
-
-  connectedCallback() {
-    if (this.innerHTML) return;
-    this.innerHTML = icons[this.status] ?? icons.unknown;
-
-    const button = document.createElement("button");
-    button.classList.add("icon", "button");
-    button.innerHTML = icons.expand;
-    button.addEventListener("click", () => {
-      if (this.classList.toggle("expanded")) {
-        button.innerHTML = icons.collapse;
-      } else {
-        button.innerHTML = icons.expand;
-      }
-    });
-
-    const date = document.createElement("span");
-    if (this.trt.date) date.innerText = "" + this.trt.date;
-    else {
-      date.classList.add("missing");
-      date.innerText = "No Date";
-    }
-    this.append(date);
-
-    const spinner = document.createElement("progress");
-    this.append(": ", spinner);
-
-    this.append(button);
-
-    const names = document.createElement("div");
-    names.classList.add("indent", "details");
-    this.append(names);
-
-    const url = document.createElement("a");
-    url.classList.add("treatment", "uri");
-    url.href = this.trt.url;
-    url.target = "_blank";
-    url.innerText = this.trt.url.replace("http://treatment.plazi.org/id/", "");
-    url.innerHTML += icons.link;
-    names.append(url);
-
-    this.trt.details.then((details) => {
-      const creators = document.createElement("span");
-      const title = document.createElement("i");
-      spinner.replaceWith(creators, " ", title);
-
-      if (details.creators) creators.innerText = details.creators;
-      else {
-        creators.classList.add("missing");
-        creators.innerText = "No Authors";
-      }
-
-      if (details.title) title.innerText = "“" + details.title + "”";
-      else {
-        title.classList.add("missing");
-        title.innerText = "No Title";
-      }
-
-      if (details.treats.def.size > 0) {
-        const line = document.createElement("div");
-        // line.innerHTML = this.status === "cite" ? icons.line : icons.east;
-        line.innerHTML = icons.east;
-        line.innerHTML += icons.def;
-        if (this.status === "def" || this.status === "cite") {
-          line.classList.add("hidden");
-        }
-        names.append(line);
-
-        details.treats.def.forEach((n) => {
-          const url = document.createElement("a");
-          url.classList.add("taxon", "uri");
-          const short = n.replace("http://taxon-concept.plazi.org/id/", "");
-          url.innerText = short;
-          url.href = "#" + short;
-          url.title = "show name";
-          line.append(" ", url);
-          this.synoGroup.findName(n).then((nn) => {
-            url.classList.remove("uri");
-            if ((nn as AuthorizedName).authority) {
-              url.innerText = nn.displayName + " " +
-                (nn as AuthorizedName).authority;
-            } else url.innerText = nn.displayName;
-          }, () => {
-            url.removeAttribute("href");
-          });
-        });
-      }
-      if (details.treats.aug.size > 0 || details.treats.treattn.size > 0) {
-        const line = document.createElement("div");
-        // line.innerHTML = this.status === "cite" ? icons.line : icons.east;
-        line.innerHTML = icons.east;
-        line.innerHTML += icons.aug;
-        if (this.status === "aug" || this.status === "cite") {
-          line.classList.add("hidden");
-        }
-        names.append(line);
-
-        details.treats.aug.forEach((n) => {
-          const url = document.createElement("a");
-          url.classList.add("taxon", "uri");
-          const short = n.replace("http://taxon-concept.plazi.org/id/", "");
-          url.innerText = short;
-          url.href = "#" + short;
-          url.title = "show name";
-          line.append(" ", url);
-          this.synoGroup.findName(n).then((nn) => {
-            url.classList.remove("uri");
-            if ((nn as AuthorizedName).authority) {
-              url.innerText = nn.displayName + " " +
-                (nn as AuthorizedName).authority;
-            } else url.innerText = nn.displayName;
-          }, () => {
-            url.removeAttribute("href");
-          });
-        });
-        details.treats.treattn.forEach((n) => {
-          const url = document.createElement("a");
-          url.classList.add("taxon", "uri");
-          const short = n.replace("http://taxon-name.plazi.org/id/", "");
-          url.innerText = short;
-          url.href = "#" + short;
-          url.title = "show name";
-          line.append(" ", url);
-          this.synoGroup.findName(n).then((nn) => {
-            url.classList.remove("uri");
-            if ((nn as AuthorizedName).authority) {
-              url.innerText = nn.displayName + " " +
-                (nn as AuthorizedName).authority;
-            } else url.innerText = nn.displayName;
-          }, () => {
-            url.removeAttribute("href");
-          });
-        });
-      }
-      if (details.treats.dpr.size > 0) {
-        const line = document.createElement("div");
-        // line.innerHTML = this.status === "cite" ? icons.line : icons.west;
-        line.innerHTML = icons.west;
-        line.innerHTML += icons.dpr;
-        if (this.status === "dpr" || this.status === "cite") {
-          line.classList.add("hidden");
-        }
-        names.append(line);
-
-        details.treats.dpr.forEach((n) => {
-          const url = document.createElement("a");
-          url.classList.add("taxon", "uri");
-          const short = n.replace("http://taxon-concept.plazi.org/id/", "");
-          url.innerText = short;
-          url.href = "#" + short;
-          url.title = "show name";
-          line.append(" ", url);
-          this.synoGroup.findName(n).then((nn) => {
-            url.classList.remove("uri");
-            if ((nn as AuthorizedName).authority) {
-              url.innerText = nn.displayName + " " +
-                (nn as AuthorizedName).authority;
-            } else url.innerText = nn.displayName;
-          }, () => {
-            url.removeAttribute("href");
-          });
-        });
-      }
-      if (details.treats.citetc.size > 0 || details.treats.citetn.size > 0) {
-        const line = document.createElement("div");
-        line.innerHTML = icons.empty + icons.cite;
-        // if (this.status === "dpr" || this.status === "cite") {
-        line.classList.add("hidden");
-        // }
-        names.append(line);
-
-        details.treats.citetc.forEach((n) => {
-          const url = document.createElement("a");
-          url.classList.add("taxon", "uri");
-          const short = n.replace("http://taxon-concept.plazi.org/id/", "");
-          url.innerText = short;
-          url.href = "#" + short;
-          url.title = "show name";
-          line.append(" ", url);
-          this.synoGroup.findName(n).then((nn) => {
-            url.classList.remove("uri");
-            if ((nn as AuthorizedName).authority) {
-              url.innerText = nn.displayName + " " +
-                (nn as AuthorizedName).authority;
-            } else url.innerText = nn.displayName;
-          }, () => {
-            url.removeAttribute("href");
-          });
-        });
-        details.treats.citetn.forEach((n) => {
-          const url = document.createElement("a");
-          url.classList.add("taxon", "uri");
-          const short = n.replace("http://taxon-name.plazi.org/id/", "");
-          url.innerText = short;
-          url.href = "#" + short;
-          url.title = "show name";
-          line.append(" ", url);
-          this.synoGroup.findName(n).then((nn) => {
-            url.classList.remove("uri");
-            if ((nn as AuthorizedName).authority) {
-              url.innerText = nn.displayName + " " +
-                (nn as AuthorizedName).authority;
-            } else url.innerText = nn.displayName;
-          }, () => {
-            url.removeAttribute("href");
-          });
-        });
-      }
+/*
       if (details.figureCitations.length > 0) {
         const line = document.createElement("div");
         line.classList.add("figures", "hidden");
@@ -432,3 +411,4 @@ export class SynoTreatmentOld extends HTMLElement {
     });
   }
 }
+  */
