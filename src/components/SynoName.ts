@@ -6,7 +6,11 @@ import type {
 } from "@plazi/synolib";
 import { distinct } from "@std/collections/distinct";
 import "./Icons.ts";
-import { type SynoStatus, SynoTreatment } from "./SynoTreatment.ts";
+import {
+  SynoColTreatment,
+  type SynoStatus,
+  SynoTreatment,
+} from "./SynoTreatment.ts";
 import "./WikidataButtons.ts";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
@@ -73,34 +77,9 @@ export class SynoAuthName extends LitElement {
     }
         </h3>
         <ul>
-        ${
+      ${
       this.authorizedName.colURI
-        ? html`<div class="treatmentline">
-            <s-icon icon=${
-          this.authorizedName.acceptedColURI !== this.authorizedName.colURI
-            ? "col_dpr"
-            : "col_aug"
-        }></s-icon>
-              Catalogue of Life
-              <div class="indent">${
-          this.authorizedName.acceptedColURI !== this.authorizedName.colURI
-            ? html`<div><s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon><a
-                  href="#${
-              encodeURIComponent(this.authorizedName.acceptedColURI!)
-            }" title="show name">${
-              until(
-                this.synoGroup.findName(this.authorizedName.acceptedColURI!)
-                  .then((n) =>
-                    (n as AuthorizedName).authority
-                      ? n.displayName + " " + (n as AuthorizedName).authority
-                      : n.displayName
-                  ),
-                shortUrl(this.authorizedName.acceptedColURI!),
-              )
-            }</a></div>`
-            : nothing
-        }</div>
-            </div>`
+        ? html`<syno-col .synoGroup=${this.synoGroup} .colURI=${this.authorizedName.colURI} .acceptedColURI=${this.authorizedName.acceptedColURI}></syno-col>`
         : nothing
     }${
       treatments_array.map(({ trt, status }) => {

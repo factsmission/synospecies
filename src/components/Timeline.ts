@@ -20,7 +20,7 @@ export class TimelineTreatment extends LitElement {
     :host > a {
       background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
       color: var(--text-color);
-      border-radius: .75rem;
+      border-radius: 12px;
       display: grid;
       padding: 0 .25rem;
       min-width: .5rem;
@@ -30,7 +30,7 @@ export class TimelineTreatment extends LitElement {
     }
 
     :host > a.col {
-      border-radius: .5rem;
+      border-radius: 4px;
     }
 
     :host > a[href] {
