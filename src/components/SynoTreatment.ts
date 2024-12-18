@@ -1,4 +1,9 @@
-import type { AuthorizedName, SynonymGroup, Treatment } from "@plazi/synolib";
+import type {
+  AuthorizedName,
+  MaterialCitation,
+  SynonymGroup,
+  Treatment,
+} from "@plazi/synolib";
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
@@ -12,15 +17,47 @@ const shortUrl = (url: string) =>
     .replace("http://taxon-concept.plazi.org/id/", "")
     .replace("http://taxon-name.plazi.org/id/", "");
 
+function unCamelCase(string: string) {
+  const result = string.charAt(0).toUpperCase() +
+    string.slice(1).replace(/([A-Z])/g, " $1").trim();
+  return result.replace(/gbif/gi, "GBIF").replace(/id/gi, "ID").replace(
+    /http/gi,
+    "HTTP",
+  ).replace(/uri/gi, "URI");
+}
+
+function pretty(mc: MaterialCitation): string {
+  let result = "";
+  if (mc.typeStatus) result += `Status: ${mc.typeStatus}\n`;
+  // if (mc.recordedBy) result += `Recorded by ${mc.recordedBy}\n`;
+  for (const [key, value] of Object.entries(mc)) {
+    if (
+      value &&
+      !([
+        // "collectionCode",
+        // "catalogNumber",
+        "typeStatus",
+        "recordedBy",
+        "httpUri",
+      ].includes(key))
+    ) {
+      result += `${unCamelCase(key)}: ${value}\n`;
+    }
+  }
+  if (result === "") result = "[no additional details provided]";
+  return result;
+}
+
 @customElement("syno-treatment")
 export class SynoTreatment extends LitElement {
   static override styles = css`
     :host {
-      border-radius: 8px;
+      border-radius: 12px;
       display: block;
-      margin-block: 4px;
+      margin-block: 6px;
       margin-left: -20px;
-      padding: 0 4px;
+      padding: 0 6px;
+      font-feature-settings: "liga", "calt", "dlig", "tnum";
     }
 
     s-icon {
@@ -46,24 +83,20 @@ export class SynoTreatment extends LitElement {
     }
 
     .details {
+      color: var(--text-color-muted);
       margin: 4px 0 0 20px;
 
       .row {
         display: grid;
         line-height: 16px;
         font-size: 0.75em;
-        grid-template-columns: auto auto 1fr;
+        grid-template-columns: auto 1fr;
         grid-template-rows: 16px auto;
         gap: 0 4px;
         align-items: center;
 
         &>div {
           grid-row-end: span 2;
-
-          &>span {
-            font-weight: 600;
-            text-transform: uppercase;
-          }
         }
       }
 
@@ -77,6 +110,23 @@ export class SynoTreatment extends LitElement {
 
       &.open .row.hidden {
         display: grid;
+      }
+    }
+
+    a,
+    a:where(:visited) {
+      color: var(--accent);
+      text-decoration: none;
+
+      &:hover,
+      &:focus,
+      &:active {
+        color: var(--accent-mild) !important;
+        text-decoration: underline;
+      }
+
+      & img {
+        display: block;
       }
     }
 
@@ -146,7 +196,6 @@ export class SynoTreatment extends LitElement {
 
     .figures {
       display: grid;
-      color: var(--text-color-muted);
       grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
       grid-template-rows: masonry;
       gap: 12px 4px;
@@ -166,6 +215,24 @@ export class SynoTreatment extends LitElement {
       }
     }
 
+    .materials {
+      &>b {
+        display: block;
+        height: 16px;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 12px;
+        column-gap: 16px;
+        columns: calc(24rem + 4px);
+      }
+      
+      li {
+        break-inside: avoid;
+      }
+    }
+
     .blue {
       color: #1e88e5;
     }
@@ -180,6 +247,12 @@ export class SynoTreatment extends LitElement {
 
     .gray {
       color: #666666;
+    }
+
+    b {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-feature-settings: "liga", "calt", "dlig", "tnum", "cpsp";
     }
 `;
 
@@ -211,10 +284,9 @@ export class SynoTreatment extends LitElement {
           <i>${
       until(this.trt?.details.then((d) => `“${d.title}”`), nothing)
     }</i>
-          <a target="_blank" href=${this.trt?.url} class="treatment uri">
-            ${this.trt?.url.replace("http://treatment.plazi.org/id/", "")}
-            <s-icon icon="link"></s-icon>
-          </a>
+          <a target="_blank" href=${this.trt?.url} class="treatment uri">${
+      this.trt?.url.replace("http://treatment.plazi.org/id/", "")
+    }<s-icon icon="link"></s-icon></a>
         </div>
         <span class="counts">
           ${
@@ -247,7 +319,7 @@ export class SynoTreatment extends LitElement {
             details.treats.def.size
               ? html`<div class="row ${
                 this.status === "def" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="def"></s-icon><div><span class="green">Defines:</span>${
+              }"><s-icon icon="def"></s-icon><div><b class="green">Defines:</b>${
                 details.treats.def.values().map((n) => {
                   const short = n.replace(
                     "http://taxon-concept.plazi.org/id/",
@@ -273,7 +345,7 @@ export class SynoTreatment extends LitElement {
             details.treats.aug.size > 0 || details.treats.treattn.size > 0
               ? html`<div class="row ${
                 this.status === "aug" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="aug"></s-icon><div><span class="blue">Treats:</span>${
+              }"><s-icon icon="aug"></s-icon><div><b class="blue">Treats:</b>${
                 details.treats.aug.union(details.treats.treattn).values().map(
                   (n) => {
                     const short = n.replace(
@@ -304,7 +376,7 @@ export class SynoTreatment extends LitElement {
             details.treats.dpr.size
               ? html`<div class="row ${
                 this.status === "dpr" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="dpr"></s-icon><div><span class="red">Deprecates:</span>${
+              }"><s-icon icon="dpr"></s-icon><div><b class="red">Deprecates:</b>${
                 details.treats.dpr.values().map((n) => {
                   const short = n.replace(
                     "http://taxon-concept.plazi.org/id/",
@@ -328,7 +400,7 @@ export class SynoTreatment extends LitElement {
               : nothing
           }${
             details.treats.citetc.size > 0 || details.treats.citetn.size > 0
-              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><span class="gray">Cites:</span>${
+              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray">Cites:</b>${
                 details.treats.citetc.union(details.treats.citetn).values().map(
                   (n) => {
                     const short = n.replace(
@@ -358,12 +430,90 @@ export class SynoTreatment extends LitElement {
           }${
             details.figureCitations.length > 0
               ? html`<div class="row hidden"><s-icon icon="image"></s-icon><div class="figures">${
-                details.figureCitations.map((figure) => html`
+                details.figureCitations.map((figure) =>
+                  html`
                   <figure>
-                    <img src=${figure.url} loading="lazy" alt=${figure.description ?? "Cited Figure without caption"}>
+                    <img src=${figure.url} loading="lazy" alt=${
+                    figure.description ?? "Cited Figure without caption"
+                  }>
                     <figcaption>${figure.description ?? ""}</figcaption>
-                  </figure>`)
+                  </figure>`
+                )
               }</div></div>`
+              : nothing
+          }${
+            details.materialCitations.length > 0
+              ? html`<div class="row hidden"><s-icon icon="material"></s-icon><div class="materials"><b class="gray">Cited Materials:</b><ul>${
+                details.materialCitations.sort((a, b) =>
+                  (a.collectionCode + a.catalogNumber).localeCompare(
+                    b.collectionCode + b.catalogNumber,
+                  )
+                ).map((material) =>
+                  html`
+                <li title=${pretty(material)}>
+                  ${
+                    material.typeStatus &&
+                      material.typeStatus.toLocaleLowerCase() !==
+                        "other material"
+                      ? html`<b class=${
+                        material.typeStatus.toLocaleLowerCase().includes(
+                            "holotype",
+                          )
+                          ? "green"
+                          : nothing
+                      }>${material.typeStatus}:</b>`
+                      : nothing
+                  }
+                  ${
+                    material.collectionCode
+                      ? material.collectionCode + ":"
+                      : nothing
+                  }
+                  ${
+                    material.collectionCode &&
+                      material.catalogNumber.startsWith(material.collectionCode)
+                      ? material.catalogNumber.slice(
+                        material.collectionCode.length,
+                      ).replace(/^\s*[-:]\s*/i, "")
+                      : material.catalogNumber
+                  }
+                  ${
+                    material.recordedBy || material.eventDate
+                      ? `(Recorded ${material.eventDate ?? ""}${
+                        material.recordedBy ? " by " + material.recordedBy : ""
+                      })`
+                      : nothing
+                  }
+                  ${
+                    material.httpUri?.filter((uri) =>
+                      uri &&
+                      (!material.gbifSpecimenId ||
+                        !uri.endsWith(material.gbifSpecimenId)) &&
+                      (!material.gbifOccurrenceId ||
+                        !uri.endsWith(material.gbifOccurrenceId))
+                    ).map((uri) =>
+                      html`<a class="uri" href=${uri}>Link<s-icon icon="link"></s-icon></a>`
+                    )
+                  }
+                  ${
+                    material.gbifSpecimenId
+                      ? html`<a class="uri" href=${
+                        "https://www.gbif.org/specimen/" +
+                        material.gbifSpecimenId
+                      }>GBIF&nbsp;Specimen&nbsp;${material.gbifSpecimenId}<s-icon icon="link"></s-icon></a>`
+                      : nothing
+                  }
+                  ${
+                    material.gbifOccurrenceId
+                      ? html`<a class="uri" href=${
+                        "https://www.gbif.org/occurrence/" +
+                        material.gbifOccurrenceId
+                      }>GBIF&nbsp;Occurrence&nbsp;${material.gbifOccurrenceId}<s-icon icon="link"></s-icon></a>`
+                      : nothing
+                  }
+                </li>`
+                )
+              }</ul></div></div>`
               : nothing
           }`
         ),
@@ -374,41 +524,3 @@ export class SynoTreatment extends LitElement {
     `;
   }
 }
-
-/*
-      if (details.figureCitations.length > 0) {
-        const line = document.createElement("div");
-        line.classList.add("figures", "hidden");
-        names.append(line);
-        for (const figure of details.figureCitations) {
-          const el = document.createElement("figure");
-          line.append(el);
-          const img = document.createElement("img");
-          img.src = figure.url;
-          img.loading = "lazy";
-          img.alt = figure.description ?? "Cited Figure without caption";
-          el.append(img);
-          const caption = document.createElement("figcaption");
-          caption.innerText = figure.description ?? "";
-          el.append(caption);
-        }
-      }
-      if (details.materialCitations.length > 0) {
-        const line = document.createElement("div");
-        line.innerHTML = icons.empty + icons.cite +
-          " Material Citations:<br> -";
-        line.classList.add("hidden");
-        names.append(line);
-        line.innerText += details.materialCitations.map((c) =>
-          JSON.stringify(c)
-            .replaceAll("{", "")
-            .replaceAll("}", "")
-            .replaceAll('":', ": ")
-            .replaceAll(",", ", ")
-            .replaceAll('"', "")
-        ).join("\n -");
-      }
-    });
-  }
-}
-  */
