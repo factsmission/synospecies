@@ -78,8 +78,9 @@ export class SynoTreatment extends LitElement {
     }
 
     .counts {
-      display: flex;
       align-items: center;
+      color: var(--text-color-muted);
+      display: flex;
     }
 
     .details {
@@ -162,6 +163,10 @@ export class SynoTreatment extends LitElement {
       }
     }
 
+    .uri, .id {
+      font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
+    }
+
     .uri:not(:empty) {
       font-size: 0.75rem;
       line-height: 1em;
@@ -170,7 +175,6 @@ export class SynoTreatment extends LitElement {
       background: var(--nav-background);
       font-family: inherit;
       font-weight: normal;
-      font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
       text-decoration: none;
 
       &.taxon {
@@ -212,6 +216,7 @@ export class SynoTreatment extends LitElement {
       & img {
         max-width: 100%;
         max-height: 100%;
+        background: var(--body-background);
       }
     }
 
@@ -270,8 +275,9 @@ export class SynoTreatment extends LitElement {
 
   override render() {
     this.classList.toggle("open", this.open);
+    const treatmentID = this.trt?.url.replace("http://treatment.plazi.org/id/", "") || "";
     return html`
-      <div class="head">
+      <div class="head ${this.open ? "open" : ""}">
         <s-icon icon=${this.status || "unknown"}></s-icon>
         <div>
           ${this.trt?.date ?? html`<i>No Date</i>`}:
@@ -283,11 +289,7 @@ export class SynoTreatment extends LitElement {
     }
           <i>${
       until(this.trt?.details.then((d) => `“${d.title}”`), nothing)
-    }</i>
-          <a target="_blank" href=${this.trt?.url} class="treatment uri">${
-      this.trt?.url.replace("http://treatment.plazi.org/id/", "")
-    }<s-icon icon="link"></s-icon></a>
-        </div>
+    }</i></div>
         <span class="counts">
           ${
       until(
@@ -312,6 +314,16 @@ export class SynoTreatment extends LitElement {
     }}><s-icon icon=${this.open ? "collapse" : "expand"}></s-icon></button>
       </div>
       <div class="details ${this.open ? "open" : ""}">
+        <div class="row hidden">
+          <s-icon icon="empty"></s-icon>
+          <div>
+            <b>Treatment ID:</b>
+            <span class="id">${treatmentID}</span>
+            <a target="_blank" href=${this.trt?.url} class="treatment uri">TreatmentBank<s-icon icon="link"></s-icon></a>
+            <a target="_blank" href="https://git.ld.plazi.org/plazi/treatments-xml/src/branch/main/data/${treatmentID.slice(0,2)}/${treatmentID.slice(2,4)}/${treatmentID.slice(4,6)}/${treatmentID}.xml" class="treatment uri">XML<s-icon icon="link"></s-icon></a>
+            <a target="_blank" href="https://git.ld.plazi.org/plazi/treatments-rdf/src/branch/main/data/${treatmentID.slice(0,2)}/${treatmentID.slice(2,4)}/${treatmentID.slice(4,6)}/${treatmentID}.ttl" class="treatment uri">RDF<s-icon icon="link"></s-icon></a>
+          </div>
+        </div>
       ${
       until(
         this.trt?.details.then((details) =>
@@ -400,7 +412,7 @@ export class SynoTreatment extends LitElement {
               : nothing
           }${
             details.treats.citetc.size > 0 || details.treats.citetn.size > 0
-              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray">Cites:</b>${
+              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray"><abbr title="These citations are not considered to find synonyms by SynoSpecies.">Cites:</abbr></b>${
                 details.treats.citetc.union(details.treats.citetn).values().map(
                   (n) => {
                     const short = n.replace(
@@ -430,12 +442,12 @@ export class SynoTreatment extends LitElement {
           }${
             details.figureCitations.length > 0
               ? html`<div class="row hidden"><s-icon icon="image"></s-icon><div class="figures">${
-                details.figureCitations.map((figure) =>
+                details.figureCitations.sort((a, b) =>
+                  (a.description || "").localeCompare(b.description || "")
+                ).map((figure) =>
                   html`
                   <figure>
-                    <img src=${figure.url} loading="lazy" alt=${
-                    figure.description ?? "Cited Figure without caption"
-                  }>
+                    <img src=${figure.url} loading="lazy" alt=${figure.url}>
                     <figcaption>${figure.description ?? ""}</figcaption>
                   </figure>`
                 )
@@ -445,9 +457,11 @@ export class SynoTreatment extends LitElement {
             details.materialCitations.length > 0
               ? html`<div class="row hidden"><s-icon icon="material"></s-icon><div class="materials"><b class="gray">Cited Materials:</b><ul>${
                 details.materialCitations.sort((a, b) =>
-                  (a.collectionCode + a.catalogNumber).localeCompare(
-                    b.collectionCode + b.catalogNumber,
-                  )
+                  ((a.typeStatus || "zz") + a.collectionCode + a.catalogNumber)
+                    .localeCompare(
+                      (b.typeStatus || "zz") +
+                        b.collectionCode + b.catalogNumber,
+                    )
                 ).map((material) =>
                   html`
                 <li title=${pretty(material)}>
@@ -492,7 +506,7 @@ export class SynoTreatment extends LitElement {
                       (!material.gbifOccurrenceId ||
                         !uri.endsWith(material.gbifOccurrenceId))
                     ).map((uri) =>
-                      html`<a class="uri" href=${uri}>Link<s-icon icon="link"></s-icon></a>`
+                      html` <a class="uri" href=${uri}>Link<s-icon icon="link"></s-icon></a>`
                     )
                   }
                   ${
