@@ -55,7 +55,11 @@ export class SynoAuthName extends LitElement {
     });
 
     return html`
-        <h3>
+        <h3 id=${
+      this.authorizedName.colURI
+        ? encodeURIComponent(this.authorizedName.colURI)
+        : nothing
+    }>
           <i class="ditto">${this.authorizedName.displayName}</i>
           ${this.authorizedName.authority}
             ${
@@ -64,14 +68,6 @@ export class SynoAuthName extends LitElement {
           encodeURIComponent(this.authorizedName.taxonConceptURI)
         } href=${this.authorizedName.taxonConceptURI} target="_blank">${
           shortUrl(this.authorizedName.taxonConceptURI)
-        }<s-icon icon="link"></s-icon></a>`
-        : nothing
-    }${
-      this.authorizedName.colURI
-        ? html`<a class="taxon uri" id=${
-          encodeURIComponent(this.authorizedName.colURI)
-        } href=${this.authorizedName.colURI} target="_blank">${
-          shortUrl(this.authorizedName.colURI)
         }<s-icon icon="link"></s-icon></a>`
         : nothing
     }
@@ -126,7 +122,9 @@ export class SynoName extends LitElement {
 
     return html`
     <div class="header">
-      <h2>
+      <h2 id=${
+      this.name.colURI ? encodeURIComponent(this.name.colURI) : nothing
+    }>
         <i>${this.name.displayName}</i>
         <span class="rank">${this.name.kingdom || "Missing Kingdom"}</span>
         <span class="rank">${this.name.rank}</span>
@@ -136,14 +134,6 @@ export class SynoName extends LitElement {
           encodeURIComponent(this.name.taxonNameURI)
         } href=${this.name.taxonNameURI} target="_blank">${
           shortUrl(this.name.taxonNameURI)
-        }<s-icon icon="link"></s-icon></a>`
-        : nothing
-    }${
-      this.name.colURI
-        ? html`<a class="taxon uri" id=${
-          encodeURIComponent(this.name.colURI)
-        } href=${this.name.colURI} target="_blank">${
-          shortUrl(this.name.colURI)
         }<s-icon icon="link"></s-icon></a>`
         : nothing
     }
@@ -170,29 +160,7 @@ export class SynoName extends LitElement {
     <ul>
     ${
       this.name.colURI
-        ? html`<div class="treatmentline">
-        <s-icon icon=${
-          this.name.acceptedColURI !== this.name.colURI ? "col_dpr" : "col_aug"
-        }></s-icon>
-          Catalogue of Life
-          <div class="indent">${
-          this.name.acceptedColURI !== this.name.colURI
-            ? html`<div><s-icon icon="east"></s-icon><s-icon icon="col_aug"></s-icon><a
-              href="#${
-              encodeURIComponent(this.name.acceptedColURI!)
-            }" title="show name">${
-              until(
-                this.synoGroup.findName(this.name.acceptedColURI!).then((n) =>
-                  (n as AuthorizedName).authority
-                    ? n.displayName + " " + (n as AuthorizedName).authority
-                    : n.displayName
-                ),
-                shortUrl(this.name.acceptedColURI!),
-              )
-            }</a></div>`
-            : nothing
-        }</div>
-        </div>`
+        ? html`<syno-col .synoGroup=${this.synoGroup} .colURI=${this.name.colURI} .acceptedColURI=${this.name.acceptedColURI}></syno-col>`
         : nothing
     }${
       treatments_array.map(({ trt, status }) => {

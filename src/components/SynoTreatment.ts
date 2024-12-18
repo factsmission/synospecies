@@ -67,6 +67,10 @@ s-icon {
   &>div {
     grid-row-end: span 2;
   }
+  
+  &:hover button::before {
+    background: #ededed8c;
+  }
 }
 
 .counts {
@@ -284,13 +288,13 @@ export class SynoTreatment extends LitElement {
     }}>
         <s-icon icon=${this.status || "unknown"}></s-icon>
         <div>
-          ${this.trt?.date ?? html`<i>No Date</i>`}:
           ${
       until(
         this.trt?.details.then((d) => d.creators),
         html`<progress></progress>`,
       )
-    }
+    },
+          <b>${this.trt?.date ?? html`<i>No Date</i>`}</b>:
           <i>${
       until(this.trt?.details.then((d) => `“${d.title}”`), nothing)
     }</i></div>
@@ -343,7 +347,7 @@ export class SynoTreatment extends LitElement {
             details.treats.def.size
               ? html`<div class="row ${
                 this.status === "def" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="def"></s-icon><div><b class="green">Defines:</b>${
+              }"><s-icon icon="def"></s-icon><div><b class="green"><abbr title="This treatment defines (e.g. as 'sp. nov.)' a new Taxon.">Defines:</abbr></b>${
                 details.treats.def.values().map((n) => {
                   const short = n.replace(
                     "http://taxon-concept.plazi.org/id/",
@@ -369,7 +373,7 @@ export class SynoTreatment extends LitElement {
             details.treats.aug.size > 0 || details.treats.treattn.size > 0
               ? html`<div class="row ${
                 this.status === "aug" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="aug"></s-icon><div><b class="blue">Treats:</b>${
+              }"><s-icon icon="aug"></s-icon><div><b class="blue"><abbr title="The taxon the treatment is about. SynoSpecies interprets this as an assertion that this name is valid.">Treats:</abbr></b>${
                 details.treats.aug.union(details.treats.treattn).values().map(
                   (n) => {
                     const short = n.replace(
@@ -400,7 +404,7 @@ export class SynoTreatment extends LitElement {
             details.treats.dpr.size
               ? html`<div class="row ${
                 this.status === "dpr" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="dpr"></s-icon><div><b class="red">Deprecates:</b>${
+              }"><s-icon icon="dpr"></s-icon><div><b class="red"><abbr title="Synonym(s) cited in the treatment.">Deprecates:</abbr></b>${
                 details.treats.dpr.values().map((n) => {
                   const short = n.replace(
                     "http://taxon-concept.plazi.org/id/",
@@ -424,7 +428,7 @@ export class SynoTreatment extends LitElement {
               : nothing
           }${
             details.treats.citetc.size > 0 || details.treats.citetn.size > 0
-              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray"><abbr title="These citations are not considered to find synonyms by SynoSpecies.">Cites:</abbr></b>${
+              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray"><abbr title="These citations are not considered synonyms by SynoSpecies.">Cites:</abbr></b>${
                 details.treats.citetc.union(details.treats.citetn).values().map(
                   (n) => {
                     const short = n.replace(
@@ -543,7 +547,7 @@ export class SynoTreatment extends LitElement {
               : nothing
           }`
         ),
-        html`<progress></progress>`,
+        nothing,
       )
     }
       </div>
@@ -553,7 +557,7 @@ export class SynoTreatment extends LitElement {
 
 @customElement("syno-col")
 export class SynoColTreatment extends LitElement {
-  static override styles = styles;
+  static override styles =  css`${styles} :host { border-radius: 4px; }`;
 
   @property({ attribute: false })
   accessor synoGroup: SynonymGroup | null = null;
@@ -622,124 +626,6 @@ export class SynoColTreatment extends LitElement {
     }</a>
           </div>
         </div>
-      ${nothing
-      /*
-      until(
-        this.trt?.details.then((details) =>
-          html`${
-            details.treats.def.size
-              ? html`<div class="row ${
-                this.status === "def" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="def"></s-icon><div><b class="green">Defines:</b>${
-                details.treats.def.values().map((n) => {
-                  const short = n.replace(
-                    "http://taxon-concept.plazi.org/id/",
-                    "",
-                  );
-                  return until(
-                    this.synoGroup?.findName(n).then((nn) => {
-                      if ((nn as AuthorizedName).authority) {
-                        return html` <a class="taxon" href="#${short}">${
-                          nn.displayName + " " +
-                          (nn as AuthorizedName).authority
-                        }</a>`;
-                      } else {
-                        return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                      }
-                    }),
-                    html` <a class="taxon uri">${short}</a>`,
-                  );
-                })
-              }</div></div>`
-              : nothing
-          }${
-            details.treats.aug.size > 0 || details.treats.treattn.size > 0
-              ? html`<div class="row ${
-                this.status === "aug" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="aug"></s-icon><div><b class="blue">Treats:</b>${
-                details.treats.aug.union(details.treats.treattn).values().map(
-                  (n) => {
-                    const short = n.replace(
-                      "http://taxon-concept.plazi.org/id/",
-                      "",
-                    ).replace(
-                      "http://taxon-name.plazi.org/id/",
-                      "",
-                    );
-                    return until(
-                      this.synoGroup?.findName(n).then((nn) => {
-                        if ((nn as AuthorizedName).authority) {
-                          return html` <a class="taxon" href="#${short}">${
-                            nn.displayName + " " +
-                            (nn as AuthorizedName).authority
-                          }</a>`;
-                        } else {
-                          return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                        }
-                      }),
-                      html` <a class="taxon uri">${short}</a>`,
-                    );
-                  },
-                )
-              }</div></div>`
-              : nothing
-          }${
-            details.treats.dpr.size
-              ? html`<div class="row ${
-                this.status === "dpr" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="dpr"></s-icon><div><b class="red">Deprecates:</b>${
-                details.treats.dpr.values().map((n) => {
-                  const short = n.replace(
-                    "http://taxon-concept.plazi.org/id/",
-                    "",
-                  );
-                  return until(
-                    this.synoGroup?.findName(n).then((nn) => {
-                      if ((nn as AuthorizedName).authority) {
-                        return html` <a class="taxon" href="#${short}">${
-                          nn.displayName + " " +
-                          (nn as AuthorizedName).authority
-                        }</a>`;
-                      } else {
-                        return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                      }
-                    }),
-                    html` <a class="taxon uri">${short}</a>`,
-                  );
-                })
-              }</div></div>`
-              : nothing
-          }${
-            details.treats.citetc.size > 0 || details.treats.citetn.size > 0
-              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray"><abbr title="These citations are not considered to find synonyms by SynoSpecies.">Cites:</abbr></b>${
-                details.treats.citetc.union(details.treats.citetn).values().map(
-                  (n) => {
-                    const short = n.replace(
-                      "http://taxon-concept.plazi.org/id/",
-                      "",
-                    ).replace(
-                      "http://taxon-name.plazi.org/id/",
-                      "",
-                    );
-                    return until(
-                      this.synoGroup?.findName(n).then((nn) => {
-                        if ((nn as AuthorizedName).authority) {
-                          return html` <a class="taxon" href="#${short}">${
-                            nn.displayName + " " +
-                            (nn as AuthorizedName).authority
-                          }</a>`;
-                        } else {
-                          return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                        }
-                      }),
-                      html` <a class="taxon uri">${short}</a>`,
-                    );
-                  },
-                )
-              }</div></div>`
-              : nothing
-              */
-    }
       </div>
     `;
   }

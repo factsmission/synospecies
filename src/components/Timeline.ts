@@ -616,7 +616,7 @@ export class Timeline extends LitElement {
                 : a.taxonConceptURI
                 ? "#" + encodeURIComponent(a.taxonConceptURI)
                 : nothing
-            }"><span class="ditto">—“—</span> ${a.authority}</a>`
+            }><span class="ditto">—“—</span> ${a.authority}</a>`
           )
         }</div>`
       )
