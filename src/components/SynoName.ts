@@ -6,14 +6,12 @@ import type {
 } from "@plazi/synolib";
 import { distinct } from "@std/collections/distinct";
 import "./Icons.ts";
-import {
-  type SynoStatus,
-  SynoTreatment,
-} from "./SynoTreatment.ts";
+import { type SynoStatus, SynoTreatment } from "./SynoTreatment.ts";
 import "./WikidataButtons.ts";
 import { html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
+import { authNameToID, nameToID } from "./utils.ts";
 
 const shortUrl = (url: string) =>
   url
@@ -57,11 +55,7 @@ export class SynoAuthName extends LitElement {
     authorities.delete(this.authorizedName.authority);
 
     return html`
-        <h3 id=${
-      this.authorizedName.colURI
-        ? encodeURIComponent(this.authorizedName.colURI)
-        : nothing
-    }>
+        <h3 id=${authNameToID(this.authorizedName)}>
           <i class="ditto">${this.authorizedName.displayName}</i>
           ${this.authorizedName.authority}
           ${
@@ -73,9 +67,7 @@ export class SynoAuthName extends LitElement {
     }
           ${
       this.authorizedName.taxonConceptURIs.map((tc) =>
-        html`<a class="taxon uri" id=${
-          encodeURIComponent(tc)
-        } href=${tc} target="_blank">${
+        html`<a class="taxon uri" href=${tc} target="_blank">${
           shortUrl(tc)
         }<s-icon icon="link"></s-icon></a>`
       )
@@ -131,17 +123,13 @@ export class SynoName extends LitElement {
 
     return html`
     <div class="header">
-      <h2 id=${
-      this.name.colURI ? encodeURIComponent(this.name.colURI) : nothing
-    }>
+      <h2 id=${nameToID(this.name)}>
         <i>${this.name.displayName}</i>
         <span class="rank">${this.name.kingdom || "Missing Kingdom"}</span>
         <span class="rank">${this.name.rank}</span>
     ${
       this.name.taxonNameURI
-        ? html`<a class="taxon uri" id=${
-          encodeURIComponent(this.name.taxonNameURI)
-        } href=${this.name.taxonNameURI} target="_blank">${
+        ? html`<a class="taxon uri" href=${this.name.taxonNameURI} target="_blank">${
           shortUrl(this.name.taxonNameURI)
         }<s-icon icon="link"></s-icon></a>`
         : nothing

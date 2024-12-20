@@ -1,6 +1,7 @@
 import type {
   AuthorizedName,
   MaterialCitation,
+  Name,
   SynonymGroup,
   Treatment,
 } from "@plazi/synolib";
@@ -8,6 +9,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import "./Icons.ts";
+import { authNameToID, nameToID } from "./utils.ts";
 
 export type SynoStatus = "def" | "aug" | "dpr" | "cite";
 
@@ -354,16 +356,7 @@ export class SynoTreatment extends LitElement {
                     "",
                   );
                   return until(
-                    this.synoGroup?.findName(n).then((nn) => {
-                      if ((nn as AuthorizedName).authority) {
-                        return html` <a class="taxon" href="#${short}">${
-                          nn.displayName + " " +
-                          (nn as AuthorizedName).authority
-                        }</a>`;
-                      } else {
-                        return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                      }
-                    }),
+                    this.synoGroup?.findName(n).then(nameLink),
                     html` <a class="taxon uri">${short}</a>`,
                   );
                 })
@@ -383,17 +376,9 @@ export class SynoTreatment extends LitElement {
                       "http://taxon-name.plazi.org/id/",
                       "",
                     );
+
                     return until(
-                      this.synoGroup?.findName(n).then((nn) => {
-                        if ((nn as AuthorizedName).authority) {
-                          return html` <a class="taxon" href="#${short}">${
-                            nn.displayName + " " +
-                            (nn as AuthorizedName).authority
-                          }</a>`;
-                        } else {
-                          return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                        }
-                      }),
+                      this.synoGroup?.findName(n).then(nameLink),
                       html` <a class="taxon uri">${short}</a>`,
                     );
                   },
@@ -410,17 +395,9 @@ export class SynoTreatment extends LitElement {
                     "http://taxon-concept.plazi.org/id/",
                     "",
                   );
+
                   return until(
-                    this.synoGroup?.findName(n).then((nn) => {
-                      if ((nn as AuthorizedName).authority) {
-                        return html` <a class="taxon" href="#${short}">${
-                          nn.displayName + " " +
-                          (nn as AuthorizedName).authority
-                        }</a>`;
-                      } else {
-                        return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                      }
-                    }),
+                    this.synoGroup?.findName(n).then(nameLink),
                     html` <a class="taxon uri">${short}</a>`,
                   );
                 })
@@ -438,17 +415,9 @@ export class SynoTreatment extends LitElement {
                       "http://taxon-name.plazi.org/id/",
                       "",
                     );
+
                     return until(
-                      this.synoGroup?.findName(n).then((nn) => {
-                        if ((nn as AuthorizedName).authority) {
-                          return html` <a class="taxon" href="#${short}">${
-                            nn.displayName + " " +
-                            (nn as AuthorizedName).authority
-                          }</a>`;
-                        } else {
-                          return html` <a class="taxon" href="#${short}">${nn.displayName}</a>`;
-                        }
-                      }),
+                      this.synoGroup?.findName(n).then(nameLink),
                       html` <a class="taxon uri">${short}</a>`,
                     );
                   },
@@ -557,7 +526,7 @@ export class SynoTreatment extends LitElement {
 
 @customElement("syno-col")
 export class SynoColTreatment extends LitElement {
-  static override styles =  css`${styles} :host { border-radius: 4px; }`;
+  static override styles = css`${styles} :host { border-radius: 4px; }`;
 
   @property({ attribute: false })
   accessor synoGroup: SynonymGroup | null = null;
@@ -606,15 +575,7 @@ export class SynoColTreatment extends LitElement {
             <b class="blue">Accepted Name:</b>
             ${
       until(
-        this.synoGroup?.findName(this.acceptedColURI!)
-          .then((n) => {
-            const text = (n as AuthorizedName).authority
-              ? n.displayName + " " + (n as AuthorizedName).authority
-              : n.displayName;
-            return html`<a class="col" href="#${
-              encodeURIComponent(this.acceptedColURI!)
-            }" title="show name">${text}</a>`;
-          }),
+        this.synoGroup?.findName(this.acceptedColURI!).then(nameLink),
         html`<a target="_blank" href=${this
           .acceptedColURI!} class="col uri">${
           this.acceptedColURI?.replace(
@@ -628,5 +589,20 @@ export class SynoColTreatment extends LitElement {
         </div>
       </div>
     `;
+  }
+}
+
+function nameLink(nn: Name | AuthorizedName) {
+  if ((nn as AuthorizedName).authority) {
+    return html` <a class="taxon" href="#${
+      authNameToID(nn as AuthorizedName)
+    }">${
+      nn.displayName + " " +
+      (nn as AuthorizedName).authority
+    }</a>`;
+  } else {
+    return html` <a class="taxon" href="#${
+      nameToID(nn as Name)
+    }">${nn.displayName}</a>`;
   }
 }

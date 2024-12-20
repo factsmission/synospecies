@@ -2,8 +2,8 @@ import type { Treatment } from "@plazi/synolib";
 import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
-import { IconName } from "./Icons.ts";
 import { type NameState } from "../types.ts";
+import { authNameToID, nameToID } from "./utils.ts";
 
 type Cell = { def: number; aug: number; dpr: number; cite: number };
 
@@ -24,7 +24,7 @@ export class TimelineTreatment extends LitElement {
       display: grid;
       padding: 0 .25rem;
       min-width: .5rem;
-      min-height: 100%;
+      /* min-height: 100%; */
       font-size: 0.8rem;
       text-decoration: none;
     }
@@ -583,13 +583,7 @@ export class Timeline extends LitElement {
       this.names.map((n, index) =>
         html`<div class="name ${
           n.open ? "open" : "closed"
-        }"><div class="unauthorized"><a href=${
-          n.name.colURI
-            ? "#" + encodeURIComponent(n.name.colURI)
-            : n.name.taxonNameURI
-            ? "#" + encodeURIComponent(n.name.taxonNameURI)
-            : nothing
-        }>${
+        }"><div class="unauthorized"><a href="#${nameToID(n.name)}">${
           n.homonym
             ? (n.name.kingdom === "Animalia" || n.name.kingdom === "Plantae"
               ? html`<s-icon icon=${n.name.kingdom}></s-icon>`
@@ -610,13 +604,9 @@ export class Timeline extends LitElement {
             : nothing
         }</div>${
           n.name.authorizedNames.map((a) =>
-            html`<a class="authorized" href=${
-              a.colURI
-                ? "#" + encodeURIComponent(a.colURI)
-                : a.taxonConceptURI
-                ? "#" + encodeURIComponent(a.taxonConceptURI)
-                : nothing
-            }><span class="ditto">—“—</span> ${a.authority}</a>`
+            html`<a class="authorized" href="#${
+              authNameToID(a)
+            }"><span class="ditto">—“—</span> ${a.authority}</a>`
           )
         }</div>`
       )
