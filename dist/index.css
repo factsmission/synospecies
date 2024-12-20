@@ -284,6 +284,12 @@ syno-treatment.open {
   color: var(--text-color-muted);
 }
 
+.aka {
+  font-size: 0.75rem;
+  color: var(--text-color-muted);
+  font-weight: normal;
+}
+
 .uri:not(:empty) {
   font-size: 0.8rem;
   line-height: 1rem;
@@ -319,45 +325,6 @@ h2,
 h3,
 ul {
   margin: 0;
-}
-
-.treatmentline {
-  display: block;
-  position: relative;
-  margin: 0;
-  transition: all 200ms;
-  clear: both;
-
-  &>s-icon,
-  &>svg {
-    height: 20px;
-    vertical-align: sub;
-    margin: 0 0.2rem 0 -1.2rem;
-  }
-
-  >.icon.button {
-    float: right;
-  }
-
-  .hidden {
-    max-height: 0;
-    overflow: hidden;
-    transition: all 200ms;
-  }
-
-  &.expanded {
-    /* position: absolute; */
-    background: var(--nav-background);
-    z-index: 10;
-    border-radius: 0.2rem;
-    padding: 0.2rem;
-    margin: 0.2rem -0.2rem;
-
-    .hidden {
-      max-height: 200rem;
-      overflow: auto;
-    }
-  }
 }
 
 .icon.button {

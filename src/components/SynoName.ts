@@ -7,12 +7,11 @@ import type {
 import { distinct } from "@std/collections/distinct";
 import "./Icons.ts";
 import {
-  SynoColTreatment,
   type SynoStatus,
   SynoTreatment,
 } from "./SynoTreatment.ts";
 import "./WikidataButtons.ts";
-import { css, html, LitElement, nothing } from "lit";
+import { html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 
@@ -54,6 +53,9 @@ export class SynoAuthName extends LitElement {
       return 0;
     });
 
+    const authorities = new Set(this.authorizedName.authorities);
+    authorities.delete(this.authorizedName.authority);
+
     return html`
         <h3 id=${
       this.authorizedName.colURI
@@ -62,14 +64,21 @@ export class SynoAuthName extends LitElement {
     }>
           <i class="ditto">${this.authorizedName.displayName}</i>
           ${this.authorizedName.authority}
-            ${
-      this.authorizedName.taxonConceptURI
-        ? html`<a class="taxon uri" id=${
-          encodeURIComponent(this.authorizedName.taxonConceptURI)
-        } href=${this.authorizedName.taxonConceptURI} target="_blank">${
-          shortUrl(this.authorizedName.taxonConceptURI)
-        }<s-icon icon="link"></s-icon></a>`
+          ${
+      authorities.size > 0
+        ? html`<span class="aka">Authority also given as “${
+          [...authorities].join("”, “")
+        }”</span>`
         : nothing
+    }
+          ${
+      this.authorizedName.taxonConceptURIs.map((tc) =>
+        html`<a class="taxon uri" id=${
+          encodeURIComponent(tc)
+        } href=${tc} target="_blank">${
+          shortUrl(tc)
+        }<s-icon icon="link"></s-icon></a>`
+      )
     }
         </h3>
         <ul>
