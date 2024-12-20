@@ -51,7 +51,7 @@ const styles = css`
   margin-block: 6px;
   margin-left: -20px;
   padding: 0 4px;
-  font-feature-settings: "liga", "calt", "dlig", "tnum";
+  font-feature-settings: "liga", "calt", "dlig";
 }
 
 s-icon {
@@ -178,13 +178,10 @@ button {
   font-family: inherit;
   font-weight: normal;
   text-decoration: none;
+  color: var(--text-color-muted);
 
   &.taxon {
     color: #4e69ae;
-  }
-
-  &.treatment {
-    color: var(--text-color-muted);
   }
 
   &.col {
@@ -292,13 +289,16 @@ export class SynoTreatment extends LitElement {
         <div>
           ${
       until(
-        this.trt?.details.then((d) => d.creators),
-        html`<progress></progress>`,
+        this.trt?.details.then((d) => d.creators + ","),
+        nothing,
       )
-    },
+    }
           <b>${this.trt?.date ?? html`<i>No Date</i>`}</b>:
           <i>${
-      until(this.trt?.details.then((d) => `“${d.title}”`), nothing)
+      until(
+        this.trt?.details.then((d) => `“${d.title}”`),
+        html`<progress></progress>`,
+      )
     }</i></div>
         <span class="counts">
           ${
@@ -455,9 +455,7 @@ export class SynoTreatment extends LitElement {
                       material.typeStatus.toLocaleLowerCase() !==
                         "other material"
                       ? html`<b class=${
-                        material.typeStatus.toLocaleLowerCase().includes(
-                            "holotype",
-                          )
+                        /holotype|^type$/i.test(material.typeStatus)
                           ? "green"
                           : nothing
                       }>${material.typeStatus}:</b>`

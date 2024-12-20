@@ -325,6 +325,7 @@ h2,
 h3,
 ul {
   margin: 0;
+  scroll-margin: 2rem 1rem 5rem;
 }
 
 .icon.button {
@@ -356,10 +357,6 @@ ul {
   &:hover::before {
     background: #ededed8c;
   }
-}
-
-.indent {
-  margin-left: 1.4rem;
 }
 
 .blue {

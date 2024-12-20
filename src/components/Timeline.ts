@@ -24,9 +24,12 @@ export class TimelineTreatment extends LitElement {
       display: grid;
       padding: 0 .25rem;
       min-width: .5rem;
-      /* min-height: 100%; */
       font-size: 0.8rem;
       text-decoration: none;
+
+      &:empty {
+        min-height: 100%;
+      }
     }
 
     :host > a.col {
@@ -358,6 +361,13 @@ export class Timeline extends LitElement {
       overflow: auto;
       max-height: 90vh;
 
+      @media (max-width: 540px) {
+        & {
+          margin-inline: -1rem;
+          border-radius: 0px;
+        }
+      }
+
       --l: linear-gradient(var(--text-color-muted) 0px 1px, transparent 1px 2px);
     }
 
@@ -394,7 +404,7 @@ export class Timeline extends LitElement {
       text-overflow: ellipsis;
       text-wrap: nowrap;
       min-width: min(24rem, 40vw);
-      max-width: min(48rem, calc(100vw - 12rem));
+      max-width: min(48rem, calc(100vw - 14rem));
       overflow: hidden;
 
       .header {
