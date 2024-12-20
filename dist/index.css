@@ -23,7 +23,6 @@
 }
 
 @keyframes high-light {
-
   10%,
   50% {
     background: var(--highlight-background);
@@ -247,7 +246,7 @@ syno-name {
     grid-auto-flow: column;
     grid-template-columns: 1fr;
     align-items: center;
-    gap: .25rem;
+    gap: 0.25rem;
   }
 }
 
@@ -339,7 +338,7 @@ ul {
   padding: 0;
   position: relative;
 
-  &>svg {
+  & > svg {
     height: 1rem;
     margin: 0;
   }
