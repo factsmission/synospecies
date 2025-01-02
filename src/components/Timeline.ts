@@ -30,6 +30,10 @@ export class TimelineTreatment extends LitElement {
       &:empty {
         min-height: 100%;
       }
+
+      &:hover {
+        background-color: light-dark(rgb(167, 218, 255), rgb(23, 78, 117));
+      }
     }
 
     :host > a.col {
@@ -38,6 +42,10 @@ export class TimelineTreatment extends LitElement {
 
     :host > a[href] {
       background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
+
+      &:hover {
+        background-color: light-dark(rgb(250, 214, 143), rgb(121, 91, 35));
+      }
     }
 
     .row {
@@ -336,12 +344,15 @@ export class TimelineYear extends LitElement {
           html`<s-timeline-treatment .names=${this.names} .icons=${t} ></s-timeline-treatment>`
         )
       }`;
+    } else if (this.treatments.length > 0) {
+      return html`<s-timeline-treatment
+        title="Click to expand ${this.treatments.length} treatments."
+        .names=${this.names} .icons=${this.groupIcons} .isCoL=${true}
+      ></s-timeline-treatment>`;
     } else {
       return html`<s-timeline-treatment
-        title=${this.treatments.length || this.acceptedCoL.length}
-        .names=${this.names} .icons=${this.groupIcons} .isCoL=${
-        this.acceptedCoL.length > 0
-      }
+        title="Click to expand ${this.acceptedCoL.length} CoL-taxa."
+        .names=${this.names} .icons=${this.groupIcons}
       ></s-timeline-treatment>`;
     }
   }
@@ -493,7 +504,7 @@ export class Timeline extends LitElement {
       }
 
       &:hover::before {
-        background: #ededed8c;
+        background: rgb(from var(--highlight-background) r g b / 40%);
       }
     }
 
@@ -629,7 +640,7 @@ export class Timeline extends LitElement {
           <div>
             <div class="header"><h2>CoL</h2>${
           this.cols.length > 1
-            ? html`<button @click=${() =>
+            ? html`<button title="Click to expand ${this.cols.length} CoL-taxa." @click=${() =>
               this.colExpanded = !this.colExpanded}><s-icon icon=${
               this.colExpanded ? "collapse" : "expand"
             }></s-icon></button>`
@@ -652,7 +663,7 @@ export class Timeline extends LitElement {
         html`<div>
           <div class="header"><h2>${t.year}</h2>${
           t.treatments.length > 1
-            ? html`<button @click=${() =>
+            ? html`<button title="Click to expand ${t.treatments.length} treatments." @click=${() =>
               this.toggle_open_year(index, !t.open)}><s-icon icon=${
               t.open ? "collapse" : "expand"
             }></s-icon</button>`
