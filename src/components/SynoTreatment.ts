@@ -5,7 +5,7 @@ import type {
   SynonymGroup,
   Treatment,
 } from "@plazi/synolib";
-import { css, html, LitElement, nothing } from "lit";
+import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import "./Icons.ts";
@@ -534,10 +534,20 @@ export class SynoColTreatment extends LitElement {
   accessor colURI: string | null = null;
 
   @property({ attribute: false })
-  accessor acceptedColURI: string | null = null;
+  accessor acceptedColURI: Promise<string> | null = null;
+  @state()
+  accessor acceptedString: string | null = null;
 
   @state()
   accessor open = false;
+
+  override willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has("acceptedColURI")) {
+      this.acceptedColURI?.then((uri) => {
+        this.acceptedString = uri;
+      });
+    }
+  }
 
   override render() {
     this.classList.toggle("open", this.open);
@@ -547,7 +557,7 @@ export class SynoColTreatment extends LitElement {
       this.open = !this.open;
     }}>
         <s-icon icon=${
-      this.acceptedColURI !== this.colURI ? "col_dpr" : "col_aug"
+      this.acceptedString !== this.colURI ? "col_dpr" : "col_aug"
     }></s-icon>
         <div>
           Found in the Catalogue of Life
@@ -568,16 +578,16 @@ export class SynoColTreatment extends LitElement {
     }<s-icon icon="link"></s-icon></a>
           </div>
         </div>
-        <div class="row ${this.acceptedColURI !== this.colURI ? "" : "hidden"}">
+        <div class="row ${this.acceptedString !== this.colURI ? "" : "hidden"}">
           <s-icon icon="col_aug"></s-icon>
           <div>
             <b class="blue">Accepted Name:</b>
             ${
       until(
-        this.synoGroup?.findName(this.acceptedColURI!).then(nameLink),
+        this.synoGroup?.findName(this.acceptedString!).then(nameLink),
         html`<a target="_blank" href=${this
-          .acceptedColURI!} class="col uri">${
-          this.acceptedColURI?.replace(
+          .acceptedString} class="col uri">${
+          this.acceptedString?.replace(
             "https://www.catalogueoflife.org/data/taxon/",
             "",
           )

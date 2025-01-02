@@ -143,15 +143,21 @@ export class SynoMain extends LitElement {
         dateOld,
       }].toSorted(sortName(this.sortOrder));
 
-      if (name.acceptedColURI && !this.cols.includes(name.acceptedColURI)) {
-        this.cols = [...this.cols, name.acceptedColURI].toSorted();
+      if (name.acceptedColURI) {
+        name.acceptedColURI.then((col) => {
+          if (!this.cols.includes(col)) {
+            this.cols = [...this.cols, col].toSorted();
+          }
+        });
       }
+
       for (const authName of name.authorizedNames) {
-        if (
-          authName.acceptedColURI &&
-          !this.cols.includes(authName.acceptedColURI)
-        ) {
-          this.cols = [...this.cols, authName.acceptedColURI].toSorted();
+        if (authName.acceptedColURI) {
+          authName.acceptedColURI.then((col) => {
+            if (!this.cols.includes(col)) {
+              this.cols = [...this.cols, col].toSorted();
+            }
+          });
         }
       }
       for (const treatment of this.synoGroup.treatments.values()) {

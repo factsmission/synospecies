@@ -220,7 +220,7 @@ export class TimelineYear extends LitElement {
     icons: NameIcons[];
   } = { icons: [] };
 
-  override willUpdate(_changedProperties: PropertyValues<this>) {
+  override async willUpdate(_changedProperties: PropertyValues<this>) {
     if (this.treatments.length) {
       this.icons = this.treatments.map((treatment) => {
         const icons = this.names.map((ns) => {
@@ -258,10 +258,10 @@ export class TimelineYear extends LitElement {
         return { icons, treatment };
       });
     } else if (this.acceptedCoL.length) {
-      this.icons = this.acceptedCoL.map((col) => {
-        const icons = this.names.map((ns) => {
+      this.icons = await Promise.all(this.acceptedCoL.map(async (col) => {
+        const icons = await Promise.all(this.names.map(async (ns) => {
           const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
-          if (ns.name.colURI && ns.name.acceptedColURI === col) {
+          if (ns.name.colURI && await ns.name.acceptedColURI === col) {
             if (ns.name.colURI === col) {
               expanded[0].aug = 1;
             } else {
@@ -269,7 +269,7 @@ export class TimelineYear extends LitElement {
             }
           } else {
             for (const authName of ns.name.authorizedNames) {
-              if (authName.colURI && authName.acceptedColURI === col) {
+              if (authName.colURI && await authName.acceptedColURI === col) {
                 if (authName.colURI === col) {
                   expanded.push({ def: 0, aug: 1, dpr: 0, cite: 0 });
                 } else {
@@ -292,9 +292,9 @@ export class TimelineYear extends LitElement {
           );
 
           return { expanded, collapsed };
-        });
+        }));
         return { icons, acceptedCoL: col };
-      });
+      }));
     }
 
     const groupIcons: NameIcons[] = [];
@@ -624,7 +624,7 @@ export class Timeline extends LitElement {
       </div>
       <div class="treatments">
         <div class="years">${
-      this.cols.length > 0
+      this.cols.length > 0 && false
         ? html`
           <div>
             <div class="header"><h2>CoL</h2>${
