@@ -9,9 +9,10 @@ import "./Icons.ts";
 import { type SynoStatus, SynoTreatment } from "./SynoTreatment.ts";
 import "./WikidataButtons.ts";
 import { html, LitElement, nothing } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import { authNameToID, nameToID } from "./utils.ts";
+import { type NameState } from "../types.ts";
 
 const shortUrl = (url: string) =>
   url
@@ -100,17 +101,23 @@ export class SynoName extends LitElement {
   @property({ attribute: false })
   accessor synoGroup: SynonymGroup | null = null;
   @property({ attribute: false })
-  accessor name: Name | null = null;
+  accessor name: NameState | null = null;
+  @property({ attribute: false })
+  accessor showKingdom = false;
+
+  @state()
+  accessor open = false;
 
   override render() {
     if (!this.synoGroup || !this.name) return nothing;
+    this.classList.toggle("open", this.open);
 
     const treatments_array: { trt: Treatment; status: SynoStatus }[] = [];
 
-    for (const trt of this.name.treatments.treats) {
+    for (const trt of this.name.name.treatments.treats) {
       treatments_array.push({ trt, status: "aug" });
     }
-    for (const trt of this.name.treatments.cite) {
+    for (const trt of this.name.name.treatments.cite) {
       treatments_array.push({ trt, status: "cite" });
     }
 
@@ -122,42 +129,104 @@ export class SynoName extends LitElement {
     });
 
     return html`
-    <div class="header">
-      <h2 id=${nameToID(this.name)}>
-        <i>${this.name.displayName}</i>
-        <span class="rank">${this.name.kingdom || "Missing Kingdom"}</span>
-        <span class="rank">${this.name.rank}</span>
-    ${
-      this.name.taxonNameURI
-        ? html`<a class="taxon uri" href=${this.name.taxonNameURI} target="_blank">${
-          shortUrl(this.name.taxonNameURI)
-        }<s-icon icon="link"></s-icon></a>`
+    <div class="header" @click=${(e: Event) => {
+      e.stopPropagation();
+      this.open = !this.open;
+    }}>
+      <h2 id=${
+      nameToID(this.name.name)
+    }><i>${this.name.name.displayName}</i></h2>
+      <div class="header" style="padding: 0;">
+        <s-wikidata displayname=${this.name.name.displayName}></s-wikidata>
+        <button class="icon" @click=${(e: Event) => {
+      e.stopPropagation();
+      this.open = !this.open;
+    }}><s-icon icon=${this.open ? "collapse" : "expand"}></s-icon></button>
+    </div>
+    </div>
+    <div class="details ${this.open ? "open" : ""}">
+      ${
+      this.name.name.taxonNameURI
+        ? html`<div class="hidden row">
+        <s-icon icon="empty"></s-icon>
+        <div>
+          <b>Taxon Name ID:</b>
+          <span class="id">${this.name.name.taxonNameURI}</span>
+          <a target="_blank" href="?q=${
+          encodeURIComponent(this.name.name.taxonNameURI)
+        }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${this.name.name.taxonNameURI} class="uri">TreatmentBank<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href="https://rdf2h-browser.linked.solutions/#${
+          this.name.name.taxonNameURI.replace("http://", "https://").replace(
+            ".plazi.",
+            ".ld.plazi.",
+          )
+        }" class="uri">RDF2h<s-icon icon="link"></s-icon></a>
+        </div>
+      </div>`
         : nothing
     }
-        <abbr class="justification" title="${
+      <div class="row ${
+      this.name.name.rank === "genus" || this.name.name.rank === "species"
+        ? "hidden"
+        : ""
+    }">
+        <s-icon icon="empty"></s-icon>
+        <div><b>Rank:</b> ${this.name.name.rank}</div>
+      </div>
+      <div class="row ${
+      this.showKingdom || !this.name.name.kingdom ? "" : "hidden"
+    }">
+        <s-icon style=${
+      this.name.homonym ? "color: var(--accent);" : ""
+    } icon=${
+      this.name.name.kingdom === "Animalia" ||
+        this.name.name.kingdom === "Plantae"
+        ? this.name.name.kingdom
+        : "empty"
+    }></s-icon>
+        <div><b>Kingdom:</b> ${
+      this.name.name.kingdom || html`<i>Missing Kingdom</i>`
+    }${
+      this.name.homonym
+        ? html` <i style="color: var(--accent);">(is homonym)</i>`
+        : nothing
+    }</div>
+      </div>
+      <div class="hidden row">
+        <s-icon icon="justification"></s-icon>
+        <div style="white-space: pre"><b>Justification:</b> ${
       until(
-        justify(this.name).then((just) => `This ${just}`),
+        justify(this.name.name).then((just) => `This ${just}`),
         "Justification loading...",
       )
-    }">...?</abbr>
-      </h2>
-      <s-wikidata displayname=${this.name.displayName}></s-wikidata>
-    </div>
-    <div class="vernacular">${
+    }</div>
+      </div>
+      <!--<div class="row">
+        <s-icon icon="empty"></s-icon>
+        <div><b style="line-height: 20px;">Found in Wikidata:</b><s-wikidata displayname=${this.name.name.displayName}></s-wikidata></div>
+      </div>-->
+      ${
       until(
-        this.name.vernacularNames.then((names) => {
+        this.name.name.vernacularNames.then((names) => {
           if (names.size > 0) {
-            return "“" +
-              distinct([...names.values()].flat()).join("”, “") + "”";
+            return html`
+      <div class="row">
+        <s-icon icon="vernacular"></s-icon>
+        <div><b>Common Names:</b> ${
+              "“" + distinct([...names.values()].flat()).join("”, “") + "”"
+            }</div>
+      </div>`;
           }
         }),
         nothing,
       )
-    }</div>
+    }
+    </div>
     <ul>
     ${
-      this.name.colURI
-        ? html`<syno-col .synoGroup=${this.synoGroup} .colURI=${this.name.colURI} .acceptedColURI=${this.name.acceptedColURI}></syno-col>`
+      this.name.name.colURI
+        ? html`<syno-col .synoGroup=${this.synoGroup} .colURI=${this.name.name.colURI} .acceptedColURI=${this.name.name.acceptedColURI}></syno-col>`
         : nothing
     }${
       treatments_array.map(({ trt, status }) => {
@@ -170,7 +239,7 @@ export class SynoName extends LitElement {
     }
     </ul>
     ${
-      this.name.authorizedNames.map((authorizedName) =>
+      this.name.name.authorizedNames.map((authorizedName) =>
         html`<syno-authname .synoGroup=${this.synoGroup} .authorizedName=${authorizedName}></syno-authname>`
       )
     }`;
@@ -189,10 +258,10 @@ async function justify(name: Name): Promise<string> {
   } else if (name.justification.treatment) {
     const details = await name.justification.treatment.details;
     const parent = await justify(name.justification.parent);
-    return `is, according to ${details.creators} ${name.justification.treatment.date},\n     a synonym of ${name.justification.parent.displayName} which ${parent}`;
+    return `is – according to ${details.creators} ${name.justification.treatment.date} –\n     a synonym of ${name.justification.parent.displayName} which ${parent}`;
     // return `is, according to ${details.creators} ${details.date} “${details.title||"No Title"}” ${name.justification.treatment.url},\n     a synonym of ${name.justification.parent.displayName} which ${parent}`;
   } else {
     const parent = await justify(name.justification.parent);
-    return `is, according to the Catalogue of Life,\n     a synonym of ${name.justification.parent.displayName} which ${parent}`;
+    return `is – according to the Catalogue of Life –\n     a synonym of ${name.justification.parent.displayName} which ${parent}`;
   }
 }

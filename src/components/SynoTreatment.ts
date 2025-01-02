@@ -71,7 +71,7 @@ s-icon {
   }
   
   &:hover button::before {
-    background: #ededed8c;
+    background: var(--button-hover);
   }
 }
 
@@ -151,7 +151,7 @@ button {
   }
 
   &:hover::before {
-    background: #ededed8c;
+    background: var(--button-hover);
   }
 }
 
@@ -166,7 +166,7 @@ button {
 }
 
 .uri, .id {
-  font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
+  font-feature-settings: "liga", "calt", "dlig", "ss02";
   word-break: break-all;
 }
 
@@ -257,7 +257,7 @@ button {
 b {
   font-weight: 600;
   text-transform: uppercase;
-  font-feature-settings: "liga", "calt", "dlig", "tnum", "cpsp";
+  font-feature-settings: "liga", "calt", "dlig", "cpsp", "case";
 }
 `;
 

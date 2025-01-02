@@ -49,6 +49,8 @@ export class SynoMain extends LitElement {
   @state()
   protected accessor names: NameState[] = [];
   @state()
+  protected accessor hasHomonyms = false;
+  @state()
   protected accessor colExpanded: boolean = false;
   @state()
   protected accessor cols: string[] = [];
@@ -79,7 +81,10 @@ export class SynoMain extends LitElement {
       const sameName = this.names.find((n) =>
         n.name.displayName === name.displayName
       );
-      if (sameName) sameName.homonym = true;
+      if (sameName) {
+        sameName.homonym = true;
+        this.hasHomonyms = true;
+      }
 
       let dateOld = Infinity;
       let dateNew = -Infinity;
@@ -261,7 +266,7 @@ export class SynoMain extends LitElement {
         </label>
       </div>
     </div>
-    <s-timeline .names=${this.names} .cols=${this.cols} .years=${this.years} ></s-timeline>
+    <s-timeline .names=${this.names} .cols=${this.cols} .years=${this.years} .showKingdoms=${this.hasHomonyms}></s-timeline>
     ${
       // this.names.map((name) =>
       //   html`<syno-name .synoGroup=${this.synoGroup} .name=${name.name}></syno-name>`
@@ -270,7 +275,7 @@ export class SynoMain extends LitElement {
         this.names,
         (name) => name.name.displayName + (name.name.taxonNameURI ?? "@"),
         (name) =>
-          html`<syno-name .synoGroup=${this.synoGroup} .name=${name.name}></syno-name>`,
+          html`<syno-name .synoGroup=${this.synoGroup} .name=${name} .showKingdom=${this.hasHomonyms}></syno-name>`,
       )}${
       this.timeEnd === null && this.names.length === 0
         ? html`<div class="placeholder">It may take a moment for the first result to appear.</div>`

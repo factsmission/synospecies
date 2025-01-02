@@ -14,6 +14,7 @@
   --accent: light-dark(#476100, #9bc134);
   --text-color: light-dark(#222222, #dddddd);
   --text-color-muted: light-dark(#666666, #808080);
+  --button-hover: rgb(from var(--text-color) r g b / 50%);
 }
 
 @supports (font-variation-settings: normal) {
@@ -23,7 +24,6 @@
 }
 
 @keyframes high-light {
-
   10%,
   50% {
     background: var(--highlight-background);
@@ -258,20 +258,66 @@ svg {
 }
 
 syno-name {
+  border-radius: 0.8rem;
   display: block;
   margin: 1rem 0;
-  border-radius: 0.8rem;
 
   &:has(:target) {
     animation: 2s ease-in-out high-light;
   }
 
   .header {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 1fr;
     align-items: center;
-    gap: 0.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: space-between;
+    padding-right: 4px;
+
+    &:hover button.icon::before {
+      background: var(--button-hover);
+    }
+  }
+
+  .details {
+    color: var(--text-color-muted);
+    margin: 4px 4px 4px 8px;
+
+    .row {
+      display: grid;
+      line-height: 16px;
+      font-size: 0.75em;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: 16px auto;
+      gap: 0 4px;
+      align-items: center;
+
+      & > s-icon {
+        height: 12px;
+      }
+
+      & > div {
+        grid-row-end: span 2;
+      }
+    }
+
+    .row + .row {
+      margin-top: 4px;
+    }
+
+    .row.hidden {
+      display: none;
+    }
+
+    &.open .row.hidden {
+      display: grid;
+    }
+  }
+
+  b {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-feature-settings: "liga", "calt", "dlig", "cpsp", "case";
   }
 }
 
@@ -314,32 +360,34 @@ syno-treatment.open {
   font-weight: normal;
 }
 
+.uri,
+.id {
+  font-feature-settings: "liga", "calt", "dlig", "ss02";
+  word-break: break-all;
+}
+
 .uri:not(:empty) {
-  font-size: 0.8rem;
-  line-height: 1rem;
-  padding: 0 0.2rem;
-  margin: 0.2rem 0;
-  border-radius: 0.2rem;
+  font-size: 0.75rem;
+  line-height: 1em;
+  padding: 0 4px;
+  border-radius: 4px;
   background: var(--nav-background);
   font-family: inherit;
   font-weight: normal;
-  font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
-  word-break: break-all;
+  text-decoration: none;
+  color: var(--text-color-muted);
 
   &.taxon {
     color: #4e69ae;
-  }
-
-  &.treatment {
-    color: var(--text-color-muted);
   }
 
   &.col {
     color: #177669;
   }
 
-  s-icon,
-  svg {
+  s-icon:last-child,
+  svg:last-child {
+    display: inline-block;
     height: 0.8em;
     vertical-align: baseline;
     margin: 0 -0.1em 0 0.2em;
@@ -353,7 +401,8 @@ ul {
   scroll-margin: 2rem 1rem 5rem;
 }
 
-.icon.button {
+button.icon,
+.button.icon {
   border-radius: 1rem;
   border: none;
   background: none;
@@ -364,7 +413,7 @@ ul {
   padding: 0;
   position: relative;
 
-  &>svg {
+  & > svg {
     height: 1rem;
     margin: 0;
   }
@@ -380,7 +429,7 @@ ul {
   }
 
   &:hover::before {
-    background: #ededed8c;
+    background: var(--button-hover);
   }
 }
 
