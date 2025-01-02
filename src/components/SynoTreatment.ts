@@ -167,6 +167,7 @@ button {
 
 .uri, .id {
   font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
+  word-break: break-all;
 }
 
 .uri:not(:empty) {

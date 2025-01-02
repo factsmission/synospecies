@@ -23,6 +23,7 @@
 }
 
 @keyframes high-light {
+
   10%,
   50% {
     background: var(--highlight-background);
@@ -171,7 +172,6 @@ syno-form {
   .search {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 0.4rem;
   }
 
   .options {
@@ -184,18 +184,30 @@ syno-form {
   .awesomplete {
     z-index: 300;
 
-    * {
+    mark {
+      background: var(--highlight-background);
+    }
+
+    ul {
       background: var(--nav-background);
+      border: 1px solid var(--accent);
       color: var(--text-color);
+      overflow: hidden;
+
+      &::before {
+        background: var(--nav-background);
+      }
     }
 
     input {
-      border: 1px solid var(--text-color);
-      border-radius: 0.6rem 0 0 0.6rem;
+      background: var(--body-background);
+      border: 2px solid var(--accent-mild);
+      border-right: none;
+      border-radius: 8px 0 0 8px;
       height: 100%;
       font-size: 1rem;
-      line-height: 2rem;
-      padding: 0 0.5rem;
+      line-height: 1.25rem;
+      padding: 0 4px;
       width: 100%;
     }
   }
@@ -216,6 +228,19 @@ syno-form {
       border-color: var(--accent);
       color: var(--body-background);
     }
+  }
+}
+
+.result-header {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  gap: 4px;
+  justify-content: space-between;
+  margin: 1rem 0;
+
+  .sort {
+    flex-grow: 1;
+    text-align: end;
   }
 }
 
@@ -299,6 +324,7 @@ syno-treatment.open {
   font-family: inherit;
   font-weight: normal;
   font-feature-settings: "liga", "calt", "dlig", "case", "ss02", "tnum";
+  word-break: break-all;
 
   &.taxon {
     color: #4e69ae;
@@ -338,7 +364,7 @@ ul {
   padding: 0;
   position: relative;
 
-  & > svg {
+  &>svg {
     height: 1rem;
     margin: 0;
   }

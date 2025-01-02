@@ -45,7 +45,7 @@ export class SynoMain extends LitElement {
   @state()
   protected accessor isWaiting = false;
   @state()
-  accessor sortOrder = sortOrder.Oldest;
+  accessor sortOrder = sortOrder.Newest;
   @state()
   protected accessor names: NameState[] = [];
   @state()
@@ -85,8 +85,9 @@ export class SynoMain extends LitElement {
       let dateNew = -Infinity;
       name.treatments.treats.forEach((t) => {
         if (t.date) {
-          if (t.date < dateOld) dateOld = t.date;
-          if (t.date > dateNew) dateNew = t.date;
+          const date = t.date + 0.2;
+          if (date < dateOld) dateOld = date;
+          if (date > dateNew) dateNew = date;
         }
       });
       name.treatments.cite.forEach((t) => {
@@ -98,14 +99,16 @@ export class SynoMain extends LitElement {
       name.authorizedNames.forEach((a) => {
         a.treatments.def.forEach((t) => {
           if (t.date) {
-            if (t.date < dateOld) dateOld = t.date;
-            if (t.date > dateNew) dateNew = t.date;
+            const date = t.date + 0.4;
+            if (date < dateOld) dateOld = date;
+            if (date > dateNew) dateNew = date;
           }
         });
         a.treatments.aug.forEach((t) => {
           if (t.date) {
-            if (t.date < dateOld) dateOld = t.date;
-            if (t.date > dateNew) dateNew = t.date;
+            const date = t.date + 0.3;
+            if (date < dateOld) dateOld = date;
+            if (date > dateNew) dateNew = date;
           }
         });
         a.treatments.dpr.forEach((t) => {
@@ -205,35 +208,9 @@ export class SynoMain extends LitElement {
     }
 
     return html`
-    <div class="option">
-      Sort Names:
-      <label><input type="radio" name="sort"
-        ?checked=${this.sortOrder === sortOrder.Found}
-        @change=${(_: Event) => {
-      this.sortOrder = sortOrder.Found;
-    }}
-      >Order Found</label>
-      <label><input type="radio" name="sort"
-        ?checked=${this.sortOrder === sortOrder.Alphabetical}
-        @change=${(_: Event) => {
-      this.sortOrder = sortOrder.Alphabetical;
-    }}
-      >Alphabetical</label>
-      <label><input type="radio" name="sort"
-        ?checked=${this.sortOrder === sortOrder.Oldest}
-        @change=${(_: Event) => {
-      this.sortOrder = sortOrder.Oldest;
-    }}
-      >Oldest Treatment</label>
-      <label><input type="radio" name="sort"
-        ?checked=${this.sortOrder === sortOrder.Newest}
-        @change=${(_: Event) => {
-      this.sortOrder = sortOrder.Newest;
-    }}
-      >Newest Treatment</label>
-      (Date of defining treatment may be inferred from the authority)
-    </div>
-    <div>${
+    <div class="result-header">
+      <div class="status">
+      ${
       this.timeEnd === null
         ? html`Finding Synonyms for ${this.NAME} <progress></progress> (`
         : nothing
@@ -247,7 +224,43 @@ export class SynoMain extends LitElement {
       this.timeEnd === null
         ? ` so far)`
         : `. This took ${(this.timeEnd - this.timeStart) / 1000} seconds.`
-    }</div>
+    }
+      </div>
+      <div class="sort">
+        <label>
+          Sort
+          <select name="sort" required @change=${(e: Event) => {
+      const value = (e.target as HTMLSelectElement).value;
+      switch (value) {
+        case "Found": {
+          this.sortOrder = sortOrder.Found;
+          break;
+        }
+        case "Alphabetical": {
+          this.sortOrder = sortOrder.Alphabetical;
+          break;
+        }
+        case "Oldest": {
+          this.sortOrder = sortOrder.Oldest;
+          break;
+        }
+        case "Newest": {
+          this.sortOrder = sortOrder.Newest;
+          break;
+        }
+        default: {
+          console.error("Invalid Sort Order", e);
+        }
+      }
+    }}>
+            <option value="Found">Order Found</option>
+            <option value="Alphabetical">Alphabetical</option>
+            <option value="Oldest">Oldest Treatment</option>
+            <option value="Newest" selected>Newest Treatment</option>
+          </select>
+        </label>
+      </div>
+    </div>
     <s-timeline .names=${this.names} .cols=${this.cols} .years=${this.years} ></s-timeline>
     ${
       // this.names.map((name) =>
@@ -258,7 +271,11 @@ export class SynoMain extends LitElement {
         (name) => name.name.displayName + (name.name.taxonNameURI ?? "@"),
         (name) =>
           html`<syno-name .synoGroup=${this.synoGroup} .name=${name.name}></syno-name>`,
-      )}
+      )}${
+      this.timeEnd === null && this.names.length === 0
+        ? html`<div class="placeholder">It may take a moment for the first result to appear.</div>`
+        : nothing
+    }
     `;
   }
 
