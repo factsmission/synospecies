@@ -195,7 +195,7 @@ export class SynoName extends LitElement {
       </div>
       <div class="hidden row">
         <s-icon icon="justification"></s-icon>
-        <div style="white-space: pre"><b>Justification:</b> ${
+        <div style="white-space: pre-wrap;"><b>Justification:</b> ${
       until(
         justify(this.name.name).then((just) => `This ${just}`),
         "Justification loading...",

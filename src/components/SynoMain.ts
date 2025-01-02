@@ -49,7 +49,7 @@ export class SynoMain extends LitElement {
   @state()
   protected accessor names: NameState[] = [];
   @state()
-  protected accessor hasHomonyms = false;
+  protected accessor hasMultipleKingdoms = false;
   @state()
   protected accessor colExpanded: boolean = false;
   @state()
@@ -73,7 +73,15 @@ export class SynoMain extends LitElement {
       alert("Uh Oh!");
       return;
     }
+    let multipleKingdoms: undefined | string = undefined;
     for await (const name of this.synoGroup) {
+      if (!multipleKingdoms) {
+        multipleKingdoms = name.kingdom;
+      } else if (
+        !this.hasMultipleKingdoms && multipleKingdoms !== name.kingdom
+      ) {
+        this.hasMultipleKingdoms = true;
+      }
       const openable = name.authorizedNames.length > 0 &&
         (name.authorizedNames.length > 1 ||
           (!!name.colURI || name.treatments.cite.size > 0 ||
@@ -81,10 +89,7 @@ export class SynoMain extends LitElement {
       const sameName = this.names.find((n) =>
         n.name.displayName === name.displayName
       );
-      if (sameName) {
-        sameName.homonym = true;
-        this.hasHomonyms = true;
-      }
+      if (sameName) sameName.homonym = true;
 
       let dateOld = Infinity;
       let dateNew = -Infinity;
@@ -266,7 +271,7 @@ export class SynoMain extends LitElement {
         </label>
       </div>
     </div>
-    <s-timeline .names=${this.names} .cols=${this.cols} .years=${this.years} .showKingdoms=${this.hasHomonyms}></s-timeline>
+    <s-timeline .names=${this.names} .cols=${this.cols} .years=${this.years} .showKingdoms=${this.hasMultipleKingdoms}></s-timeline>
     ${
       // this.names.map((name) =>
       //   html`<syno-name .synoGroup=${this.synoGroup} .name=${name.name}></syno-name>`
@@ -275,7 +280,7 @@ export class SynoMain extends LitElement {
         this.names,
         (name) => name.name.displayName + (name.name.taxonNameURI ?? "@"),
         (name) =>
-          html`<syno-name .synoGroup=${this.synoGroup} .name=${name} .showKingdom=${this.hasHomonyms}></syno-name>`,
+          html`<syno-name .synoGroup=${this.synoGroup} .name=${name} .showKingdom=${this.hasMultipleKingdoms}></syno-name>`,
       )}${
       this.timeEnd === null && this.names.length === 0
         ? html`<div class="placeholder">It may take a moment for the first result to appear.</div>`
