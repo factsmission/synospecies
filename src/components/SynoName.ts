@@ -27,6 +27,9 @@ export class SynoAuthName extends LitElement {
   @property({ attribute: false })
   accessor authorizedName: AuthorizedName | null = null;
 
+  @state()
+  accessor open = false;
+
   override render() {
     if (!this.synoGroup || !this.authorizedName) return nothing;
 
@@ -56,25 +59,57 @@ export class SynoAuthName extends LitElement {
     authorities.delete(this.authorizedName.authority);
 
     return html`
-        <h3 id=${authNameToID(this.authorizedName)}>
-          <i class="ditto">${this.authorizedName.displayName}</i>
-          ${this.authorizedName.authority}
-          ${
+      <div class="header" @click=${(e: Event) => {
+      e.stopPropagation();
+      this.open = !this.open;
+    }}>
+      <h3 id=${authNameToID(this.authorizedName)}>
+        <i class="ditto">${this.authorizedName.displayName}</i>
+        ${this.authorizedName.authority}
+      </h3>
+      ${
+      // authorities.size > 0 ||
+      this.authorizedName.taxonConceptURIs.length > 0
+        ? html`<button class="icon" @click=${(e: Event) => {
+          e.stopPropagation();
+          this.open = !this.open;
+        }}><s-icon icon=${
+          this.open ? "collapse" : "justification"
+        }></s-icon></button>`
+        : nothing}
+    </div>
+    <div class="details ${this.open ? "open" : ""}">
+      ${
+      this.authorizedName.taxonConceptURIs.map((tc) =>
+        html`
+      <div class="hidden row">
+        <s-icon icon="empty"></s-icon>
+        <div>
+          <b>Taxon Concept ID:</b>
+          <span class="id">${tc}</span>
+          <a target="_blank" href="?q=${
+          encodeURIComponent(tc)
+        }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${tc} class="uri">TreatmentBank<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href="https://rdf2h-browser.linked.solutions/#${
+          tc.replace("http://", "https://")
+            .replace(".plazi.", ".ld.plazi.")
+        }" class="uri">RDF2h<s-icon icon="link"></s-icon></a>
+        </div>
+      </div>`
+      )
+    }${
       authorities.size > 0
-        ? html`<span class="aka">Authority also given as “${
-          [...authorities].join("”, “")
-        }”</span>`
+        ? html`<div class="row">
+        <s-icon icon="empty"></s-icon>
+        <div>
+          <b>Authority also given as:</b> “${[...authorities].join("”, “")}”
+        </div>
+      </div>`
         : nothing
     }
-          ${
-      this.authorizedName.taxonConceptURIs.map((tc) =>
-        html`<a class="taxon uri" href=${tc} target="_blank">${
-          shortUrl(tc)
-        }<s-icon icon="link"></s-icon></a>`
-      )
-    }
-        </h3>
-        <ul>
+    </div>
+    <ul>
       ${
       this.authorizedName.colURI
         ? html`<syno-col .synoGroup=${this.synoGroup} .colURI=${this.authorizedName.colURI} .acceptedColURI=${this.authorizedName.acceptedColURI}></syno-col>`
@@ -141,7 +176,9 @@ export class SynoName extends LitElement {
         <button class="icon" @click=${(e: Event) => {
       e.stopPropagation();
       this.open = !this.open;
-    }}><s-icon icon=${this.open ? "collapse" : "expand"}></s-icon></button>
+    }}><s-icon icon=${
+      this.open ? "collapse" : "justification"
+    }></s-icon></button>
     </div>
     </div>
     <div class="details ${this.open ? "open" : ""}">
@@ -195,7 +232,7 @@ export class SynoName extends LitElement {
       </div>
       <div class="hidden row">
         <s-icon icon="justification"></s-icon>
-        <div style="white-space: pre-wrap;"><b>Justification:</b> ${
+        <div style="white-space: pre-wrap;"><b><abbr title="Why this name was found by SynoSpecies.">Justification:</abbr></b> ${
       until(
         justify(this.name.name).then((just) => `This ${just}`),
         "Justification loading...",

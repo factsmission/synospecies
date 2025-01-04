@@ -23,13 +23,10 @@ export class TimelineTreatment extends LitElement {
       border-radius: 12px;
       display: grid;
       padding: 0 .25rem;
+      min-height: 100%;
       min-width: .5rem;
       font-size: 0.8rem;
       text-decoration: none;
-
-      &:empty {
-        min-height: 100%;
-      }
 
       &:hover {
         background-color: light-dark(rgb(167, 218, 255), rgb(23, 78, 117));
