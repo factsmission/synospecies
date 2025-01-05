@@ -1,4 +1,4 @@
-import { css, html, LitElement, nothing, type PropertyValues } from "lit";
+import { html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { type NameState } from "../types.ts";
@@ -74,7 +74,10 @@ export class SynoMain extends LitElement {
       return;
     }
     let multipleKingdoms: undefined | string = undefined;
+    console.time("synogroup");
+    console.timeLog("synogroup", "Starting");
     for await (const name of this.synoGroup) {
+      console.timeLog("synogroup", "Found Name", name.displayName);
       if (!multipleKingdoms) {
         multipleKingdoms = name.kingdom;
       } else if (
@@ -84,7 +87,7 @@ export class SynoMain extends LitElement {
       }
       const openable = name.authorizedNames.length > 0 &&
         (name.authorizedNames.length > 1 ||
-          (!!name.colURI || name.treatments.cite.size > 0 ||
+          (!!name.col || name.treatments.cite.size > 0 ||
             name.treatments.treats.size > 0));
       const sameName = this.names.find((n) =>
         n.name.displayName === name.displayName
@@ -153,15 +156,15 @@ export class SynoMain extends LitElement {
         dateOld,
       }].toSorted(sortName(this.sortOrder));
 
-      if (name.acceptedColURI && !this.cols.includes(name.acceptedColURI)) {
-        this.cols = [...this.cols, name.acceptedColURI].toSorted();
+      if (name.col && !this.cols.includes(name.col.acceptedURI)) {
+        this.cols = [...this.cols, name.col.acceptedURI].toSorted();
       }
       for (const authName of name.authorizedNames) {
         if (
-          authName.acceptedColURI &&
-          !this.cols.includes(authName.acceptedColURI)
+          authName.col &&
+          !this.cols.includes(authName.col.acceptedURI)
         ) {
-          this.cols = [...this.cols, authName.acceptedColURI].toSorted();
+          this.cols = [...this.cols, authName.col.acceptedURI].toSorted();
         }
       }
       for (const treatment of this.synoGroup.treatments.values()) {
@@ -183,6 +186,7 @@ export class SynoMain extends LitElement {
       }
     }
     this.timeEnd = performance.now();
+    console.timeEnd("synogroup");
   }
 
   override willUpdate(changedProperties: PropertyValues<this>) {

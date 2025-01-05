@@ -14,12 +14,6 @@ import { until } from "lit/directives/until.js";
 import { authNameToID, nameToID } from "./utils.ts";
 import { type NameState } from "../types.ts";
 
-const shortUrl = (url: string) =>
-  url
-    .replace("https://www.catalogueoflife.org/data/taxon/", "")
-    .replace("http://taxon-concept.plazi.org/id/", "")
-    .replace("http://taxon-name.plazi.org/id/", "");
-
 @customElement("syno-authname")
 export class SynoAuthName extends LitElement {
   @property({ attribute: false })
@@ -111,8 +105,8 @@ export class SynoAuthName extends LitElement {
     </div>
     <ul>
       ${
-      this.authorizedName.colURI
-        ? html`<syno-col .synoGroup=${this.synoGroup} .colURI=${this.authorizedName.colURI} .acceptedColURI=${this.authorizedName.acceptedColURI}></syno-col>`
+      this.authorizedName.col
+        ? html`<syno-col .synoGroup=${this.synoGroup} .col=${this.authorizedName.col}></syno-col>`
         : nothing
     }${
       treatments_array.map(({ trt, status }) => {
@@ -212,13 +206,12 @@ export class SynoName extends LitElement {
         <div><b>Rank:</b> ${this.name.name.rank}</div>
       </div>
       <div class="row ${
-      this.showKingdom || !this.name.name.kingdom ? "" : "hidden"
+      this.showKingdom || this.name.homonym || !this.name.name.kingdom ? "" : "hidden"
     }">
         <s-icon style=${
       this.name.homonym ? "color: var(--accent);" : ""
     } icon=${
-      this.name.name.kingdom === "Animalia" ||
-        this.name.name.kingdom === "Plantae"
+      ["Animalia", "Plantae", "Bacteria", "Fungi"].includes(this.name.name.kingdom)
         ? this.name.name.kingdom
         : "empty"
     }></s-icon>
@@ -262,8 +255,8 @@ export class SynoName extends LitElement {
     </div>
     <ul>
     ${
-      this.name.name.colURI
-        ? html`<syno-col .synoGroup=${this.synoGroup} .colURI=${this.name.name.colURI} .acceptedColURI=${this.name.name.acceptedColURI}></syno-col>`
+      this.name.name.col
+        ? html`<syno-col .synoGroup=${this.synoGroup} .col=${this.name.name.col}></syno-col>`
         : nothing
     }${
       treatments_array.map(({ trt, status }) => {

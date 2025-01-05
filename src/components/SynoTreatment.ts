@@ -531,10 +531,7 @@ export class SynoColTreatment extends LitElement {
   accessor synoGroup: SynonymGroup | null = null;
 
   @property({ attribute: false })
-  accessor colURI: string | null = null;
-
-  @property({ attribute: false })
-  accessor acceptedColURI: string | null = null;
+  accessor col: { colURI: string; acceptedURI: string; }| null = null;
 
   @state()
   accessor open = false;
@@ -547,7 +544,7 @@ export class SynoColTreatment extends LitElement {
       this.open = !this.open;
     }}>
         <s-icon icon=${
-      this.acceptedColURI !== this.colURI ? "col_dpr" : "col_aug"
+      this.col?.acceptedURI !== this.col?.colURI ? "col_dpr" : "col_aug"
     }></s-icon>
         <div>
           Found in the Catalogue of Life
@@ -563,21 +560,21 @@ export class SynoColTreatment extends LitElement {
           <s-icon icon="empty"></s-icon>
           <div>
             <b>CoL ID:</b>
-            <a target="_blank" href=${this.colURI || nothing} class="col uri">${
-      this.colURI?.replace("https://www.catalogueoflife.org/data/taxon/", "")
+            <a target="_blank" href=${this.col?.colURI || nothing} class="col uri">${
+      this.col?.colURI?.replace("https://www.catalogueoflife.org/data/taxon/", "")
     }<s-icon icon="link"></s-icon></a>
           </div>
         </div>
-        <div class="row ${this.acceptedColURI !== this.colURI ? "" : "hidden"}">
+        <div class="row ${this.col?.acceptedURI !== this.col?.colURI ? "" : "hidden"}">
           <s-icon icon="col_aug"></s-icon>
           <div>
             <b class="blue">Accepted Name:</b>
             ${
       until(
-        this.synoGroup?.findName(this.acceptedColURI!).then(nameLink),
+        this.synoGroup?.findName(this.col?.acceptedURI!).then(nameLink),
         html`<a target="_blank" href=${this
-          .acceptedColURI!} class="col uri">${
-          this.acceptedColURI?.replace(
+          .col?.acceptedURI} class="col uri">${
+          this.col?.acceptedURI?.replace(
             "https://www.catalogueoflife.org/data/taxon/",
             "",
           )

@@ -266,16 +266,16 @@ export class TimelineYear extends LitElement {
       this.icons = this.acceptedCoL.map((col) => {
         const icons = this.names.map((ns) => {
           const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
-          if (ns.name.colURI && ns.name.acceptedColURI === col) {
-            if (ns.name.colURI === col) {
+          if (ns.name.col && ns.name.col.acceptedURI === col) {
+            if (ns.name.col.colURI === col) {
               expanded[0].aug = 1;
             } else {
               expanded[0].dpr = 1;
             }
           } else {
             for (const authName of ns.name.authorizedNames) {
-              if (authName.colURI && authName.acceptedColURI === col) {
-                if (authName.colURI === col) {
+              if (authName.col && authName.col.acceptedURI === col) {
+                if (authName.col.colURI === col) {
                   expanded.push({ def: 0, aug: 1, dpr: 0, cite: 0 });
                 } else {
                   expanded.push({ def: 0, aug: 0, dpr: 1, cite: 0 });
@@ -605,17 +605,21 @@ export class Timeline extends LitElement {
           n.open ? "open" : "closed"
         }"><div class="unauthorized"><a href="#${nameToID(n.name)}">${
           this.showKingdoms
-            ? (n.name.kingdom === "Animalia" || n.name.kingdom === "Plantae"
-              ? html`<s-icon style="color: var(${
-                n.homonym ? "--accent" : "--text-color-muted"
-              });" icon=${n.name.kingdom}></s-icon>`
-              : n.name.kingdom
-              ? html`<span style="color: var(${
-                n.homonym ? "--accent" : "--text-color-muted"
-              });">(${n.name.kingdom})</span> `
-              : html`<s-icon style="color: var(${
-                n.homonym ? "--accent" : "--text-color-muted"
-              });" icon="unknown"></s-icon>`)
+            ? (
+              ["Animalia", "Plantae", "Bacteria", "Fungi"].includes(
+                  n.name.kingdom,
+                )
+                ? html`<s-icon style="color: var(${
+                  n.homonym ? "--accent" : "--text-color-muted"
+                });" icon=${n.name.kingdom}></s-icon>`
+                : n.name.kingdom
+                ? html`<span style="color: var(${
+                  n.homonym ? "--accent" : "--text-color-muted"
+                });">(${n.name.kingdom})</span> `
+                : html`<s-icon style="color: var(${
+                  n.homonym ? "--accent" : "--text-color-muted"
+                });" icon="unknown"></s-icon>`
+            )
             : nothing
         }<i>${n.name.displayName}</i>${
           !n.openable && n.name.authorizedNames.length === 1
