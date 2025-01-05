@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "dom.asynciterable",
+      "deno.ns"
+    ]
+    // "experimentalDecorators": false, // default for TypeScript 5.0 and up
+    // "useDefineForClassFields": true // default when "target" is "ES2022" or higher
+  },
+  "imports": {
+    "@luca/esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.0",
+    "@plazi/synolib": "jsr:@plazi/synolib@^3.4.2",
+    "@std/collections": "jsr:@std/collections@^1.0.9",
+    "yasqe": "npm:@triply/yasqe@^4.2.28",
+    "yasr": "npm:@triply/yasr@^4.2.28",
+    "esbuild": "npm:esbuild@^0.24.0",
+    "esbuild-sass-plugin": "npm:esbuild-sass-plugin@^3.3.1",
+    "lit": "npm:lit@^3.2.1",
+
+    // TODO: taxomplete is hacky
+    "taxomplete": "https://plazi.github.io/taxomplete/src/taxomplete.js",
+    // for taxomplete:
+    "awesomplete": "npm:awesomplete@^1.1.5",
+    "lodash": "npm:lodash@^4.17.21"
+  },
+  "tasks": {
+    "serve": "deno run --allow-read --allow-write --allow-env --allow-run build.ts serve",
+    "build": "deno run --allow-read --allow-write --allow-env --allow-run build.ts build"
+  }
+}
