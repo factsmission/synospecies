@@ -5,6 +5,7 @@ const endpoints = {
   plazi: "https://treatment.ld.plazi.org/sparql",
   lindas: "https://lindas.admin.ch/query",
   cached: "https://lindas-cached.cluster.ldbar.ch/query",
+  qlever: "https://qlever.ld.plazi.org/sparql",
 };
 
 export class SynoForm extends HTMLElement {
@@ -95,6 +96,21 @@ export class SynoForm extends HTMLElement {
       endpointLindasLabelUrl,
     );
 
+    const endpointQleverLabel = document.createElement("label");
+    const endpointQleverLabelUrl = document.createElement("code");
+    endpointQleverLabelUrl.className = "uri";
+    endpointQleverLabelUrl.innerText = endpoints.qlever.replace("https://", "");
+    const endpointQlever = document.createElement("input");
+    endpointQlever.type = "radio";
+    endpointQlever.name = "endpoint";
+    endpointQlever.checked = ENDPOINT_URL === endpoints.qlever;
+    endpointQleverLabel.append(
+      endpointQlever,
+      "Qlever ",
+      endpointQleverLabelUrl,
+      " (NEW)",
+    );
+
     const button = document.createElement("button");
     button.innerText = "Go";
 
@@ -104,6 +120,7 @@ export class SynoForm extends HTMLElement {
 
     const label = document.createElement("span");
     label.innerText = "(Options applied on next search)";
+    label.style.gridColumn = "auto / span 2"
 
     const options = document.createElement("div");
     options.className = "options";
@@ -113,6 +130,7 @@ export class SynoForm extends HTMLElement {
       subtaxaCheckLabel,
       label,
       "Server: ",
+      endpointQleverLabel,
       endpointLindasCachedLabel,
       endpointLindasLabel,
       endpointPlaziLabel,
@@ -135,6 +153,8 @@ export class SynoForm extends HTMLElement {
         params.append("server", endpoints.lindas);
       } else if (endpointPlazi.checked) {
         params.append("server", endpoints.plazi);
+      } else if (endpointQlever.checked) {
+        params.append("server", endpoints.qlever);
       }
       document.location.hash = "";
       document.location.search = params.toString();

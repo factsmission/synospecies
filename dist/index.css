@@ -177,7 +177,7 @@ syno-form {
 
   .options {
     display: grid;
-    grid-template-columns: auto repeat(3, 1fr);
+    grid-template-columns: auto repeat(4, 1fr);
     gap: 0.4rem;
     margin-top: 0.6rem;
   }
