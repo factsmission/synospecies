@@ -406,7 +406,7 @@ export class SynoTreatment extends LitElement {
               : nothing
           }${
             details.treats.citetc.size > 0 || details.treats.citetn.size > 0
-              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray"><abbr title="These citations are not considered synonyms by SynoSpecies.">Cites:</abbr></b>${
+              ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray"><abbr title="Other taxa cited in the treatment. These citations are not considered synonyms by SynoSpecies.">Cites:</abbr></b>${
                 details.treats.citetc.union(details.treats.citetn).values().map(
                   (n) => {
                     const short = n.replace(

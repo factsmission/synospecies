@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SynoSpecies</title>
+  <link rel="preconnect" href="https://rsms.me/" />
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  <link rel="stylesheet" href="index.css" />
+  <script src="./index.js"></script>
+  <link rel="icon" href="/favicon.ico" />
+</head>
+
+<body>
+  <header>
+    <nav class="center">
+      <h1><a href="/">SynoSpecies</a></h1>
+      <div>
+        <a class="active" href="info.html">Info</a>
+        <a class="inactive" href="advanced.html">Advanced</a>
+      </div>
+      <a href="http://plazi.org/">
+        <img src="./assets/logo.png" alt="Plazi - take care of freedom" class="logo plazi" />
+      </a>
+      <a href="https://factsmission.com">
+        <img src="./assets/FactsMissionTEO.png" alt="FactsMission" class="logo fm" />
+      </a>
+    </nav>
+  </header>
+
+  <main class="center">
+    <noscript>
+      We're sorry but SynoSpecies doesn't work without JavaScript enabled.
+      Please enable it to continue.
+    </noscript>
+
+    <h2>About SynoSpecies</h2>
+    <p>
+      SynoSpecies is a tool developed by FactsMission AG to leverage the RDF data provided by Plazi. The RDF data of all
+      treatments is stored in an
+      <a href="https://allegrograph.com/">AllegroGraph</a> triple store allowing
+      <a href="https://www.w3.org/TR/sparql11-overview/">SPARQL</a> queries over the data. SynoSpecies allows manually
+      writing and submitting such queries in the advanced mode and send such queries in the background when using the
+      easier interface.
+    </p>
+    <p>
+      SynoSpecies is an Open Source application running purely in the browser, the source code is available on
+      <a href="https://github.com/factsmission/synospecies/">GitHub</a>.
+    </p>
+
+    <h3>
+      About <a href="http://plazi.org/">Plazi</a>
+    </h3>
+    <p>Plazi is an association supporting and promoting the development of persistent and openly accessible digital
+      taxonomic literature. To this end Plazi will:</p>
+    <ul>
+      <li>Maintain a digital taxonomic literature repository to enable archiving of taxonomic treatments.</li>
+      <li>Enhance submitted taxonomic treatments by creating TaxonX and Taxpub XML versions.</li>
+      <li>Participate in the development of new models for publishing taxonomic treatments in order to maximize
+        interoperability with other relevant cyberinfrastructure components (e.g., name servers, biodiversity resources,
+        etc...)</li>
+      <li>Advocate and educate about the vital importance of maintaining free and open access to scientific discourse
+        and data</li>
+    </ul>
+
+    <h3>
+      About <a href="https://factsmission.com/">FactsMission</a>
+    </h3>
+    <p>FactsMission offers consulting and development services to create, process, store, publish, and consume linked
+      data.</p>
+    <p>FactsMission helps you provide data in such a way that it can be easily used as the foundation of different
+      applications as well as linked to as an authoritative source.</p>
+    <p>FactsMission helps you grow communities around your data to maximize its impact and increase your organization’s
+      influence.</p>
+
+    <hr>
+
+    <h2>Explanation of the Interface</h2>
+
+    <h3>Search</h3>
+    <p>
+      SynoSpecies supports using any of the following as search terms:
+    <ul>
+      <li>
+        A human readable taxon name in the form <span class="uri">Genus</span>,
+        <span class="uri">Genus species</span>, or <span class="uri">Genus species infraspecific</span>.
+        <br>
+        The input field will offer auto-complete suggestions for this.
+      </li>
+      <li>
+        A URI for a taxon-name or taxon-concept, i.e. a URI starting with
+        <span class="uri">http://taxon-name.plazi.org/</span> or <span
+          class="uri">http://taxon-concept.plazi.org/</span>.
+        <br>
+        <small>(You can find these by expanding any of the search results by clicking the
+          <s-icon icon="justification" style="font-size: 0.75em; vertical-align: sub;"></s-icon>)</small>
+      </li>
+      <li>
+        A URI for a Catalogue of Life-taxon, i.e. a URI starting with
+        <span class="uri">https://www.catalogueoflife.org/data/taxon/</span>.
+      </li>
+    </ul>
+    </p>
+    <p>
+      If the “Show CoL-synonyms” option is <i>disabled</i>, SynoSpecies will not follow
+      <s-icon icon="col_dpr" style="font-size: 0.75em; vertical-align: sub;"></s-icon>-synonyms listed in the Catalogue
+      of Life.
+      They will still be shown if they are found via treatment citations.
+      Use this option if you get too many deprecated synonyms otherwise.
+    </p>
+    <p>
+      If the “Include subtaxa of search term” option is <i>enabled</i>, SynoSpecies will also search for all taxa that
+      are subtaxa of the search term.
+      For example, with this option enabled, a search for “Mini” will also include “Mini ature, “Mini mum”, and “Mini
+      scule”, as if you also searched for these.
+    </p>
+
+    <h3>Timeline</h3>
+    <p>
+      The Timeline visualizes the data in a two-dimensional grid.
+      Here, the rows correspond to taxon names and the columns correspond to years of treatments.
+    </p>
+    <p>
+      Usually, one row corresponds to one taxon and one authority.
+      However, if there are multiple authorities given for a taxon (or if some treatments omit the authority entirely),
+      The taxon is split into multiple rows with the top row used for authority-less citations
+      and underneath one row per authority.
+
+      In such cases, the
+      <s-icon icon="collapse" style="font-size: 0.75em; vertical-align: sub;"></s-icon>/<s-icon icon="expand"
+        style="font-size: 0.75em; vertical-align: sub;"></s-icon>
+      buttons can be used to collapse/expand the taxon into one row.
+    </p>
+    <p>
+      Hint: To quickly scroll to a given taxon in the list below, click its name on the left.
+    </p>
+    <p>
+      In the right half of the Timeline, we find a visualization of all treatments found, grouped by year.
+      A yellow bar always indicates a single treatment. Hover over one to reveal its authors.
+
+      If there are multiple treatments in one year, they are collapsed into one blue bar showing aggregate counts of the
+      icons.
+      Clicking a blue bar or the
+      <s-icon icon="expand" style="font-size: 0.75em; vertical-align: sub;"></s-icon>
+      buttons next to the year number will expand the year to show all its treatments.
+    </p>
+    <p>
+      If there are entries of the Catalogue of Life found, the corresponding synonym-relationships are shown in the
+      first column as there is no date information here.
+      Here too is a blue bar used for the collapsed (union) state, and (when expanded) separate yellow bars for each
+      accepted name and its synonyms.
+    </p>
+
+    <h3>Icons</h3>
+    <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.8em; margin-block: 0.8rem; align-items: center;">
+      <s-icon icon="def"></s-icon>
+      <div>
+        This indicates a <b class="sc green">defines</b>-relationship between a treatment and a taxon:
+        “This treatment defines (e.g. as 'sp. nov.)' a new Taxon.”
+      </div>
+      <s-icon icon="aug"></s-icon>
+      <div>
+        This indicates a <b class="sc blue">treats</b>-relationship between a treatment and a taxon:
+        “The taxon the treatment is about. SynoSpecies interprets this as an assertion that this name is valid.”
+      </div>
+      <s-icon icon="dpr"></s-icon>
+      <div>
+        This indicates a <b class="sc red">deprecates</b>-relationship between a treatment and a taxon:
+        “Synonym(s) cited in the treatment.”
+      </div>
+      <s-icon icon="cite"></s-icon>
+      <div>
+        This indicates a <b class="sc gray">cites</b>-relationship between a treatment and a taxon:
+        “Other taxa cited in the treatment. These citations are not considered synonyms by SynoSpecies.”
+      </div>
+      <!-- <s-icon icon="multiple"></s-icon>
+      <div>
+        Currently unused
+      </div>
+      <s-icon icon="def_dpr"></s-icon>
+      <div>
+        Currently unused
+      </div>
+      <s-icon icon="aug_dpr"></s-icon>
+      <div>
+        Currently unused
+      </div> -->
+      <s-icon icon="col_aug"></s-icon>
+      <div>
+        This indicates that the Catalogue of Life considers this an <b class="sc blue">accepted name</b>.
+      </div>
+      <s-icon icon="col_dpr"></s-icon>
+      <div>
+        This indicates that the Catalogue of Life considers this a <b class="sc red">synonym</b> or <b
+          class="sc red">combination</b>.
+      </div>
+
+      <s-icon icon="Plantae"></s-icon>
+      <div>
+        This indicates <i>Plantae</i>.
+
+        It is only shown in the Timeline if there are multiple kingdoms present in the result.
+      </div>
+      <s-icon icon="Animalia"></s-icon>
+      <div>
+        This indicates <i>Animalia</i>.
+        —“—
+      </div>
+      <s-icon icon="Bacteria"></s-icon>
+      <div>
+        This indicates <i>Bacteria</i>.
+        —“—
+      </div>
+      <s-icon icon="Fungi"></s-icon>
+      <div>
+        This indicates <i>Fungi</i>.
+        —“—
+      </div>
+      <s-icon icon="unknown"></s-icon>
+      <div>
+        This indicates a missing kingdom.
+        —“—
+      </div>
+
+      <span></span>
+      <div>
+        <s-icon icon="Plantae" style="color: var(--accent);"></s-icon>
+        <s-icon icon="Animalia" style="color: var(--accent);"></s-icon>
+        <s-icon icon="Bacteria" style="color: var(--accent);"></s-icon>
+        <s-icon icon="Fungi" style="color: var(--accent);"></s-icon>
+        <s-icon icon="unknown" style="color: var(--accent);"></s-icon>
+        – A green tint is used to highlight homonyms.
+      </div>
+
+      <s-icon icon="image"></s-icon>
+      <div>
+        Used for treatments with figures. They are shown when the treatment is expanded.
+      </div>
+      <s-icon icon="material"></s-icon>
+      <div>
+        Used for treatments with cited materials. They are shown when the treatment is expanded.
+      </div>
+      <s-icon icon="vernacular"></s-icon>
+      <div>
+        This is used as decoration next to the vernacular or common names of a taxon.
+      </div>
+
+      <s-icon icon="justification"></s-icon>
+      <div>
+        This is used for the button which expands the details for a taxon.
+        Additionally, this is used as decoration next to the justification (“Why this name was found by SynoSpecies.”)
+      </div>
+      <s-icon icon="expand"></s-icon>
+      <div>
+        This is used for the button which expands the details for a treatment, Catalogue of Life entry, and to expand
+        rows or columns in the Timeline.
+      </div>
+      <s-icon icon="collapse"></s-icon>
+      <div>
+        Collapse details, row, or column.
+      </div>
+
+      <s-icon icon="link"></s-icon>
+      <div>
+        This indicates a link which will open in a new tab.
+      </div>
+
+      <!-- <s-icon icon="east"></s-icon>
+      <div>
+        Currently unused
+      </div>
+      <s-icon icon="west"></s-icon>
+      <div>
+        Currently unused
+      </div>
+      <s-icon icon="empty"></s-icon>
+      <div>
+        (Placeholder)
+      </div> -->
+    </div>
+    <p>
+      The Wikidata logo, Wikipedia 'W' icon, Wikispecies logo, and Wikimedia Commons logo are used for links to the
+      respective sites.
+    </p>
+  </main>
+
+  <footer>
+    <div class="center">
+      SynoSpecies is created and maintained by
+      <a href="https://factsmission.com">FactsMission</a>, is powered by <a
+        href="https://allegrograph.com/products/allegrograph/">Franz Inc. AllegroGraph</a> and uses the taxonomic
+      treatment data
+      provided by
+      <a href="http://plazi.org/">Plazi</a>.
+      <hr />
+      This project has received funding from the European Union’s Horizon 2020
+      programme (grant agreement 101007492) and from the <a href="https://www.arcadiafund.org.uk/">Arcadia Fund</a>.
+      <hr />
+      This is an open source project:
+      <a href="https://github.com/factsmission/synospecies">
+        View the code on Github
+      </a>
+    </div>
+  </footer>
+</body>
+
+</html>
