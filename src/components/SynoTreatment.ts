@@ -350,7 +350,7 @@ export class SynoTreatment extends LitElement {
             details.treats.def.size
               ? html`<div class="row ${
                 this.status === "def" || this.status === "cite" ? "hidden" : ""
-              }"><s-icon icon="def"></s-icon><div><b class="green"><abbr title="This treatment defines (e.g. as 'sp. nov.)' a new Taxon.">Defines:</abbr></b>${
+              }"><s-icon icon="def"></s-icon><div><b class="green"><abbr title="This treatment defines (e.g. as ‘sp. nov.’) a new Taxon.">Defines:</abbr></b>${
                 details.treats.def.values().map((n) => {
                   const short = n.replace(
                     "http://taxon-concept.plazi.org/id/",
