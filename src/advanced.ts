@@ -68,8 +68,11 @@ LIMIT 10`,
 export class QueryEditor extends LitElement {
   static override styles = css`
   :host {
+    color-scheme: only light;
     display: block;
     margin: 1rem 0 2rem;
+    background: #ffffff;
+    color: #222222;
   }
 
   .CodeMirror {
