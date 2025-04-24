@@ -226,7 +226,9 @@ export class SynoMain extends LitElement {
       <div class="status">
       ${
       this.timeEnd === null
-        ? html`Finding Synonyms for ${this.NAME} <progress></progress> (`
+        ? (this.synoGroup.noSynonyms
+          ? html`Finding details for ${this.NAME} <progress></progress> (`
+          : html`Finding synonyms for ${this.NAME} <progress></progress> (`)
         : nothing
     }Found ${
       this.names.length === 1 ? "1 name" : `${this.names.length} names`

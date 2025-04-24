@@ -9,6 +9,7 @@ const START_WITH_SUBTAXA = params.has("subtaxa");
 const ENDPOINT_URL = params.get("server") ||
   "https://lindas-cached.cluster.ldbar.ch/query"; // "https://treatment.ld.plazi.org/sparql";
 const NAME = params.get("q");
+const NOSYNONYMS = params.has("nosynonyms");
 
 const sparqlEndpoint = new SparqlEndpoint(ENDPOINT_URL);
 
@@ -24,6 +25,7 @@ function main(name: string) {
     name,
     HIDE_COL_ONLY_SYNONYMS,
     START_WITH_SUBTAXA,
+    NOSYNONYMS,
   );
 
   const synoMain = new SynoMain();

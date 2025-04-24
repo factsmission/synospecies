@@ -19,6 +19,7 @@ export class SynoForm extends HTMLElement {
     const params = new URLSearchParams(document.location.search);
     const SHOW_COL = params.has("show_col");
     const START_WITH_SUBTAXA = params.has("subtaxa");
+    const NOSYNONYMS = params.has("nosynonyms");
     const ENDPOINT_URL = params.get("server");
     const NAME = params.get("q");
 
@@ -32,6 +33,13 @@ export class SynoForm extends HTMLElement {
     colCheck.type = "checkbox";
     colCheck.checked = NAME ? SHOW_COL : true;
     colCheckLabel.prepend(colCheck);
+
+    const nosynonymsCheckLabel = document.createElement("label");
+    nosynonymsCheckLabel.innerText = "Do not search for Synonyms";
+    const nosynonymsCheck = document.createElement("input");
+    nosynonymsCheck.type = "checkbox";
+    nosynonymsCheck.checked = NAME ? NOSYNONYMS : false;
+    nosynonymsCheckLabel.prepend(nosynonymsCheck);
 
     const subtaxaCheckLabel = document.createElement("label");
     subtaxaCheckLabel.innerText = "Include subatxa of search term.";
@@ -120,7 +128,7 @@ export class SynoForm extends HTMLElement {
 
     const label = document.createElement("span");
     label.innerText = "(Options applied on next search)";
-    label.style.gridColumn = "auto / span 2"
+    // label.style.gridColumn = "auto / span 2";
 
     const options = document.createElement("div");
     options.className = "options";
@@ -128,6 +136,7 @@ export class SynoForm extends HTMLElement {
       "Options: ",
       colCheckLabel,
       subtaxaCheckLabel,
+      nosynonymsCheckLabel,
       label,
       "Server: ",
       endpointQleverLabel,
@@ -144,6 +153,7 @@ export class SynoForm extends HTMLElement {
       });
       if (colCheck.checked) params.append("show_col", "");
       if (subtaxaCheck.checked) params.append("subtaxa", "");
+      if (nosynonymsCheck.checked) params.append("nosynonyms", "");
       // if (sorttreatmentsCheck.checked) {
       //   params.append("sort_treatments_by_type", "");
       // }
