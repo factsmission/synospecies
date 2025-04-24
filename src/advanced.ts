@@ -19,8 +19,8 @@ const queryPrefixes = {
   dc: "http://purl.org/dc/elements/1.1/",
   trt: "http://plazi.org/vocab/treatment#",
   treatment: "http://treatment.plazi.org/id/",
-  taxonConcept: "http://taxon-concept.plazi.org/id/",
-  taxonName: "http://taxon-name.plazi.org/id/",
+  // taxonConcept: "http://taxon-concept.plazi.org/id/",
+  // taxonName: "http://taxon-name.plazi.org/id/",
   publication: "http://publication.plazi.org/id/",
 };
 
@@ -199,6 +199,14 @@ type exampleQuery = {
   query: string;
 };
 const exampleQueries: exampleQuery[] = [
+  {
+    title: "Describing objects",
+    description: `
+    A good way to get get a first impression as to how the data is structured is using <code class="uri">DESCRIBE</code>-queries.
+    Try also to describe the objects that this first query returns.
+    `,
+    query: `DESCRIBE <http://treatment.plazi.org/id/962587B2FFF8FF9EFF2A38EEF59DB87E>`,
+  },
   {
     title: "All synonyms",
     description: `
