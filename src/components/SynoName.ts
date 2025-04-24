@@ -63,7 +63,7 @@ export class SynoAuthName extends LitElement {
       </h3>
       ${
       // authorities.size > 0 ||
-      this.authorizedName.taxonConceptURIs.length > 0
+      this.authorizedName.col || this.authorizedName.taxonConceptURIs.length > 0
         ? html`<button class="icon" @click=${(e: Event) => {
           e.stopPropagation();
           this.open = !this.open;
@@ -93,6 +93,26 @@ export class SynoAuthName extends LitElement {
       </div>`
       )
     }${
+      this.authorizedName.col
+        ? html`
+      <div class="hidden row">
+        <s-icon icon="empty"></s-icon>
+        <div>
+          <b>Catalogue of Life ID:</b>
+          <span class="id">${
+          this.authorizedName.col.colURI.replace(
+            "https://www.catalogueoflife.org/data/taxon/",
+            "",
+          )
+        }</span>
+          <a target="_blank" href="?q=${
+          encodeURIComponent(this.authorizedName.col.colURI)
+        }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${this.authorizedName.col.colURI} class="uri">Catalogue of Life<s-icon icon="link"></s-icon></a>
+        </div>
+      </div>`
+        : nothing
+    }${
       authorities.size > 0
         ? html`<div class="row">
         <s-icon icon="empty"></s-icon>
@@ -101,6 +121,16 @@ export class SynoAuthName extends LitElement {
         </div>
       </div>`
         : nothing
+    }${
+      this.authorizedName.col || treatments_array.length > 0
+        ? nothing
+        : html`<div class="row">
+            <s-icon icon="unknown"></s-icon>
+            <div><i>
+              No treatments found for this name.
+              It could be that there are treatments for subtaxa, but this could also indicate an error in the dataset.
+            </i></div>
+          </div>`
     }
     </div>
     <ul>
@@ -196,6 +226,26 @@ export class SynoName extends LitElement {
         </div>
       </div>`
         : nothing
+    }${
+      this.name.name.col
+        ? html`
+      <div class="hidden row">
+        <s-icon icon="empty"></s-icon>
+        <div>
+          <b>Catalogue of Life ID:</b>
+          <span class="id">${
+          this.name.name.col.colURI.replace(
+            "https://www.catalogueoflife.org/data/taxon/",
+            "",
+          )
+        }</span>
+          <a target="_blank" href="?q=${
+          encodeURIComponent(this.name.name.col.colURI)
+        }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${this.name.name.col.colURI} class="uri">Catalogue of Life<s-icon icon="link"></s-icon></a>
+        </div>
+      </div>`
+        : nothing
     }
       <div class="row ${
       this.name.name.rank === "genus" || this.name.name.rank === "species"
@@ -206,12 +256,16 @@ export class SynoName extends LitElement {
         <div><b>Rank:</b> ${this.name.name.rank}</div>
       </div>
       <div class="row ${
-      this.showKingdom || this.name.homonym || !this.name.name.kingdom ? "" : "hidden"
+      this.showKingdom || this.name.homonym || !this.name.name.kingdom
+        ? ""
+        : "hidden"
     }">
         <s-icon style=${
       this.name.homonym ? "color: var(--accent);" : ""
     } icon=${
-      ["Animalia", "Plantae", "Bacteria", "Fungi"].includes(this.name.name.kingdom)
+      ["Animalia", "Plantae", "Bacteria", "Fungi"].includes(
+          this.name.name.kingdom,
+        )
         ? this.name.name.kingdom
         : "empty"
     }></s-icon>
