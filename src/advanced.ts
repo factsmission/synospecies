@@ -12,10 +12,6 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import "./components/Icons.ts";
 
-const params = new URLSearchParams(document.location.search);
-const ENDPOINT_URL = params.get("server") ||
-  "https://lindas-cached.cluster.ldbar.ch/query"; // "https://treatment.ld.plazi.org/sparql";
-
 const queryPrefixes = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
   dwcFP: "http://filteredpush.org/ontologies/oa/dwcFP#",
@@ -36,11 +32,10 @@ const resultsPrefixes = {
 
 const requestConfig = {
   showQueryButton: true,
-  endpoint: ENDPOINT_URL,
   method: "GET",
-  headers: () => {
-    return {};
-  },
+  // headers: () => {
+  //   return {};
+  // },
 };
 
 const config = {
@@ -49,8 +44,6 @@ const config = {
   createShareableLink: false,
   autoAddOnInit: true,
   prefixes: { ...queryPrefixes, ...resultsPrefixes },
-  // yasr: {
-  // pluginOrder: ["response", "table"],
   plugins: {
     table: {
       dynamicConfig: {
@@ -58,7 +51,6 @@ const config = {
       },
     },
   },
-  // },
   // default query
   value: `
 # This query gets ten arbitrary triples from the endpoint.
@@ -82,6 +74,16 @@ export class QueryEditor extends LitElement {
 
   .CodeMirror {
     height: auto;
+  }
+
+  .yasr {
+    .yasr_btnGroup .yasr_btn {
+      padding-top: 0;
+    }
+
+    .yasr_btn.yasr_external_ref_btn {
+      display: none;
+    }
   }
 
   // colum-resizer
@@ -304,6 +306,10 @@ export class SynoAdvanced extends LitElement {
   accessor endpoint: string = "https://treatment.ld.plazi.org/sparql";
 
   override render() {
+    const params = new URLSearchParams(document.location.search);
+    const ENDPOINT_URL = params.get("server");
+    if (ENDPOINT_URL) this.endpoint = ENDPOINT_URL;
+
     return html`
       <link href="index.css" rel="stylesheet">
       <h2>Advanced Mode</h2>
