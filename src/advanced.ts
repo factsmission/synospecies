@@ -7,7 +7,7 @@ import Yasr from "yasr";
 import "yasr/build/yasr.min.css";
 
 import { css, html, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import "./components/Icons.ts";
@@ -46,6 +46,7 @@ const requestConfig = {
 const config = {
   autofocus: false,
   copyEndpointOnNewTab: true,
+  createShareableLink: false,
   autoAddOnInit: true,
   prefixes: { ...queryPrefixes, ...resultsPrefixes },
   // yasr: {
@@ -76,7 +77,7 @@ export class QueryEditor extends LitElement {
   static override styles = css`
   :host {
     display: block;
-    margin: 1rem 0;
+    margin: 1rem 0 2rem;
   }
 
   .CodeMirror {
@@ -263,7 +264,8 @@ WHERE {
   },
   {
     title: "List specific material citations",
-    description: `This query returns all material citations for all synonyms of Tyrannosaurus rex that are in the New Mexico Museum of Natural History & Science (NMMNH).`,
+    description:
+      `This query returns all material citations for all synonyms of Tyrannosaurus rex that are in the New Mexico Museum of Natural History & Science (NMMNH).`,
     query: `SELECT DISTINCT ?syn ?catalogNumber # ?collectionCode
 WHERE {
   <http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^trt:deprecates/(trt:augmentsTaxonConcept|trt:definesTaxonConcept))|((^trt:augmentsTaxonConcept|^trt:definesTaxonConcept)/trt:deprecates))* ?syn .
@@ -287,7 +289,19 @@ export class SynoAdvanced extends LitElement {
   h4 + p {
     margin-top: 0;
   }
+
+  .options {
+    border: 1px solid var(--nav-background);
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: auto repeat(4, auto);
+    margin: 1rem 0;
+    padding: 0.5rem;
+  }
   `;
+
+  @state()
+  accessor endpoint: string = "https://treatment.ld.plazi.org/sparql";
 
   override render() {
     return html`
@@ -298,16 +312,41 @@ export class SynoAdvanced extends LitElement {
         <a target="_blank" href="https://www.w3.org/TR/sparql11-query/" class="uri">SPARQL<s-icon icon="link"></s-icon></a>
         queries against our data.
       </p>
-      <query-editor persistenceId="editor-1"></query-editor>
-      <query-editor persistenceId="editor-2"></query-editor>
+      <div class="options">
+        <span>Server:</span>
+        <label><input type="radio" name="endpoint" checked=${
+      this.endpoint === "https://qlever.ld.plazi.org/sparql"
+    } @change=${() => {
+      this.endpoint = "https://qlever.ld.plazi.org/sparql";
+    }}>Qlever <code class="uri">qlever.ld.plazi.org/sparql</code> (NEW)</label>
+        <label><input type="radio" name="endpoint" checked=${
+      this.endpoint === "https://lindas-cached.cluster.ldbar.ch/query"
+    } @change=${() => {
+      this.endpoint = "https://lindas-cached.cluster.ldbar.ch/query";
+    }}>Lindas <code class="uri">lindas-cached.cluster.ldbar.ch/query</code></label>
+        <label><input type="radio" name="endpoint" checked=${
+      this.endpoint === "https://lindas.admin.ch/query"
+    } @change=${() => {
+      this.endpoint = "https://lindas.admin.ch/query";
+    }}>Lindas uncached <code class="uri">lindas.admin.ch/query</code></label>
+        <label><input type="radio" name="endpoint" checked=${
+      this.endpoint === "https://treatment.ld.plazi.org/sparql"
+    } @change=${() => {
+      this.endpoint = "https://treatment.ld.plazi.org/sparql";
+    }}>Plazi <code class="uri">treatment.ld.plazi.org/sparql</code> (Most up-to-date)</label>
+      </div>
+      <query-editor persistenceId="editor-1" endpoint=${this.endpoint}></query-editor>
+      <query-editor persistenceId="editor-2" endpoint=${this.endpoint}></query-editor>
       <hr>
       <h3>Example Queries</h3>
       <p><small>(You can reset the following editors by reloading the page)</small></p>
       ${
       exampleQueries.map((example) =>
-        html`<section><h4>${example.title}</h4><p>${
-          unsafeHTML(example.description)
-        }</p><query-editor query=${example.query}></query-editor></section>`
+        html`<section>
+          <h4>${example.title}</h4>
+          <p>${unsafeHTML(example.description)}</p>
+          <query-editor query=${example.query} endpoint=${this.endpoint}></query-editor>
+        </section>`
       )
     }
     `;
@@ -316,3 +355,10 @@ export class SynoAdvanced extends LitElement {
   //   return this;
   // }
 }
+
+const endpoints = {
+  plazi: "https://treatment.ld.plazi.org/sparql",
+  lindas: "https://lindas.admin.ch/query",
+  cached: "https://lindas-cached.cluster.ldbar.ch/query",
+  qlever: "https://qlever.ld.plazi.org/sparql",
+};
