@@ -34,6 +34,13 @@ export class SynoForm extends HTMLElement {
     colCheck.checked = NAME ? SHOW_COL : true;
     colCheckLabel.prepend(colCheck);
 
+    const subtaxaCheckLabel = document.createElement("label");
+    subtaxaCheckLabel.innerText = "Include subatxa of search term.";
+    const subtaxaCheck = document.createElement("input");
+    subtaxaCheck.type = "checkbox";
+    subtaxaCheck.checked = NAME ? START_WITH_SUBTAXA : false;
+    subtaxaCheckLabel.prepend(subtaxaCheck);
+
     const nosynonymsCheckLabel = document.createElement("label");
     nosynonymsCheckLabel.innerText = "Do not search for Synonyms";
     const nosynonymsCheck = document.createElement("input");
@@ -41,12 +48,11 @@ export class SynoForm extends HTMLElement {
     nosynonymsCheck.checked = NAME ? NOSYNONYMS : false;
     nosynonymsCheckLabel.prepend(nosynonymsCheck);
 
-    const subtaxaCheckLabel = document.createElement("label");
-    subtaxaCheckLabel.innerText = "Include subatxa of search term.";
-    const subtaxaCheck = document.createElement("input");
-    subtaxaCheck.type = "checkbox";
-    subtaxaCheck.checked = NAME ? START_WITH_SUBTAXA : false;
-    subtaxaCheckLabel.prepend(subtaxaCheck);
+    colCheck.disabled = nosynonymsCheck.checked;
+    nosynonymsCheck.addEventListener(
+      "change",
+      () => colCheck.disabled = nosynonymsCheck.checked,
+    );
 
     // const sorttreatmentsCheckLabel = document.createElement("label");
     // sorttreatmentsCheckLabel.innerText = "Sort treatments by type.";
