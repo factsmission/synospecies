@@ -62,24 +62,38 @@ LIMIT 10`,
   // render all lines
   editorHeight: "auto",
   viewportMargin: Infinity,
+  theme: "plazi",
 };
 
 @customElement("query-editor")
 export class QueryEditor extends LitElement {
   static override styles = css`
   :host {
-    color-scheme: only light;
     display: block;
     margin: 1rem 0 2rem;
-    background: #ffffff;
-    color: #222222;
   }
 
-  .CodeMirror {
+  .yasqe .CodeMirror {
     height: auto;
+    min-height: 50px;
+    background: var(--nav-background);
+    color: var(--text-color);
+    border: none;
+    border-radius: 1rem;
+  }
+
+  .yasqe .yasqe_buttons {
+    top: 5px;
+    right: 2.8166px;
   }
 
   .yasr {
+    .yasr_btn {
+      color: var(--text-color-muted);
+      &:not(.disabled):hover {
+        color: var(--text-color);
+      }
+    }
     .yasr_btnGroup .yasr_btn {
       padding-top: 0;
     }
@@ -87,9 +101,42 @@ export class QueryEditor extends LitElement {
     .yasr_btn.yasr_external_ref_btn {
       display: none;
     }
+
+    .dataTables_wrapper table.dataTable tbody tr {
+      background: var(--body-background);
+      color: var(--text-color);
+
+      &:hover {
+        background: var(--highlight-background);
+      }
+    }
+    
+    .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_paginate, .dataTables_wrapper .dataTables_processing,
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      color: var(--text-color-muted) !important;
+    }
   }
 
-  // colum-resizer
+  /* CodeMirror theme */
+  .cm-s-plazi .cm-keyword { color: var(--text-color-muted); font-weight: 900; }
+  .cm-s-plazi .cm-punc { color: var(--text-color); }
+  .cm-s-plazi .cm-string-2 { color: var(--accent); }
+  .cm-s-plazi .cm-string,
+  .cm-s-plazi .cm-variable-3 { color: #4e69ae; }
+  .cm-s-plazi .cm-atom { color: light-dark(rgb(139, 72, 9), rgb(185, 119, 58)); }
+  .cm-s-plazi .cm-number { color: var(--accent); }
+  .cm-s-plazi .cm-matchingbracket { color: var(--accent-mild); }
+  .cm-s-plazi .cm-matchhighlight { background: var(--highlight-background); }
+  .cm-s-plazi .cm-comment { color: var(--text-color-muted); font-style: italic; }
+  .CodeMirror-gutters {
+    background: var(--nav-background);
+    border-color: var(--body-background);
+  }
+  .CodeMirror-linenumber {
+    color: var(--text-color-muted);
+  }
+
+  /* colum-resizer */
   .grip-resizable{table-layout:fixed;} .grip-resizable > tbody > tr > td, .grip-resizable > tbody > tr > th{overflow:hidden}
   .grip-padding > tbody > tr > td, .grip-padding > tbody > tr > th{padding-left:0!important; padding-right:0!important;}
   .grip-container{ height:0px; position:relative;} .grip-handle{margin-left:-5px; position:absolute; z-index:5; }
