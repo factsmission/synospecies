@@ -5,8 +5,12 @@ import "yasqe/build/yasqe.min.css";
 // @ts-types="yasr/src/index.ts"
 import Yasr from "yasr";
 import "yasr/build/yasr.min.css";
+
 import { css, html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
+
+import "./components/Icons.ts";
 
 const params = new URLSearchParams(document.location.search);
 const ENDPOINT_URL = params.get("server") ||
@@ -15,6 +19,8 @@ const ENDPOINT_URL = params.get("server") ||
 const queryPrefixes = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
   dwcFP: "http://filteredpush.org/ontologies/oa/dwcFP#",
+  dwc: "http://rs.tdwg.org/dwc/terms/",
+  dc: "http://purl.org/dc/elements/1.1/",
   trt: "http://plazi.org/vocab/treatment#",
   treatment: "http://treatment.plazi.org/id/",
   taxonConcept: "http://taxon-concept.plazi.org/id/",
@@ -24,8 +30,6 @@ const queryPrefixes = {
 
 const resultsPrefixes = {
   bibo: "http://purl.org/ontology/bibo/",
-  dwc: "http://rs.tdwg.org/dwc/terms/",
-  dce: "http://purl.org/dc/elements/1.1/",
   doi: "http://dx.doi.org/",
   fabio: "http://purl.org/spar/fabio/",
 };
@@ -40,13 +44,20 @@ const requestConfig = {
 };
 
 const config = {
-  autofocus: true,
+  autofocus: false,
   copyEndpointOnNewTab: true,
   autoAddOnInit: true,
   prefixes: { ...queryPrefixes, ...resultsPrefixes },
-  yasr: {
-    pluginOrder: ["table", "response"],
+  // yasr: {
+  // pluginOrder: ["response", "table"],
+  plugins: {
+    table: {
+      dynamicConfig: {
+        compact: true,
+      },
+    },
   },
+  // },
   // default query
   value: `
 # This query gets ten arbitrary triples from the endpoint.
@@ -55,6 +66,9 @@ WHERE {
   ?sub ?pred ?obj .
 }
 LIMIT 10`,
+  // render all lines
+  editorHeight: "auto",
+  viewportMargin: Infinity,
 };
 
 @customElement("query-editor")
@@ -64,10 +78,22 @@ export class QueryEditor extends LitElement {
     display: block;
     margin: 1rem 0;
   }
+
+  .CodeMirror {
+    height: auto;
+  }
+
+  // colum-resizer
+  .grip-resizable{table-layout:fixed;} .grip-resizable > tbody > tr > td, .grip-resizable > tbody > tr > th{overflow:hidden}
+  .grip-padding > tbody > tr > td, .grip-padding > tbody > tr > th{padding-left:0!important; padding-right:0!important;}
+  .grip-container{ height:0px; position:relative;} .grip-handle{margin-left:-5px; position:absolute; z-index:5; }
+  .grip-handle .grip-resizable{position:absolute;background-color:red;filter:alpha(opacity=1);opacity:0;width:10px;height:100%;cursor: col-resize;top:0px}
+  .grip-lastgrip{position:absolute; width:1px; } .grip-drag{ border-left:1px dotted black;	}
+  .grip-flex{width:auto!important;} .grip-handle.grip-disabledgrip .grip-resizable{cursor:default; display:none;}
   `;
 
   @property()
-  accessor persistenceId: string | undefined = undefined;
+  accessor persistenceId: string | false = false;
 
   @property()
   accessor endpoint: string = "https://treatment.ld.plazi.org/sparql";
@@ -76,7 +102,8 @@ export class QueryEditor extends LitElement {
   accessor query: string | null = null;
 
   override render() {
-    const newConfig = {
+    // deno-lint-ignore no-explicit-any
+    const newConfig: Record<string, any> = {
       ...config,
       requestConfig: {
         ...requestConfig,
@@ -102,8 +129,10 @@ export class QueryEditor extends LitElement {
 
     if (this.query !== null) {
       yasqe.setValue(this.query);
+      yasqe.addPrefixes(queryPrefixes);
+      yasqe.collapsePrefixes(true);
     }
-    window.requestAnimationFrame(() => {
+    globalThis.requestAnimationFrame(() => {
       yasqe.refresh();
     });
 
@@ -111,19 +140,179 @@ export class QueryEditor extends LitElement {
   }
 }
 
+type exampleQuery = {
+  title: string;
+  description: string;
+  query: string;
+};
+const exampleQueries: exampleQuery[] = [
+  {
+    title: "All synonyms",
+    description: `
+    This query returns all synonyms of 
+    <code class="uri taxon">http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905</code>.
+    It uses a transitive property path to get the taxa (Taxon-Concepts) 
+    augmented or defined by a treatmented that deprecates this taxon or that are
+    deprecated by a treatement that defines or deprecates this taxon.
+    `,
+    query: `SELECT DISTINCT *
+WHERE {
+  <http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^trt:deprecates/(trt:augmentsTaxonConcept|trt:definesTaxonConcept))|((^trt:augmentsTaxonConcept|^trt:definesTaxonConcept)/trt:deprecates))* ?tc .
+}`,
+  },
+  {
+    title: "Find homonyms",
+    description: `Find binomens that exist both as Animalia as well as Plantae`,
+    query: `SELECT DISTINCT *
+WHERE {
+  ?s1 a dwcFP:TaxonName ;
+      dwc:kingdom "Plantae" ;
+      dwc:genus ?gn ;
+      dwc:species ?sp ;
+      dwc:rank "species" .
+  ?s2 a dwcFP:TaxonName ;
+      dwc:kingdom "Animalia" ;
+      dwc:genus ?gn ;
+      dwc:species ?sp ;
+      dwc:rank "species" .
+}
+LIMIT 100`,
+  },
+  {
+    title: "Find kingdoms",
+    description:
+      `Find all kingdoms and one sample taxon-name from within each.`,
+    query: `SELECT DISTINCT ?k (SAMPLE(?s1) as ?s)
+WHERE {
+  ?s a dwcFP:TaxonName ;
+     dwc:kingdom ?k .
+}
+GROUP BY ?k`,
+  },
+  {
+    title: "Largest graphs",
+    description:
+      `This query returns the 10 largest graphs on the SPARQL endpoint.`,
+    query: `SELECT DISTINCT ?g (COUNT(?sub) AS ?size)
+WHERE {
+  GRAPH ?g { ?sub ?pred ?obj . }
+}
+GROUP BY ?g
+ORDER BY DESC(?size)
+LIMIT 10`,
+  },
+  {
+    title: "Single graph",
+    description: `
+    This query returns the triples of a single graph.
+    Note that this works only on the plazi endpoint, as this is the only endpoint where each treatment receives its own graph.`,
+    query: `CONSTRUCT {
+  ?s ?p ?o .
+}
+WHERE {
+  GRAPH <https://treatment.plazi.org/id/8E33E30FFFD9FFCC4AD302B2FFB04209> {
+    ?s ?p ?o .
+  }
+}`,
+  },
+  {
+    title: "Unusual Names",
+    description:
+      `This query returns genus with contain a character from outside the basic latin A-Z.`,
+    query: `SELECT DISTINCT ?graph ?genus WHERE { 
+  GRAPH ?graph {
+    ?sub dwc:genus ?genus .
+    ?sub dwc:species ?species .
+    ?sub a dwcFP:TaxonName .
+    FILTER regex(?genus, "[^a-zA-Z]")
+  }
+}
+ORDER BY UCASE(?genus)
+LIMIT 100`,
+  },
+  {
+    title: "Treatments by genus",
+    description: "", // TODO
+    query: `SELECT DISTINCT *
+WHERE { 
+  ?tc dwc:rank ?rank ;
+      dwc:phylum ?phylum ;
+      dwc:kingdom ?kingdom ;
+      dwc:class ?class ;
+      dwc:family ?family ;
+      dwc:order ?oder ;
+      dwc:genus "Lestes" ;
+      a dwcFP:TaxonConcept .
+  OPTIONAL {
+    ?tc trt:hasTaxonName ?tn .
+  }
+  OPTIONAL {
+    ?augmentingTreatment trt:augmentsTaxonConcept ?tc .
+    ?augmentingTreatment dc:creator ?augmentingTreatmentCreator .
+  }
+  OPTIONAL {
+    ?definingTreatment trt:definesTaxonConcept ?tc .
+    ?definingTreatment dc:creator ?definingTreatmentCreator .
+  }
+}`,
+  },
+  {
+    title: "List material citations",
+    description: "", // TODO
+    query: `SELECT ?s WHERE { ?s a dwc:MaterialCitation . } LIMIT 10`,
+  },
+  {
+    title: "List specific material citations",
+    description: `This query returns all material citations for all synonyms of Tyrannosaurus rex that are in the New Mexico Museum of Natural History & Science (NMMNH).`,
+    query: `SELECT DISTINCT ?syn ?catalogNumber # ?collectionCode
+WHERE {
+  <http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^trt:deprecates/(trt:augmentsTaxonConcept|trt:definesTaxonConcept))|((^trt:augmentsTaxonConcept|^trt:definesTaxonConcept)/trt:deprecates))* ?syn .
+  ?treat (trt:definesTaxonConcept|trt:augmentsTaxonConcept|trt:deprecates) ?syn ;
+         dwc:basisOfRecord ?mc .
+  # This might miss some specimens where the ‘dwc:collectionCode’ was entered in a non-standard way.
+  # Replace ‘"NMMNH"’ with ‘?collectionCode’ to remove this restriction.
+  # You may then add ‘?collectionCode’ to the ‘SELECT’ line to see each specimen’s collection.
+  ?mc dwc:collectionCode "NMMNH" ;
+      dwc:catalogNumber ?catalogNumber .
+}`,
+  },
+];
+
 @customElement("syno-advanced")
 export class SynoAdvanced extends LitElement {
+  static override styles = css`
+  h4 {
+    margin-bottom: 0.2rem;
+  }
+  h4 + p {
+    margin-top: 0;
+  }
+  `;
+
   override render() {
     return html`
+      <link href="index.css" rel="stylesheet">
       <h2>Advanced Mode</h2>
       <p>
-        Here, you can run arbitrary <a href="https://www.w3.org/TR/sparql11-query/">SPARQL</a> queries against our data.
+        Here, you can run arbitrary
+        <a target="_blank" href="https://www.w3.org/TR/sparql11-query/" class="uri">SPARQL<s-icon icon="link"></s-icon></a>
+        queries against our data.
       </p>
       <query-editor persistenceId="editor-1"></query-editor>
       <query-editor persistenceId="editor-2"></query-editor>
+      <hr>
+      <h3>Example Queries</h3>
+      <p><small>(You can reset the following editors by reloading the page)</small></p>
+      ${
+      exampleQueries.map((example) =>
+        html`<section><h4>${example.title}</h4><p>${
+          unsafeHTML(example.description)
+        }</p><query-editor query=${example.query}></query-editor></section>`
+      )
+    }
     `;
   }
-  protected override createRenderRoot() {
-    return this;
-  }
+  // protected override createRenderRoot() {
+  //   return this;
+  // }
 }
