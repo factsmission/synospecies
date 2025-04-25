@@ -35,6 +35,9 @@
         <router-link to="/settings">
           Settings
         </router-link>
+        <a href="/next" style="background: light-dark(#f1ffca, #3c4620); color: light-dark(#222222, #dddddd);">
+          Try SynoSpecies <i>next</i>!
+        </a>
       </div>
     </nav>
 
