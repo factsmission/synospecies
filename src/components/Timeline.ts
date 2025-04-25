@@ -18,7 +18,8 @@ export class TimelineTreatment extends LitElement {
     * { box-sizing: border-box; }
 
     :host > a {
-        background-color: light-dark(rgb(167, 218, 255), rgb(23, 78, 117));
+      background-color: light-dark(rgb(167, 218, 255), rgb(23, 78, 117));
+      box-shadow: 0 0 2px 1px var(--nav-background);
       color: var(--text-color);
       border-radius: 12px;
       display: grid;
@@ -29,7 +30,7 @@ export class TimelineTreatment extends LitElement {
       text-decoration: none;
 
       &:hover {
-      background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
+        background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
       }
     }
 
@@ -38,7 +39,7 @@ export class TimelineTreatment extends LitElement {
     }
 
     :host > a[href] {
-        background-color: light-dark(rgb(250, 214, 143), rgb(121, 91, 35));
+      background-color: light-dark(rgb(250, 214, 143), rgb(121, 91, 35));
 
       &:hover {
         background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
