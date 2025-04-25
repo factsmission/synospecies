@@ -562,7 +562,7 @@ export class Timeline extends LitElement {
   }[] = [];
 
   @state()
-  protected accessor colExpanded: boolean = false;
+  protected accessor colExpanded: boolean = true;
 
   private async toggle_open_name(index: number, n: NameState) {
     const name: NameState = { ...n, open: !n.open };
