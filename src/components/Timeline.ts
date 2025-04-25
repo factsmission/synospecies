@@ -18,7 +18,7 @@ export class TimelineTreatment extends LitElement {
     * { box-sizing: border-box; }
 
     :host > a {
-      background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
+        background-color: light-dark(rgb(167, 218, 255), rgb(23, 78, 117));
       color: var(--text-color);
       border-radius: 12px;
       display: grid;
@@ -29,7 +29,7 @@ export class TimelineTreatment extends LitElement {
       text-decoration: none;
 
       &:hover {
-        background-color: light-dark(rgb(167, 218, 255), rgb(23, 78, 117));
+      background-color: light-dark(rgb(203, 233, 255), rgb(7, 58, 95));
       }
     }
 
@@ -38,10 +38,10 @@ export class TimelineTreatment extends LitElement {
     }
 
     :host > a[href] {
-      background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
+        background-color: light-dark(rgb(250, 214, 143), rgb(121, 91, 35));
 
       &:hover {
-        background-color: light-dark(rgb(250, 214, 143), rgb(121, 91, 35));
+        background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
       }
     }
 
@@ -211,7 +211,7 @@ export class TimelineYear extends LitElement {
   accessor names: NameState[] = [];
 
   @property()
-  accessor open = false;
+  accessor open = true;
 
   /** one entry per treatment, then one entry per name */
   @state()
@@ -362,6 +362,11 @@ export class Timeline extends LitElement {
 
     :host {
       background: var(--nav-background);
+      background-image: linear-gradient(270deg,var(--nav-background) 50%,hsla(0, 0%, 100%, 0)),linear-gradient(270deg,hsla(0,0%,39%,.2),hsla(0,0%,100%,0)),linear-gradient(0deg,var(--nav-background) 50%,hsla(0, 0%, 100%, 0)),linear-gradient(0deg,hsla(0,0%,39%,.2),hsla(0,0%,100%,0));
+      background-repeat: no-repeat;
+      background-size: 1rem 100%, .5rem 100%, 100% 1rem, 100% .5rem;
+      background-position: right center, right center, center bottom, center bottom;
+      background-attachment: local, scroll, local, scroll;
       border-radius: 1rem;
       display: grid;
       grid-template-columns: max-content 1fr;
@@ -385,8 +390,6 @@ export class Timeline extends LitElement {
     }
 
     .header {
-      background: var(--nav-background);
-      background-opacity: 50%;
       display: grid;
       position: sticky;
       top: 0;
@@ -400,11 +403,23 @@ export class Timeline extends LitElement {
         font-size: 1rem;
         line-height: 1.5rem;
       }
+
+      button {
+        margin-left: 0;
+        margin-right: -3.191665px; /* optical adjustment for icon */
+        z-index: 10;
+      }
+    }
+
+    .years .header {
+      background: var(--nav-background);
+      background: rgb(from var(--nav-background) r g b / 90%);
+      border-bottom: 1px solid var(--text-color-muted);
     }
 
     .names {
       background: var(--nav-background);
-      background-opacity: 50%;
+      background: rgb(from var(--nav-background) r g b / 90%);
       border-right: 1px solid var(--text-color-muted);
       position: sticky;
       left: 0;
@@ -417,6 +432,7 @@ export class Timeline extends LitElement {
 
       .header {
         z-index: 15;
+        margin-bottom: 1px;
       }
 
       * {
@@ -519,6 +535,7 @@ export class Timeline extends LitElement {
       gap: .25rem;
       grid-auto-flow: column;
       grid-auto-columns: min-content;
+      padding: 0 0.25rem;
     }
 
     .grid {

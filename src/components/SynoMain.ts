@@ -178,7 +178,7 @@ export class SynoMain extends LitElement {
             );
           }
         } else {
-          this.years.push({ year, open: false, treatments: [treatment] });
+          this.years.push({ year, open: true, treatments: [treatment] });
           this.years = this.years.toSorted((a, b) =>
             a.year.localeCompare(b.year)
           );
