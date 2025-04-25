@@ -245,7 +245,7 @@ LIMIT 100`,
       `Find all kingdoms and one sample taxon-name from within each.`,
     query: `SELECT DISTINCT ?k (SAMPLE(?s1) as ?s)
 WHERE {
-  ?s a dwcFP:TaxonName ;
+  ?s1 a dwcFP:TaxonName ;
      dwc:kingdom ?k .
 }
 GROUP BY ?k`,
@@ -267,9 +267,7 @@ LIMIT 10`,
     description: `
     This query returns the triples of a single graph.
     Note that this works only on the plazi endpoint, as this is the only endpoint where each treatment receives its own graph.`,
-    query: `CONSTRUCT {
-  ?s ?p ?o .
-}
+    query: `CONSTRUCT { ?s ?p ?o . }
 WHERE {
   GRAPH <https://treatment.plazi.org/id/8E33E30FFFD9FFCC4AD302B2FFB04209> {
     ?s ?p ?o .
@@ -280,7 +278,8 @@ WHERE {
     title: "Unusual Names",
     description:
       `This query returns genus with contain a character from outside the basic latin A-Z.`,
-    query: `SELECT DISTINCT ?graph ?genus WHERE { 
+    query: `SELECT DISTINCT ?graph ?genus
+WHERE { 
   GRAPH ?graph {
     ?sub dwc:genus ?genus .
     ?sub dwc:species ?species .
