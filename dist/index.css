@@ -13,7 +13,7 @@
   --accent-mild: light-dark(#9bc134, #476100);
   --accent: light-dark(#476100, #9bc134);
   --text-color: light-dark(#222222, #dddddd);
-  --text-color-muted: light-dark(#666666, #808080);
+  --text-color-muted: light-dark(#666666, #8d8d8d);
   --button-hover: rgb(from var(--text-color) r g b / 50%);
 }
 

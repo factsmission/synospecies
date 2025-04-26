@@ -39,10 +39,10 @@ export class TimelineTreatment extends LitElement {
     }
 
     :host > a[href] {
-      background-color: light-dark(rgb(250, 214, 143), rgb(121, 91, 35));
+      background-color: light-dark(rgb(250, 214, 143), rgb(82, 57, 9));
 
       &:hover {
-        background-color: light-dark(rgb(250, 227, 182), rgb(82, 57, 9));
+        background-color: light-dark(rgb(250, 227, 182), rgb(121, 91, 35));
       }
     }
 

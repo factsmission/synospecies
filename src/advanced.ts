@@ -62,6 +62,7 @@ LIMIT 10`,
   // render all lines
   editorHeight: "auto",
   viewportMargin: Infinity,
+  inputStyle: "textarea",
   theme: "plazi",
 };
 
