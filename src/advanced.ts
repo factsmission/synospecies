@@ -26,7 +26,7 @@ const queryPrefixes = {
 
 const resultsPrefixes = {
   bibo: "http://purl.org/ontology/bibo/",
-  doi: "http://dx.doi.org/",
+  doi: "http://doi.org/",
   fabio: "http://purl.org/spar/fabio/",
 };
 
