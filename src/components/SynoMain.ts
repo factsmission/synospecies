@@ -1,7 +1,7 @@
 import { html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
-import { type NameState } from "../types.ts";
+import { type NameState, type NonexistentTreatment } from "../types.ts";
 import type { SynonymGroup, Treatment } from "@plazi/synolib";
 import "./Timeline.ts";
 import "./SynoName.ts";
@@ -48,6 +48,10 @@ export class SynoMain extends LitElement {
   accessor sortOrder = sortOrder.Newest;
   @state()
   protected accessor names: NameState[] = [];
+  // maps authority → NonexistentTreatment
+  @state()
+  protected accessor missingTreatments: Map<string, NonexistentTreatment> =
+    new Map();
   @state()
   protected accessor hasMultipleKingdoms = false;
   @state()
@@ -57,7 +61,7 @@ export class SynoMain extends LitElement {
   @state()
   protected accessor years: {
     year: string;
-    treatments: Treatment[];
+    treatments: (Treatment | NonexistentTreatment)[];
     open: boolean;
   }[] = [];
 
@@ -96,6 +100,7 @@ export class SynoMain extends LitElement {
 
       let dateOld = Infinity;
       let dateNew = -Infinity;
+      let missingDefines: Set<NonexistentTreatment> = new Set();
       name.treatments.treats.forEach((t) => {
         if (t.date) {
           const date = t.date + 0.2;
@@ -142,18 +147,34 @@ export class SynoMain extends LitElement {
           if (date && !isNaN(date)) {
             if (date < dateOld) dateOld = date;
             if (date > dateNew) dateNew = date;
+            if (a.treatments.def.size == 0) {
+              const existing = this.missingTreatments.get(a.authority);
+              if (existing !== undefined){
+                existing.missingDefines.add(a);
+                missingDefines.add(existing);
+             } else {
+                const missingTreatment: NonexistentTreatment = {
+                  date: date,
+                  creators: a.authority,
+                  missingDefines: new Set([a]),
+                };
+                this.missingTreatments.set(a.authority, missingTreatment);
+                missingDefines.add(missingTreatment);
+              }
+            }
           }
         }
       });
 
       this.names = [...this.names, {
         name,
-        open: openable && name.authorizedNames.length <= 2,
+        open: openable && name.authorizedNames.length <= 3,
         openable,
         homonym: !!sameName,
         orderFound: this.names.length,
         dateNew,
         dateOld,
+        missingDefines,
       }].toSorted(sortName(this.sortOrder));
 
       if (name.col && !this.cols.includes(name.col.acceptedURI)) {
@@ -165,6 +186,23 @@ export class SynoMain extends LitElement {
           !this.cols.includes(authName.col.acceptedURI)
         ) {
           this.cols = [...this.cols, authName.col.acceptedURI].toSorted();
+        }
+      }
+      for (const treatment of this.missingTreatments.values()) {
+        const year = treatment.date ? treatment.date + "" : "N/A";
+        const entry = this.years.find((y) => y.year === year);
+        if (entry) {
+          if (!entry.treatments.includes(treatment)) {
+            entry.treatments.push(treatment);
+            this.years = this.years.toSorted((a, b) =>
+              a.year.localeCompare(b.year)
+            );
+          }
+        } else {
+          this.years.push({ year, open: true, treatments: [treatment] });
+          this.years = this.years.toSorted((a, b) =>
+            a.year.localeCompare(b.year)
+          );
         }
       }
       for (const treatment of this.synoGroup.treatments.values()) {

@@ -12,7 +12,7 @@ import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import { authNameToID, nameToID } from "./utils.ts";
-import { type NameState } from "../types.ts";
+import { type NameState, type NonexistentTreatment } from "../types.ts";
 
 @customElement("syno-authname")
 export class SynoAuthName extends LitElement {
@@ -20,6 +20,8 @@ export class SynoAuthName extends LitElement {
   accessor synoGroup: SynonymGroup | null = null;
   @property({ attribute: false })
   accessor authorizedName: AuthorizedName | null = null;
+  @property({ attribute: false })
+  accessor missingDefines: Set<NonexistentTreatment> | null = null;
 
   @state()
   accessor open = false;
@@ -51,6 +53,10 @@ export class SynoAuthName extends LitElement {
 
     const authorities = new Set(this.authorizedName.authorities);
     authorities.delete(this.authorizedName.authority);
+
+    const missingTreatment = this.missingDefines?.values().find((t) =>
+      t.missingDefines.has(this.authorizedName!)
+    );
 
     return html`
       <div class="header" @click=${(e: Event) => {
@@ -122,14 +128,30 @@ export class SynoAuthName extends LitElement {
       </div>`
         : nothing
     }${
-      this.authorizedName.col || treatments_array.length > 0
+      missingTreatment
+        ? html`<div class="row">
+            <s-icon icon="missing_def"></s-icon>
+            <div>
+              <b>Missing defining treatment:</b> ${missingTreatment.creators}
+              <!--<i>(This name was cited with this authority, but there is no matching treatment)</i>-->
+            </div>
+          </div>`
+        /* this.authorizedName.treatments.def.size == 0
+        ? html`<div class="row">
+            <s-icon icon="missing_def"></s-icon>
+            <div>
+              <b>Missing defining treatment:</b> ${this.authorizedName.authority}
+            </div>
+          </div>`
+        : */
+        : this.authorizedName.col || treatments_array.length > 0
         ? nothing
         : html`<div class="row">
             <s-icon icon="unknown"></s-icon>
-            <div><i>
-              No treatments found for this name.
-              It could be that there are treatments for subtaxa, but this could also indicate an error in the dataset.
-            </i></div>
+            <div>
+              <b>No treatments</b> found for this name.
+              <i>It could be that there are treatments for subtaxa, but this could also indicate an error in the dataset.</i>
+            </div>
           </div>`
     }
     </div>
@@ -324,7 +346,9 @@ export class SynoName extends LitElement {
     </ul>
     ${
       this.name.name.authorizedNames.map((authorizedName) =>
-        html`<syno-authname .synoGroup=${this.synoGroup} .authorizedName=${authorizedName}></syno-authname>`
+        html`<syno-authname .synoGroup=${this.synoGroup} .authorizedName=${authorizedName} .missingDefines=${
+          this.name!.missingDefines
+        }></syno-authname>`
       )
     }`;
   }

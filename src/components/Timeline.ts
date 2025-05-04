@@ -2,10 +2,16 @@ import type { Treatment } from "@plazi/synolib";
 import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
-import { type NameState } from "../types.ts";
+import { type NameState, type NonexistentTreatment } from "../types.ts";
 import { authNameToID, nameToID } from "./utils.ts";
 
-type Cell = { def: number; aug: number; dpr: number; cite: number };
+type Cell = {
+  missing_def: number;
+  def: number;
+  aug: number;
+  dpr: number;
+  cite: number;
+};
 
 type NameIcons = {
   collapsed: Cell;
@@ -44,6 +50,12 @@ export class TimelineTreatment extends LitElement {
       &:hover {
         background-color: light-dark(rgb(250, 227, 182), rgb(121, 91, 35));
       }
+    }
+    
+    :host > a.missing {
+      outline: 2px dotted var(--text-color-muted);
+      outline-offset: -2px;
+      background-color: var(--nav-background);
     }
 
     .row {
@@ -85,7 +97,7 @@ export class TimelineTreatment extends LitElement {
   accessor icons:
     | ({
       icons: NameIcons[];
-      treatment?: Treatment;
+      treatment?: Treatment | NonexistentTreatment;
       acceptedCoL?: string;
     })
     | null = null;
@@ -93,11 +105,11 @@ export class TimelineTreatment extends LitElement {
   override render() {
     if (!this.icons) return nothing;
     const firstName = this.icons.icons.findIndex((i) =>
-      i.collapsed.aug + i.collapsed.def + i.collapsed.dpr +
+      i.collapsed.aug + i.collapsed.missing_def + i.collapsed.def + i.collapsed.dpr +
           i.collapsed.cite > 0
     );
     const lastName = this.icons.icons.findLastIndex((i) =>
-      i.collapsed.aug + i.collapsed.def + i.collapsed.dpr +
+      i.collapsed.aug + i.collapsed.missing_def + i.collapsed.def + i.collapsed.dpr +
           i.collapsed.cite > 0
     );
     const style = html`<style>:host {
@@ -109,28 +121,43 @@ export class TimelineTreatment extends LitElement {
     const dpr_icon = this.icons.acceptedCoL || this.isCoL ? "col_dpr" : "dpr";
 
     return html`${style}<a
-      href=${this.icons.acceptedCoL || this.icons.treatment?.url || nothing}
+      href=${
+      this.icons.acceptedCoL ||
+      (this.icons.treatment as Treatment | undefined)?.url || nothing
+    }
       target="_blank" class=${
-      this.icons.acceptedCoL || this.isCoL ? "col" : nothing
+      this.icons.acceptedCoL || this.isCoL
+        ? "col"
+        : this.icons.treatment && "missingDefines" in this.icons.treatment
+        ? "missing"
+        : nothing
     }
       title=${
       this.icons.acceptedCoL?.replace(
         "https://www.catalogueoflife.org/data/taxon/",
         "",
       ) || (this.icons.treatment
-        ? until(
-          this.icons.treatment?.details.then((d) =>
-            `${d.creators} ${this.icons!.treatment!.date} “${d.title}”`
-          ),
-          this.icons.treatment!.url,
-        )
+        ? "missingDefines" in this.icons.treatment
+          ? `Missing defining treatment(s) “${this.icons.treatment.creators}”`
+          : until(
+            this.icons.treatment?.details.then((d) =>
+              `${d.creators} ${this.icons!.treatment!.date} “${d.title}”`
+            ),
+            this.icons.treatment!.url,
+          )
         : nothing)
     }>${
       this.icons.icons.slice(firstName, lastName + 1).map((icon, index) => {
         if (this.names[index + firstName].open) {
           return html`<div class="name">${
-            icon.expanded.map(({ def, aug, dpr, cite }) =>
+            icon.expanded.map(({ missing_def, def, aug, dpr, cite }) =>
               html`<div class="row">${
+                missing_def > 1
+                  ? html`${missing_def}<s-icon icon="missing_def"></s-icon>`
+                  : missing_def === 1
+                  ? html`<s-icon icon="missing_def"></s-icon>`
+                  : nothing
+              }${
                 def > 1
                   ? html`${def}<s-icon icon="def"></s-icon>`
                   : def === 1
@@ -159,6 +186,12 @@ export class TimelineTreatment extends LitElement {
           }</div>`;
         }
         return html`<div class="name"><div class="row">${
+          icon.collapsed.missing_def > 1
+            ? html`${icon.collapsed.missing_def}<s-icon icon="missing_def"></s-icon>`
+            : icon.collapsed.missing_def === 1
+            ? html`<s-icon icon="missing_def"></s-icon>`
+            : nothing
+        }${
           icon.collapsed.def > 1
             ? html`${icon.collapsed.def}<s-icon icon="def"></s-icon>`
             : icon.collapsed.def === 1
@@ -205,7 +238,7 @@ export class TimelineYear extends LitElement {
   `;
 
   @property({ attribute: false })
-  accessor treatments: Treatment[] = [];
+  accessor treatments: (Treatment | NonexistentTreatment)[] = [];
   @property({ attribute: false })
   accessor acceptedCoL: string[] = [];
   @property({ attribute: false })
@@ -218,7 +251,7 @@ export class TimelineYear extends LitElement {
   @state()
   accessor icons: ({
     icons: NameIcons[];
-    treatment?: Treatment;
+    treatment?: Treatment | NonexistentTreatment;
     acceptedCoL?: string;
   })[] = [];
   @state()
@@ -230,24 +263,44 @@ export class TimelineYear extends LitElement {
     if (this.treatments.length) {
       this.icons = this.treatments.map((treatment) => {
         const icons = this.names.map((ns) => {
-          const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
-          if (ns.name.treatments.treats.has(treatment)) {
-            expanded[0].aug = 1;
-          } else if (ns.name.treatments.cite.has(treatment)) {
-            expanded[0].cite = 1;
+          const expanded = [{
+            missing_def: 0,
+            def: 0,
+            aug: 0,
+            dpr: 0,
+            cite: 0,
+          }];
+          if ("missingDefines" in treatment) {
+            for (const authName of ns.name.authorizedNames) {
+              expanded.push({
+                missing_def: treatment.missingDefines.has(authName) ? 1 : 0,
+                def: 0,
+                aug: 0,
+                dpr: 0,
+                cite: 0,
+              });
+            }
+          } else {
+            if (ns.name.treatments.treats.has(treatment)) {
+              expanded[0].aug = 1;
+            } else if (ns.name.treatments.cite.has(treatment)) {
+              expanded[0].cite = 1;
+            }
+            for (const authName of ns.name.authorizedNames) {
+              expanded.push({
+                missing_def: 0,
+                def: authName.treatments.def.has(treatment) ? 1 : 0,
+                aug: authName.treatments.aug.has(treatment) ? 1 : 0,
+                dpr: authName.treatments.dpr.has(treatment) ? 1 : 0,
+                cite: authName.treatments.cite.has(treatment) ? 1 : 0,
+              });
+            }
           }
-          for (const authName of ns.name.authorizedNames) {
-            expanded.push({
-              def: authName.treatments.def.has(treatment) ? 1 : 0,
-              aug: authName.treatments.aug.has(treatment) ? 1 : 0,
-              dpr: authName.treatments.dpr.has(treatment) ? 1 : 0,
-              cite: authName.treatments.cite.has(treatment) ? 1 : 0,
-            });
-          }
-          const collapsed = { def: 0, aug: 0, dpr: 0, cite: 0 };
+          const collapsed = {  missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 };
           expanded.forEach(
-            ({ def, aug, dpr, cite }) => {
+            ({ missing_def, def, aug, dpr, cite }) => {
               // using bitwise or to limit count to be in [0,1]
+              collapsed.missing_def |= missing_def;
               collapsed.def |= def;
               collapsed.aug |= aug;
               collapsed.dpr |= dpr;
@@ -266,7 +319,7 @@ export class TimelineYear extends LitElement {
     } else if (this.acceptedCoL.length) {
       this.icons = this.acceptedCoL.map((col) => {
         const icons = this.names.map((ns) => {
-          const expanded = [{ def: 0, aug: 0, dpr: 0, cite: 0 }];
+          const expanded = [{ missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 }];
           if (ns.name.col && ns.name.col.acceptedURI === col) {
             if (ns.name.col.colURI === col) {
               expanded[0].aug = 1;
@@ -277,16 +330,16 @@ export class TimelineYear extends LitElement {
             for (const authName of ns.name.authorizedNames) {
               if (authName.col && authName.col.acceptedURI === col) {
                 if (authName.col.colURI === col) {
-                  expanded.push({ def: 0, aug: 1, dpr: 0, cite: 0 });
+                  expanded.push({ missing_def: 0, def: 0, aug: 1, dpr: 0, cite: 0 });
                 } else {
-                  expanded.push({ def: 0, aug: 0, dpr: 1, cite: 0 });
+                  expanded.push({ missing_def: 0, def: 0, aug: 0, dpr: 1, cite: 0 });
                 }
               } else {
-                expanded.push({ def: 0, aug: 0, dpr: 0, cite: 0 });
+                expanded.push({ missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 });
               }
             }
           }
-          const collapsed = { def: 0, aug: 0, dpr: 0, cite: 0 };
+          const collapsed = { missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 };
           expanded.forEach(
             ({ aug, dpr }) => {
               // using bitwise or to limit count to be in [0,1]
@@ -305,20 +358,22 @@ export class TimelineYear extends LitElement {
 
     const groupIcons: NameIcons[] = [];
     for (let index = 0; index < this.names.length; index++) {
-      const collapsed = { def: 0, aug: 0, dpr: 0, cite: 0 };
+      const collapsed = { missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 };
       const expanded: Cell[] = [];
 
       this.icons.forEach(({ icons }) => {
+        collapsed.missing_def += icons[index].collapsed.missing_def;
         collapsed.def += icons[index].collapsed.def;
         collapsed.aug += icons[index].collapsed.aug;
         collapsed.dpr += icons[index].collapsed.dpr;
         collapsed.cite += icons[index].collapsed.cite;
 
         icons[index].expanded.forEach(
-          ({ def, aug, dpr, cite }, ei) => {
+          ({ missing_def, def, aug, dpr, cite }, ei) => {
             if (!expanded[ei]) {
-              expanded[ei] = { def: 0, aug: 0, dpr: 0, cite: 0 };
+              expanded[ei] = { missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 };
             }
+            expanded[ei].missing_def += missing_def;
             expanded[ei].def += def;
             expanded[ei].aug += aug;
             expanded[ei].dpr += dpr;
@@ -558,7 +613,7 @@ export class Timeline extends LitElement {
   @property({ attribute: false })
   accessor years: {
     year: string;
-    treatments: Treatment[];
+    treatments: (Treatment | NonexistentTreatment)[];
     open: boolean;
   }[] = [];
 
