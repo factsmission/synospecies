@@ -449,7 +449,7 @@ export class Timeline extends LitElement {
       display: grid;
       position: sticky;
       top: 0;
-      padding: .25rem;
+      padding: .25rem 0;
       text-align: right;
       grid-template-columns: auto auto;
       justify-content: safe center;
