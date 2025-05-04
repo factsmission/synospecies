@@ -602,6 +602,13 @@ export class Timeline extends LitElement {
       padding: .25rem;
       justify-content: safe center
     }
+
+    .gap {
+      padding-left: 0.25rem;
+    }
+    .gap-after {
+      padding-right: 0.25rem;
+    }
   `;
 
   @property({ attribute: false })
@@ -719,7 +726,7 @@ export class Timeline extends LitElement {
         <div class="years">${
       this.cols.length > 0
         ? html`
-          <div>
+          <div class="gap-after">
             <div class="header"><h2>CoL</h2>${
           this.cols.length > 1
             ? html`<button title="Click to expand ${this.cols.length} CoL-taxa." @click=${() =>
@@ -742,7 +749,7 @@ export class Timeline extends LitElement {
         : nothing
     }${
       this.years.map((t, index) =>
-        html`<div>
+        html`<div class=${index > 0 && t.year[1] != this.years[index - 1].year[1] ? "gap" : nothing }>
           <div class="header"><h2>${t.year}</h2>${
           t.treatments.length > 1
             ? html`<button title="Click to expand ${t.treatments.length} treatments." @click=${() =>
