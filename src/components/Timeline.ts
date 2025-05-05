@@ -105,11 +105,13 @@ export class TimelineTreatment extends LitElement {
   override render() {
     if (!this.icons) return nothing;
     const firstName = this.icons.icons.findIndex((i) =>
-      i.collapsed.aug + i.collapsed.missing_def + i.collapsed.def + i.collapsed.dpr +
+      i.collapsed.aug + i.collapsed.missing_def + i.collapsed.def +
+          i.collapsed.dpr +
           i.collapsed.cite > 0
     );
     const lastName = this.icons.icons.findLastIndex((i) =>
-      i.collapsed.aug + i.collapsed.missing_def + i.collapsed.def + i.collapsed.dpr +
+      i.collapsed.aug + i.collapsed.missing_def + i.collapsed.def +
+          i.collapsed.dpr +
           i.collapsed.cite > 0
     );
     const style = html`<style>:host {
@@ -296,7 +298,7 @@ export class TimelineYear extends LitElement {
               });
             }
           }
-          const collapsed = {  missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 };
+          const collapsed = { missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 };
           expanded.forEach(
             ({ missing_def, def, aug, dpr, cite }) => {
               // using bitwise or to limit count to be in [0,1]
@@ -319,7 +321,13 @@ export class TimelineYear extends LitElement {
     } else if (this.acceptedCoL.length) {
       this.icons = this.acceptedCoL.map((col) => {
         const icons = this.names.map((ns) => {
-          const expanded = [{ missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 }];
+          const expanded = [{
+            missing_def: 0,
+            def: 0,
+            aug: 0,
+            dpr: 0,
+            cite: 0,
+          }];
           if (ns.name.col && ns.name.col.acceptedURI === col) {
             if (ns.name.col.colURI === col) {
               expanded[0].aug = 1;
@@ -330,12 +338,30 @@ export class TimelineYear extends LitElement {
             for (const authName of ns.name.authorizedNames) {
               if (authName.col && authName.col.acceptedURI === col) {
                 if (authName.col.colURI === col) {
-                  expanded.push({ missing_def: 0, def: 0, aug: 1, dpr: 0, cite: 0 });
+                  expanded.push({
+                    missing_def: 0,
+                    def: 0,
+                    aug: 1,
+                    dpr: 0,
+                    cite: 0,
+                  });
                 } else {
-                  expanded.push({ missing_def: 0, def: 0, aug: 0, dpr: 1, cite: 0 });
+                  expanded.push({
+                    missing_def: 0,
+                    def: 0,
+                    aug: 0,
+                    dpr: 1,
+                    cite: 0,
+                  });
                 }
               } else {
-                expanded.push({ missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 });
+                expanded.push({
+                  missing_def: 0,
+                  def: 0,
+                  aug: 0,
+                  dpr: 0,
+                  cite: 0,
+                });
               }
             }
           }
@@ -371,7 +397,13 @@ export class TimelineYear extends LitElement {
         icons[index].expanded.forEach(
           ({ missing_def, def, aug, dpr, cite }, ei) => {
             if (!expanded[ei]) {
-              expanded[ei] = { missing_def: 0, def: 0, aug: 0, dpr: 0, cite: 0 };
+              expanded[ei] = {
+                missing_def: 0,
+                def: 0,
+                aug: 0,
+                dpr: 0,
+                cite: 0,
+              };
             }
             expanded[ei].missing_def += missing_def;
             expanded[ei].def += def;
@@ -547,6 +579,12 @@ export class Timeline extends LitElement {
       }
     }
 
+    small {
+      line-height: 16px;
+      font-size: 0.75em;
+      color: var(--text-color-muted);
+    }
+
     button {
       border-radius: 1rem;
       border: none;
@@ -702,9 +740,13 @@ export class Timeline extends LitElement {
             )
             : nothing
         }<i>${n.name.displayName}</i>${
-          n.name.authorizedNames.length === 1 && (!n.openable || !n.open)
-            ? " " + n.name.authorizedNames[0].authority
-            : ""
+          (!n.openable || !n.open)
+            ? (n.name.authorizedNames.length === 1
+              ? " " + n.name.authorizedNames[0].authority
+              : n.name.authorizedNames.length > 1
+              ? html`<small>(multiple authorities)</small>`
+              : nothing)
+            : nothing
         }</a> ${
           n.openable
             ? html`<button @click=${() =>
@@ -749,7 +791,11 @@ export class Timeline extends LitElement {
         : nothing
     }${
       this.years.map((t, index) =>
-        html`<div class=${index > 0 && t.year[1] != this.years[index - 1].year[1] ? "gap" : nothing }>
+        html`<div class=${
+          index > 0 && t.year[1] != this.years[index - 1].year[1]
+            ? "gap"
+            : nothing
+        }>
           <div class="header"><h2>${t.year}</h2>${
           t.treatments.length > 1
             ? html`<button title="Click to expand ${t.treatments.length} treatments." @click=${() =>
