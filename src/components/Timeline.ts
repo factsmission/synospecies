@@ -702,7 +702,7 @@ export class Timeline extends LitElement {
             )
             : nothing
         }<i>${n.name.displayName}</i>${
-          !n.openable && n.name.authorizedNames.length === 1
+          n.name.authorizedNames.length === 1 && (!n.openable || !n.open)
             ? " " + n.name.authorizedNames[0].authority
             : ""
         }</a> ${

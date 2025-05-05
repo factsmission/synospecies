@@ -168,7 +168,7 @@ export class SynoMain extends LitElement {
 
       this.names = [...this.names, {
         name,
-        open: openable && name.authorizedNames.length <= 3,
+        open: openable && name.authorizedNames.length !== 1 && name.authorizedNames.length <= 4,
         openable,
         homonym: !!sameName,
         orderFound: this.names.length,
