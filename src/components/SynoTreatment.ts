@@ -1,5 +1,6 @@
 import type {
   AuthorizedName,
+  ColEntry,
   MaterialCitation,
   Name,
   SynonymGroup,
@@ -357,7 +358,8 @@ export class SynoTreatment extends LitElement {
                     "",
                   );
                   return until(
-                    this.synoGroup?.findName(n).then(nameLink),
+                    this.synoGroup?.findName(n).then(nameLink, () =>
+                      html` <a class="taxon uri">${short}</a>`),
                     html` <a class="taxon uri">${short}</a>`,
                   );
                 })
@@ -379,7 +381,7 @@ export class SynoTreatment extends LitElement {
                     );
 
                     return until(
-                      this.synoGroup?.findName(n).then(nameLink),
+                      this.synoGroup?.findName(n).then(nameLink, () => html` <a class="taxon uri">${short}</a>`),
                       html` <a class="taxon uri">${short}</a>`,
                     );
                   },
@@ -398,7 +400,7 @@ export class SynoTreatment extends LitElement {
                   );
 
                   return until(
-                    this.synoGroup?.findName(n).then(nameLink),
+                    this.synoGroup?.findName(n).then(nameLink, () => html` <a class="taxon uri">${short}</a>`),
                     html` <a class="taxon uri">${short}</a>`,
                   );
                 })
@@ -418,7 +420,7 @@ export class SynoTreatment extends LitElement {
                     );
 
                     return until(
-                      this.synoGroup?.findName(n).then(nameLink),
+                      this.synoGroup?.findName(n).then(nameLink, () => html` <a class="taxon uri">${short}</a>`),
                       html` <a class="taxon uri">${short}</a>`,
                     );
                   },
@@ -531,7 +533,7 @@ export class SynoColTreatment extends LitElement {
   accessor synoGroup: SynonymGroup | null = null;
 
   @property({ attribute: false })
-  accessor col: { colURI: string; acceptedURI: string; }| null = null;
+  accessor col: ColEntry | null = null;
 
   @state()
   accessor open = false;
@@ -560,20 +562,38 @@ export class SynoColTreatment extends LitElement {
           <s-icon icon="empty"></s-icon>
           <div>
             <b>CoL ID:</b>
-            <a target="_blank" href=${this.col?.colURI || nothing} class="col uri">${
-      this.col?.colURI?.replace("https://www.catalogueoflife.org/data/taxon/", "")
+            <a target="_blank" href=${
+      this.col?.colURI || nothing
+    } class="col uri">${
+      this.col?.colURI?.replace(
+        "https://www.catalogueoflife.org/data/taxon/",
+        "",
+      )
     }<s-icon icon="link"></s-icon></a>
           </div>
         </div>
-        <div class="row ${this.col?.acceptedURI !== this.col?.colURI ? "" : "hidden"}">
+        <div class="row ${this.col?.status !== "accepted" ? "" : "hidden"}"">
+          <s-icon icon="empty"></s-icon>
+          <div>
+            <b>Status:</b>
+            ${this.col?.status}
+          </div>
+        </div>
+        <div class="row ${
+      this.col?.acceptedURI !== this.col?.colURI ? "" : "hidden"
+    }">
           <s-icon icon="col_aug"></s-icon>
           <div>
             <b class="blue">Accepted Name:</b>
             ${
       until(
-        this.synoGroup?.findName(this.col?.acceptedURI!).then(nameLink),
-        html`<a target="_blank" href=${this
-          .col?.acceptedURI} class="col uri">${
+        this.synoGroup?.findName(this.col?.acceptedURI!).then(nameLink, () => html`<a target="_blank" href=${this.col?.acceptedURI} class="col uri">${
+          this.col?.acceptedURI?.replace(
+            "https://www.catalogueoflife.org/data/taxon/",
+            "",
+          )
+        }<s-icon icon="link"></s-icon></a>`),
+        html`<a target="_blank" href=${this.col?.acceptedURI} class="col uri">${
           this.col?.acceptedURI?.replace(
             "https://www.catalogueoflife.org/data/taxon/",
             "",
