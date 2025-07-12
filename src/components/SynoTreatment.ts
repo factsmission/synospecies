@@ -492,12 +492,12 @@ export class SynoTreatment extends LitElement {
                       (!material.gbifOccurrenceId ||
                         !uri.endsWith(material.gbifOccurrenceId))
                     ).map((uri) =>
-                      html` <a class="uri" href=${uri}>Link<s-icon icon="link"></s-icon></a>`
+                      html` <a class="uri" target="_blank" href=${uri}>View in Treatment<s-icon icon="link"></s-icon></a>`
                     )
                   }
                   ${
                     material.gbifSpecimenId
-                      ? html`<a class="uri" href=${
+                      ? html`<a class="uri" target="_blank" href=${
                         "https://www.gbif.org/specimen/" +
                         material.gbifSpecimenId
                       }>GBIF&nbsp;Specimen&nbsp;${material.gbifSpecimenId}<s-icon icon="link"></s-icon></a>`
@@ -505,7 +505,7 @@ export class SynoTreatment extends LitElement {
                   }
                   ${
                     material.gbifOccurrenceId
-                      ? html`<a class="uri" href=${
+                      ? html`<a class="uri" target="_blank" href=${
                         "https://www.gbif.org/occurrence/" +
                         material.gbifOccurrenceId
                       }>GBIF&nbsp;Occurrence&nbsp;${material.gbifOccurrenceId}<s-icon icon="link"></s-icon></a>`
