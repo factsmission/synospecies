@@ -54,13 +54,6 @@ export class SynoForm extends HTMLElement {
       () => colCheck.disabled = nosynonymsCheck.checked,
     );
 
-    // const sorttreatmentsCheckLabel = document.createElement("label");
-    // sorttreatmentsCheckLabel.innerText = "Sort treatments by type.";
-    // const sorttreatmentsCheck = document.createElement("input");
-    // sorttreatmentsCheck.type = "checkbox";
-    // sorttreatmentsCheck.checked = NAME ? SORT_TREATMENTS_BY_TYPE : false;
-    // sorttreatmentsCheckLabel.prepend(sorttreatmentsCheck);
-
     const endpointPlaziLabel = document.createElement("label");
     const endpointPlaziLabelUrl = document.createElement("code");
     endpointPlaziLabelUrl.className = "uri";
