@@ -4,7 +4,7 @@ import Taxomplete from "taxomplete";
 const endpoints = {
   plazi: "https://treatment.ld.plazi.org/sparql",
   lindas: "https://lindas.admin.ch/query",
-  cached: "https://lindas-cached.cluster.ldbar.ch/query",
+  cached: "https://cached.lindas.admin.ch/query",
   qlever: "https://qlever.ld.plazi.org/sparql",
 };
 

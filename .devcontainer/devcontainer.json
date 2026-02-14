@@ -1,0 +1,33 @@
+{
+  "name": "Deno Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers-contrib/features/deno:1": {
+      "version": "latest"
+    }
+  },
+
+  "postCreateCommand": "apt-get update && apt-get install -y curl && deno --version && curl --version",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "denoland.vscode-deno"
+      ],
+      "settings": {
+        "deno.enable": true,
+        "deno.lint": true
+      }
+    }
+  },
+
+  "forwardPorts": [8000],
+
+  "remoteUser": "vscode"
+}

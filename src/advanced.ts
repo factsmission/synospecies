@@ -384,9 +384,9 @@ export class SynoAdvanced extends LitElement {
       this.endpoint = "https://qlever.ld.plazi.org/sparql";
     }}>Qlever <code class="uri">qlever.ld.plazi.org/sparql</code> (NEW)</label>
         <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://lindas-cached.cluster.ldbar.ch/query"
+      this.endpoint === "https://cached.lindas.admin.ch/query"
     } @change=${() => {
-      this.endpoint = "https://lindas-cached.cluster.ldbar.ch/query";
+      this.endpoint = "https://cached.lindas.admin.ch/query";
     }}>Lindas <code class="uri">lindas-cached.cluster.ldbar.ch/query</code></label>
         <label><input type="radio" name="endpoint" checked=${
       this.endpoint === "https://lindas.admin.ch/query"
@@ -423,6 +423,6 @@ export class SynoAdvanced extends LitElement {
 const endpoints = {
   plazi: "https://treatment.ld.plazi.org/sparql",
   lindas: "https://lindas.admin.ch/query",
-  cached: "https://lindas-cached.cluster.ldbar.ch/query",
+  cached: "https://cached.lindas.admin.ch/query",
   qlever: "https://qlever.ld.plazi.org/sparql",
 };

@@ -7,7 +7,7 @@ const params = new URLSearchParams(document.location.search);
 const HIDE_COL_ONLY_SYNONYMS = !params.has("show_col");
 const START_WITH_SUBTAXA = params.has("subtaxa");
 const ENDPOINT_URL = params.get("server") ||
-  "https://lindas-cached.cluster.ldbar.ch/query"; // "https://treatment.ld.plazi.org/sparql";
+  "https://cached.lindas.admin.ch/query"; // "https://treatment.ld.plazi.org/sparql";
 const NAME = params.get("q");
 const NOSYNONYMS = params.has("nosynonyms");
 
