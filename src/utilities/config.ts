@@ -1,12 +1,11 @@
 export const allEndpoints = [
-  'https://lindas-cached.cluster.ldbar.ch/query',
-  'https://lindas.admin.ch/query',
+  'https://cached.lindas.admin.ch/query',
+  'https://lindas.cz-aws.net/query',
   'https://treatment.ld.plazi.org/sparql',
-  'https://qlever.ld.plazi.org/sparql',
-  'https://trifid-lindas.test.cluster.ldbar.ch/query'
+  'https://qlever.ld.plazi.org/sparql'
 ]
 
-export const defaultEndpoint = 'https://lindas-cached.cluster.ldbar.ch/query'
+export const defaultEndpoint = 'https://cached.lindas.admin.ch/query'
 
 export function getEndpoint () {
   const localValue = localStorage.getItem('plazi-treatments-endpoint')
