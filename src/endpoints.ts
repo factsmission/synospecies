@@ -75,3 +75,11 @@ export function getEndpoint(): string {
   const param = new URLSearchParams(document.location.search).get("server");
   return param || getStoredEndpoint();
 }
+
+/**
+ * Whether results from this endpoint can be shown without asking: the known
+ * endpoints and the one the user chose on the settings page.
+ */
+export function isTrustedEndpoint(url: string): boolean {
+  return isKnownEndpoint(url) || url === getStoredEndpoint();
+}

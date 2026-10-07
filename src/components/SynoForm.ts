@@ -1,3 +1,4 @@
+import Awesomplete from "awesomplete";
 import Taxomplete from "taxomplete";
 
 import { getEndpoint } from "../endpoints.ts";
@@ -96,7 +97,28 @@ export class SynoForm extends HTMLElement {
 
     // we can only create the Taxomplete when nameInput has a parent
     new Taxomplete(nameInput, ENDPOINT_URL).action = go;
+    // Taxomplete renders the suggestions, which come from the endpoint, as
+    // HTML; render them as text instead.
+    const awesomplete = Awesomplete.all.find((a: { input: HTMLElement }) =>
+      a.input === nameInput
+    );
+    if (awesomplete) awesomplete.item = suggestionItem;
   }
+}
+
+/** Like Taxomplete's suggestion item, but without parsing it as HTML. */
+function suggestionItem(suggestion: string, input: string): HTMLLIElement {
+  const text = String(suggestion);
+  const spacePos = text.slice(0, -1).indexOf(" ");
+  // the input matches either the start or the second word of the suggestion
+  const start = spacePos !== -1 && !input.includes(" ") ? spacePos + 1 : 0;
+  const end = start + input.length;
+  const mark = document.createElement("mark");
+  mark.textContent = text.slice(start, end);
+  const li = document.createElement("li");
+  li.setAttribute("aria-selected", "false");
+  li.append(text.slice(0, start), mark, text.slice(end));
+  return li;
 }
 
 customElements.define("syno-form", SynoForm);

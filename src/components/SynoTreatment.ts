@@ -10,7 +10,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import "./Icons.ts";
-import { authNameToID, nameToID } from "./utils.ts";
+import { authNameToID, nameToID, safeUrl } from "./utils.ts";
 
 export type SynoStatus = "def" | "aug" | "dpr" | "cite";
 
@@ -331,7 +331,7 @@ export class SynoTreatment extends LitElement {
           <div>
             <b>Treatment ID:</b>
             <span class="id">${treatmentID}</span>
-            <a target="_blank" href=${this.trt?.url} class="treatment uri">TreatmentBank<s-icon icon="link"></s-icon></a>
+            <a target="_blank" href=${safeUrl(this.trt?.url) ?? nothing} class="treatment uri">TreatmentBank<s-icon icon="link"></s-icon></a>
             <a target="_blank" href="https://git.ld.plazi.org/plazi/treatments-xml/src/branch/main/data/${
       treatmentID.slice(0, 2)
     }/${treatmentID.slice(2, 4)}/${
@@ -435,7 +435,7 @@ export class SynoTreatment extends LitElement {
                 ).map((figure) =>
                   html`
                   <figure>
-                    <img src=${figure.url} loading="lazy" alt=${figure.url}>
+                    <img src=${safeUrl(figure.url) ?? nothing} loading="lazy" alt=${figure.url}>
                     <figcaption>${figure.description ?? ""}</figcaption>
                   </figure>`
                 )
@@ -492,7 +492,7 @@ export class SynoTreatment extends LitElement {
                       (!material.gbifOccurrenceId ||
                         !uri.endsWith(material.gbifOccurrenceId))
                     ).map((uri) =>
-                      html` <a class="uri" target="_blank" href=${uri}>View in Treatment<s-icon icon="link"></s-icon></a>`
+                      html` <a class="uri" target="_blank" href=${safeUrl(uri) ?? nothing}>View in Treatment<s-icon icon="link"></s-icon></a>`
                     )
                   }
                   ${
@@ -563,7 +563,7 @@ export class SynoColTreatment extends LitElement {
           <div>
             <b>CoL ID:</b>
             <a target="_blank" href=${
-      this.col?.colURI || nothing
+      safeUrl(this.col?.colURI) ?? nothing
     } class="col uri">${
       this.col?.colURI?.replace(
         "https://www.catalogueoflife.org/data/taxon/",
@@ -587,13 +587,13 @@ export class SynoColTreatment extends LitElement {
             <b class="blue">Accepted Name:</b>
             ${
       until(
-        this.synoGroup?.findName(this.col?.acceptedURI!).then(nameLink, () => html`<a target="_blank" href=${this.col?.acceptedURI} class="col uri">${
+        this.synoGroup?.findName(this.col?.acceptedURI!).then(nameLink, () => html`<a target="_blank" href=${safeUrl(this.col?.acceptedURI) ?? nothing} class="col uri">${
           this.col?.acceptedURI?.replace(
             "https://www.catalogueoflife.org/data/taxon/",
             "",
           )
         }<s-icon icon="link"></s-icon></a>`),
-        html`<a target="_blank" href=${this.col?.acceptedURI} class="col uri">${
+        html`<a target="_blank" href=${safeUrl(this.col?.acceptedURI) ?? nothing} class="col uri">${
           this.col?.acceptedURI?.replace(
             "https://www.catalogueoflife.org/data/taxon/",
             "",

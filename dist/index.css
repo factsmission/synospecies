@@ -173,6 +173,32 @@ footer {
   }
 }
 
+.endpoint-notice {
+  background: var(--highlight-background);
+  border: 1px solid var(--accent-mild);
+  border-radius: 0.6rem;
+  margin-block: 1rem;
+  padding: 0 1rem 1rem;
+
+  button {
+    background: var(--accent-mild);
+    border: 1px solid var(--accent-mild);
+    border-radius: 0.6rem;
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 2rem;
+    margin: 0.25rem 0.5rem 0 0;
+    padding: 0 1rem;
+
+    &:hover,
+    &:focus {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--body-background);
+    }
+  }
+}
+
 syno-form {
   display: block;
   margin-block: 1rem;

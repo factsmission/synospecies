@@ -6,13 +6,17 @@ import "yasqe/build/yasqe.min.css";
 import Yasr from "yasr";
 import "yasr/build/yasr.min.css";
 
-import { css, html, LitElement, type PropertyValues } from "lit";
+import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import "./components/EndpointSelect.ts";
 import "./components/Icons.ts";
-import { getEndpoint, isValidEndpoint } from "./endpoints.ts";
+import {
+  getEndpoint,
+  isTrustedEndpoint,
+  isValidEndpoint,
+} from "./endpoints.ts";
 
 const queryPrefixes = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -383,6 +387,10 @@ export class SynoAdvanced extends LitElement {
   @state()
   accessor endpoint: string = getEndpoint();
 
+  /** Whether the endpoint is an unfamiliar one, set by the link. */
+  @state()
+  accessor endpointFromLink: boolean = !isTrustedEndpoint(this.endpoint);
+
   override render() {
     return html`
       <link href="index.css" rel="stylesheet">
@@ -398,8 +406,17 @@ export class SynoAdvanced extends LitElement {
       e: CustomEvent<string>,
     ) => {
       if (isValidEndpoint(e.detail)) this.endpoint = e.detail;
+      this.endpointFromLink = false;
     }}></endpoint-select>
       </div>
+      ${
+      this.endpointFromLink
+        ? html`<p><b>Note:</b> This link set the server to
+        <code class="uri">${this.endpoint}</code>, which is not one of the
+        known endpoints nor the one chosen in the
+        <a href="settings.html">settings</a>. Queries are sent to that server.</p>`
+        : nothing
+    }
       <query-editor persistenceId="editor-1" endpoint=${this.endpoint}></query-editor>
       <query-editor persistenceId="editor-2" endpoint=${this.endpoint}></query-editor>
       <hr>

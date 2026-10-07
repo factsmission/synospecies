@@ -6,6 +6,7 @@ import type { EndpointSelect } from "./components/EndpointSelect.ts";
 import {
   DEFAULT_ENDPOINT,
   getStoredEndpoint,
+  isKnownEndpoint,
   isValidEndpoint,
   setStoredEndpoint,
 } from "./endpoints.ts";
@@ -89,6 +90,8 @@ export class SynoSettings extends LitElement {
     this.endpoint = url;
     setStoredEndpoint(url);
     this.saved = true;
+    // check a custom endpoint right away; a failure only warns
+    if (!isKnownEndpoint(url)) this.runTest();
   }
 
   private reset() {
@@ -182,7 +185,7 @@ export class SynoSettings extends LitElement {
       <div class="actions">
         <button @click=${this.runTest}>Test endpoint</button>
         <button @click=${this.reset}>Reset to default</button>
-        ${this.saved && !this.test ? html`<span>Saved.</span>` : null}
+        ${this.saved ? html`<span>Saved.</span>` : null}
         ${this.renderTest()}
       </div>
     `;
