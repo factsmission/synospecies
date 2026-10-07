@@ -24,6 +24,7 @@
 }
 
 @keyframes high-light {
+
   10%,
   50% {
     background: var(--highlight-background);
@@ -321,16 +322,16 @@ syno-name {
       gap: 0 4px;
       align-items: center;
 
-      & > s-icon {
+      &>s-icon {
         height: 12px;
       }
 
-      & > div {
+      &>div {
         grid-row-end: span 2;
       }
     }
 
-    .row + .row {
+    .row+.row {
       margin-top: 4px;
     }
 
@@ -426,6 +427,7 @@ syno-treatment.open {
 }
 
 #root {
+
   h2,
   h3,
   ul {
@@ -446,7 +448,7 @@ button.icon,
   padding: 0;
   position: relative;
 
-  & > svg {
+  &>svg {
     height: 1rem;
     margin: 0;
   }
