@@ -16,8 +16,8 @@ import {
  * in the layout of the surrounding element.
  *
  * Fires `endpoint-change` (with the URL as `detail`) whenever the selection
- * changes; for the custom URL only once editing is done. `value` is always
- * current.
+ * changes; for the custom URL only once editing is done (focusing the field
+ * merely selects it). `value` is always current.
  */
 @customElement("endpoint-select")
 export class EndpointSelect extends LitElement {
@@ -27,7 +27,7 @@ export class EndpointSelect extends LitElement {
   @state()
   accessor custom: string = "";
 
-  @query("input[type=url]")
+  @query(".custom-endpoint input[type=text]")
   accessor customInput!: HTMLInputElement;
 
   protected override createRenderRoot() {
@@ -45,7 +45,9 @@ export class EndpointSelect extends LitElement {
     if (isKnownEndpoint(this.value)) return true;
     const valid = isValidEndpoint(this.value);
     this.customInput.setCustomValidity(
-      valid ? "" : "Please enter the http(s) URL of a SPARQL endpoint.",
+      valid ? "" : document.location.protocol === "https:"
+        ? "Please enter the https URL of a SPARQL endpoint."
+        : "Please enter the http(s) URL of a SPARQL endpoint.",
     );
     this.customInput.reportValidity();
     return valid;
@@ -73,9 +75,9 @@ export class EndpointSelect extends LitElement {
         type="radio" name="endpoint"
         .checked=${isCustom}
         @change=${() => this.select(this.custom)}>Custom:<input
-        type="url" placeholder="https://example.org/sparql"
+        type="text" inputmode="url" placeholder="https://example.org/sparql"
         .value=${this.custom}
-        @focus=${() => this.select(this.custom)}
+        @focus=${() => this.value = this.custom}
         @input=${this.onCustomInput}
         @change=${() => this.select(this.custom)}></label>`;
   }

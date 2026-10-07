@@ -246,7 +246,7 @@ endpoint-select {
     grid-column: 2 / -1;
   }
 
-  input[type="url"] {
+  .custom-endpoint input[type="text"] {
     background: var(--body-background);
     border: 1px solid var(--accent-mild);
     border-radius: 4px;

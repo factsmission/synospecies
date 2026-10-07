@@ -6,7 +6,7 @@ import "yasqe/build/yasqe.min.css";
 import Yasr from "yasr";
 import "yasr/build/yasr.min.css";
 
-import { css, html, LitElement } from "lit";
+import { css, html, LitElement, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
@@ -157,7 +157,24 @@ export class QueryEditor extends LitElement {
   @property()
   accessor query: string | null = null;
 
+  private yasqe?: Yasqe;
+  private editor?: HTMLDivElement;
+
   override render() {
+    // the editor is created once, so that results and edits survive updates
+    this.editor ??= this.createEditor();
+    return html`<link href="advanced.css" rel="stylesheet">${this.editor}`;
+  }
+
+  protected override updated(changed: PropertyValues<this>) {
+    if (changed.has("endpoint") && this.yasqe) {
+      // used for the next query run
+      (this.yasqe.config.requestConfig as { endpoint: string }).endpoint =
+        this.endpoint;
+    }
+  }
+
+  private createEditor() {
     // deno-lint-ignore no-explicit-any
     const newConfig: Record<string, any> = {
       ...config,
@@ -169,6 +186,7 @@ export class QueryEditor extends LitElement {
     };
     const div = document.createElement("div");
     const yasqe = new Yasqe(div, newConfig);
+    this.yasqe = yasqe;
     yasqe.addPrefixes(queryPrefixes);
     yasqe.collapsePrefixes(true);
     const yasr = new Yasr(div, newConfig);
@@ -192,7 +210,7 @@ export class QueryEditor extends LitElement {
       yasqe.refresh();
     });
 
-    return html`<link href="advanced.css" rel="stylesheet">${div}`;
+    return div;
   }
 }
 

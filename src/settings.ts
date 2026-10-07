@@ -69,8 +69,17 @@ export class SynoSettings extends LitElement {
   @query("endpoint-select")
   accessor select!: EndpointSelect;
 
-  private save(url: string) {
+  /** Aborts the running endpoint test, if any. */
+  private abortTest?: AbortController;
+
+  private clearTest() {
+    this.abortTest?.abort();
+    this.abortTest = undefined;
     this.test = null;
+  }
+
+  private save(url: string) {
+    this.clearTest();
     if (!isValidEndpoint(url)) {
       this.saved = false;
       // don't complain about a custom URL not yet entered
@@ -86,7 +95,7 @@ export class SynoSettings extends LitElement {
     setStoredEndpoint(null);
     this.endpoint = DEFAULT_ENDPOINT;
     this.select.value = DEFAULT_ENDPOINT;
-    this.test = null;
+    this.clearTest();
     this.saved = true;
   }
 
@@ -94,25 +103,32 @@ export class SynoSettings extends LitElement {
   private async runTest() {
     const url = this.select.value;
     if (!this.select.checkValidity()) return;
+    // a result of an earlier test must not overwrite this one
+    this.clearTest();
+    const abort = new AbortController();
+    this.abortTest = abort;
     this.test = { state: "running" };
-    const query =
-      "ASK { ?treatment a <http://plazi.org/vocab/treatment#Treatment> }";
+    const target = new URL(url, document.baseURI);
+    target.searchParams.set(
+      "query",
+      "ASK { ?treatment a <http://plazi.org/vocab/treatment#Treatment> }",
+    );
     try {
-      const response = await fetch(
-        `${url}${url.includes("?") ? "&" : "?"}query=${
-          encodeURIComponent(query)
-        }`,
-        { headers: { accept: "application/sparql-results+json" } },
-      );
+      const response = await fetch(target, {
+        headers: { accept: "application/sparql-results+json" },
+        signal: abort.signal,
+      });
       if (!response.ok) {
         throw new Error(`${response.status} ${response.statusText}`);
       }
       const json = await response.json();
       if (typeof json?.boolean !== "boolean") {
-        throw new Error("The response is not a SPARQL ASK result.");
+        throw new Error("The response is not a SPARQL ASK result");
       }
+      if (abort.signal.aborted) return;
       this.test = { state: "ok", treatments: json.boolean };
     } catch (error) {
+      if (abort.signal.aborted) return;
       this.test = {
         state: "error",
         message: error instanceof Error ? error.message : String(error),
@@ -130,7 +146,7 @@ export class SynoSettings extends LitElement {
           ? html`<span>✓ The endpoint works and contains treatments.</span>`
           : html`<span class="error">The endpoint works, but contains no Plazi treatments.</span>`;
       case "error":
-        return html`<span class="error">Query failed: ${this.test.message}.
+        return html`<span class="error">Query failed: ${this.test.message.replace(/\.$/, "")}.
           The endpoint may be unreachable or may not allow cross-origin (CORS) requests.</span>`;
     }
   }

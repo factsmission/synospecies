@@ -24,11 +24,17 @@ export function isKnownEndpoint(url: string): boolean {
   return ENDPOINTS.some((e) => e.url === url);
 }
 
-/** Only absolute http(s) URLs are accepted as SPARQL endpoints. */
+/**
+ * Accepts http(s) URLs, also relative to this page (e.g. a same-origin proxy).
+ * On a page served over https, http endpoints would be blocked as mixed
+ * content, so only https is accepted there.
+ */
 export function isValidEndpoint(url: string): boolean {
+  if (!url) return false;
   try {
-    const { protocol } = new URL(url);
-    return protocol === "https:" || protocol === "http:";
+    const { protocol } = new URL(url, document.baseURI);
+    if (protocol === "https:") return true;
+    return protocol === "http:" && document.location.protocol !== "https:";
   } catch {
     return false;
   }
@@ -61,9 +67,11 @@ export function setStoredEndpoint(url: string | null) {
 /**
  * The endpoint to use for the current page: the `server` URL parameter takes
  * precedence over the endpoint chosen on the settings page.
+ *
+ * An invalid `server` parameter is returned as is, so that a link fails
+ * visibly instead of silently querying a different server than it names.
  */
 export function getEndpoint(): string {
   const param = new URLSearchParams(document.location.search).get("server");
-  if (param && isValidEndpoint(param)) return param;
-  return getStoredEndpoint();
+  return param || getStoredEndpoint();
 }

@@ -12,6 +12,7 @@ export class SynoForm extends HTMLElement {
     const START_WITH_SUBTAXA = params.has("subtaxa");
     const NOSYNONYMS = params.has("nosynonyms");
     const NAME = params.get("q");
+    const ENDPOINT_URL = getEndpoint();
 
     const nameInput = document.createElement("input");
     nameInput.type = "text";
@@ -45,7 +46,7 @@ export class SynoForm extends HTMLElement {
     );
 
     const endpointSelect = document.createElement("endpoint-select");
-    endpointSelect.value = getEndpoint();
+    endpointSelect.value = ENDPOINT_URL;
 
     const button = document.createElement("button");
     button.innerText = "Go";
@@ -94,7 +95,7 @@ export class SynoForm extends HTMLElement {
     });
 
     // we can only create the Taxomplete when nameInput has a parent
-    new Taxomplete(nameInput, getEndpoint()).action = go;
+    new Taxomplete(nameInput, ENDPOINT_URL).action = go;
   }
 }
 
