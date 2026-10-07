@@ -1,12 +1,8 @@
 import type { SparqlEndpoint } from "@plazi/synolib";
 import Taxomplete from "taxomplete";
 
-const endpoints = {
-  plazi: "https://treatment.ld.plazi.org/sparql",
-  lindas: "https://lindas.admin.ch/query",
-  cached: "https://cached.lindas.admin.ch/query",
-  qlever: "https://qlever.ld.plazi.org/sparql",
-};
+import { getEndpoint } from "../endpoints.ts";
+import "./EndpointSelect.ts";
 
 export class SynoForm extends HTMLElement {
   constructor(private sparqlEndpoint: SparqlEndpoint) {
@@ -20,7 +16,6 @@ export class SynoForm extends HTMLElement {
     const SHOW_COL = params.has("show_col");
     const START_WITH_SUBTAXA = params.has("subtaxa");
     const NOSYNONYMS = params.has("nosynonyms");
-    const ENDPOINT_URL = params.get("server");
     const NAME = params.get("q");
 
     const nameInput = document.createElement("input");
@@ -54,69 +49,8 @@ export class SynoForm extends HTMLElement {
       () => colCheck.disabled = nosynonymsCheck.checked,
     );
 
-    const endpointPlaziLabel = document.createElement("label");
-    const endpointPlaziLabelUrl = document.createElement("code");
-    endpointPlaziLabelUrl.className = "uri";
-    endpointPlaziLabelUrl.innerText = endpoints.plazi.replace("https://", "");
-    const endpointPlazi = document.createElement("input");
-    endpointPlazi.type = "radio";
-    endpointPlazi.name = "endpoint";
-    endpointPlazi.checked = ENDPOINT_URL === endpoints.plazi;
-    endpointPlaziLabel.append(
-      endpointPlazi,
-      "Plazi ",
-      endpointPlaziLabelUrl,
-      " (Most up-to-date)",
-    );
-
-    const endpointLindasCachedLabel = document.createElement("label");
-    const endpointLindasCachedLabelUrl = document.createElement("code");
-    endpointLindasCachedLabelUrl.className = "uri";
-    endpointLindasCachedLabelUrl.innerText = endpoints.cached.replace(
-      "https://",
-      "",
-    );
-    const endpointLindasCached = document.createElement("input");
-    endpointLindasCached.type = "radio";
-    endpointLindasCached.name = "endpoint";
-    endpointLindasCached.checked = ENDPOINT_URL
-      ? ENDPOINT_URL === endpoints.cached
-      : true;
-    endpointLindasCachedLabel.append(
-      endpointLindasCached,
-      "Lindas ",
-      endpointLindasCachedLabelUrl,
-      " (Default)",
-    );
-
-    const endpointLindasLabel = document.createElement("label");
-    const endpointLindasLabelUrl = document.createElement("code");
-    endpointLindasLabelUrl.className = "uri";
-    endpointLindasLabelUrl.innerText = endpoints.lindas.replace("https://", "");
-    const endpointLindas = document.createElement("input");
-    endpointLindas.type = "radio";
-    endpointLindas.name = "endpoint";
-    endpointLindas.checked = ENDPOINT_URL === endpoints.lindas;
-    endpointLindasLabel.append(
-      endpointLindas,
-      "Lindas uncached ",
-      endpointLindasLabelUrl,
-    );
-
-    const endpointQleverLabel = document.createElement("label");
-    const endpointQleverLabelUrl = document.createElement("code");
-    endpointQleverLabelUrl.className = "uri";
-    endpointQleverLabelUrl.innerText = endpoints.qlever.replace("https://", "");
-    const endpointQlever = document.createElement("input");
-    endpointQlever.type = "radio";
-    endpointQlever.name = "endpoint";
-    endpointQlever.checked = ENDPOINT_URL === endpoints.qlever;
-    endpointQleverLabel.append(
-      endpointQlever,
-      "Qlever ",
-      endpointQleverLabelUrl,
-      " (NEW)",
-    );
+    const endpointSelect = document.createElement("endpoint-select");
+    endpointSelect.value = getEndpoint();
 
     const button = document.createElement("button");
     button.innerText = "Go";
@@ -138,15 +72,13 @@ export class SynoForm extends HTMLElement {
       nosynonymsCheckLabel,
       label,
       "Server: ",
-      endpointQleverLabel,
-      endpointLindasCachedLabel,
-      endpointLindasLabel,
-      endpointPlaziLabel,
+      endpointSelect,
     );
 
     this.append(search, options);
 
     const go = () => {
+      if (!endpointSelect.checkValidity()) return;
       const params = new URLSearchParams({
         q: nameInput.value,
       });
@@ -156,15 +88,7 @@ export class SynoForm extends HTMLElement {
       // if (sorttreatmentsCheck.checked) {
       //   params.append("sort_treatments_by_type", "");
       // }
-      if (endpointLindasCached.checked) {
-        params.append("server", endpoints.cached);
-      } else if (endpointLindas.checked) {
-        params.append("server", endpoints.lindas);
-      } else if (endpointPlazi.checked) {
-        params.append("server", endpoints.plazi);
-      } else if (endpointQlever.checked) {
-        params.append("server", endpoints.qlever);
-      }
+      params.append("server", endpointSelect.value);
       document.location.hash = "";
       document.location.search = params.toString();
     };

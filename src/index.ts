@@ -1,13 +1,13 @@
 import { SparqlEndpoint, SynonymGroup } from "@plazi/synolib";
 
+import { getEndpoint } from "./endpoints.ts";
 import "./components/SynoForm.ts";
 import { SynoMain } from "./components/SynoMain.ts";
 
 const params = new URLSearchParams(document.location.search);
 const HIDE_COL_ONLY_SYNONYMS = !params.has("show_col");
 const START_WITH_SUBTAXA = params.has("subtaxa");
-const ENDPOINT_URL = params.get("server") ||
-  "https://cached.lindas.admin.ch/query"; // "https://treatment.ld.plazi.org/sparql";
+const ENDPOINT_URL = getEndpoint();
 const NAME = params.get("q");
 const NOSYNONYMS = params.has("nosynonyms");
 

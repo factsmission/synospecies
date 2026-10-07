@@ -10,7 +10,9 @@ import { css, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import "./components/EndpointSelect.ts";
 import "./components/Icons.ts";
+import { getEndpoint, isValidEndpoint } from "./endpoints.ts";
 
 const queryPrefixes = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -361,13 +363,9 @@ export class SynoAdvanced extends LitElement {
   `;
 
   @state()
-  accessor endpoint: string = "https://treatment.ld.plazi.org/sparql";
+  accessor endpoint: string = getEndpoint();
 
   override render() {
-    const params = new URLSearchParams(document.location.search);
-    const ENDPOINT_URL = params.get("server");
-    if (ENDPOINT_URL) this.endpoint = ENDPOINT_URL;
-
     return html`
       <link href="index.css" rel="stylesheet">
       <h2>Advanced Mode</h2>
@@ -378,26 +376,11 @@ export class SynoAdvanced extends LitElement {
       </p>
       <div class="options">
         <span>Server:</span>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://qlever.ld.plazi.org/sparql"
-    } @change=${() => {
-      this.endpoint = "https://qlever.ld.plazi.org/sparql";
-    }}>Qlever <code class="uri">qlever.ld.plazi.org/sparql</code> (NEW)</label>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://cached.lindas.admin.ch/query"
-    } @change=${() => {
-      this.endpoint = "https://cached.lindas.admin.ch/query";
-    }}>Lindas <code class="uri">lindas-cached.cluster.ldbar.ch/query</code></label>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://lindas.admin.ch/query"
-    } @change=${() => {
-      this.endpoint = "https://lindas.admin.ch/query";
-    }}>Lindas uncached <code class="uri">lindas.admin.ch/query</code></label>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://treatment.ld.plazi.org/sparql"
-    } @change=${() => {
-      this.endpoint = "https://treatment.ld.plazi.org/sparql";
-    }}>Plazi <code class="uri">treatment.ld.plazi.org/sparql</code> (Most up-to-date)</label>
+        <endpoint-select .value=${this.endpoint} @endpoint-change=${(
+      e: CustomEvent<string>,
+    ) => {
+      if (isValidEndpoint(e.detail)) this.endpoint = e.detail;
+    }}></endpoint-select>
       </div>
       <query-editor persistenceId="editor-1" endpoint=${this.endpoint}></query-editor>
       <query-editor persistenceId="editor-2" endpoint=${this.endpoint}></query-editor>
@@ -419,10 +402,3 @@ export class SynoAdvanced extends LitElement {
   //   return this;
   // }
 }
-
-const endpoints = {
-  plazi: "https://treatment.ld.plazi.org/sparql",
-  lindas: "https://lindas.admin.ch/query",
-  cached: "https://cached.lindas.admin.ch/query",
-  qlever: "https://qlever.ld.plazi.org/sparql",
-};

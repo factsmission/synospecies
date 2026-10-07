@@ -24,7 +24,6 @@
 }
 
 @keyframes high-light {
-
   10%,
   50% {
     background: var(--highlight-background);
@@ -104,6 +103,12 @@ header {
     display: grid;
     gap: 2rem;
     grid-template-columns: 1fr auto auto auto;
+  }
+
+  & nav > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
   }
 
   & h1 {
@@ -233,6 +238,28 @@ syno-form {
   }
 }
 
+endpoint-select {
+  /* the labels take part in the layout of the surrounding element */
+  display: contents;
+
+  .custom-endpoint {
+    grid-column: 2 / -1;
+  }
+
+  input[type="url"] {
+    background: var(--body-background);
+    border: 1px solid var(--accent-mild);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    margin-left: 0.4rem;
+    max-width: 100%;
+    padding: 0 4px;
+    width: 24rem;
+  }
+}
+
 .result-header {
   display: flex;
   flex-wrap: wrap-reverse;
@@ -294,16 +321,16 @@ syno-name {
       gap: 0 4px;
       align-items: center;
 
-      &>s-icon {
+      & > s-icon {
         height: 12px;
       }
 
-      &>div {
+      & > div {
         grid-row-end: span 2;
       }
     }
 
-    .row+.row {
+    .row + .row {
       margin-top: 4px;
     }
 
@@ -399,7 +426,6 @@ syno-treatment.open {
 }
 
 #root {
-
   h2,
   h3,
   ul {
@@ -420,7 +446,7 @@ button.icon,
   padding: 0;
   position: relative;
 
-  &>svg {
+  & > svg {
     height: 1rem;
     margin: 0;
   }
