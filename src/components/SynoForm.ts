@@ -1,14 +1,9 @@
-import type { SparqlEndpoint } from "@plazi/synolib";
 import Taxomplete from "taxomplete";
 
 import { getEndpoint } from "../endpoints.ts";
 import "./EndpointSelect.ts";
 
 export class SynoForm extends HTMLElement {
-  constructor(private sparqlEndpoint: SparqlEndpoint) {
-    super();
-  }
-
   connectedCallback() {
     if (this.innerHTML) return;
 
@@ -99,7 +94,7 @@ export class SynoForm extends HTMLElement {
     });
 
     // we can only create the Taxomplete when nameInput has a parent
-    new Taxomplete(nameInput, this.sparqlEndpoint).action = go;
+    new Taxomplete(nameInput, getEndpoint()).action = go;
   }
 }
 
