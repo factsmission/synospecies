@@ -1,6 +1,7 @@
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { when } from "lit/directives/when.js";
+import { safeUrl } from "./utils.ts";
 import { SparqlEndpoint } from "@plazi/synolib";
 
 @customElement("s-wikidata")
@@ -217,7 +218,7 @@ GROUP BY ?item ?gbif
     ) return nothing;
     return html`
     <a href=${
-      this.wikidataUrl ?? nothing
+      safeUrl(this.wikidataUrl) ?? nothing
     } aria-label="associated wikidata page" class="button" ?disabled=${!this
       .wikidataUrl}
       target="_blank" title="Wikidata">
@@ -241,7 +242,7 @@ GROUP BY ?item ?gbif
       when(this.wikipediaEnUrl || this.wikipediaUrls.length, () =>
         html`<div class="button_group">
       <a href=${
-          this.wikipediaEnUrl ?? nothing
+          safeUrl(this.wikipediaEnUrl) ?? nothing
         } aria-label="associated english wikipedia page" class="button" ?disabled=${!this
           .wikipediaEnUrl} target="_blank" title=${
           this.wikipediaEnUrl
@@ -266,7 +267,7 @@ GROUP BY ?item ?gbif
           <ul>${
           [this.wikipediaEnUrl, ...this.wikipediaUrls].map((link) =>
             link
-              ? html`<li><a href=${link ?? nothing}>${
+              ? html`<li><a href=${safeUrl(link) ?? nothing}>${
                 readableLink(link)
               }</a></li>`
               : nothing
@@ -277,7 +278,7 @@ GROUP BY ?item ?gbif
     </div>`)
     }${
       when(this.wikispeciesUrl, () =>
-        html`<a href=${this.wikispeciesUrl} aria-label="associated wikispecies page" class="button" target="_blank" title="Wikispecies">
+        html`<a href=${safeUrl(this.wikispeciesUrl) ?? nothing} aria-label="associated wikispecies page" class="button" target="_blank" title="Wikispecies">
       <svg viewBox="0 0 941 1103" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
         height="24px">
         <defs>
@@ -345,7 +346,7 @@ GROUP BY ?item ?gbif
     </a>`)
     }${
       when(this.commonsUrl, () =>
-        html`<a href=${this.commonsUrl} aria-label="associated wikimedia commons page" class="button" target="_blank" title="Wikimedia Commons">
+        html`<a href=${safeUrl(this.commonsUrl) ?? nothing} aria-label="associated wikimedia commons page" class="button" target="_blank" title="Wikimedia Commons">
       <svg height="24" version="1.1" viewBox="-305 -516 610 820" xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs>

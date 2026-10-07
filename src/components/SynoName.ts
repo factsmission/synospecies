@@ -11,7 +11,7 @@ import "./WikidataButtons.ts";
 import { html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
-import { authNameToID, nameToID } from "./utils.ts";
+import { authNameToID, nameToID, safeUrl } from "./utils.ts";
 import { type NameState, type NonexistentTreatment } from "../types.ts";
 
 @customElement("syno-authname")
@@ -90,7 +90,7 @@ export class SynoAuthName extends LitElement {
           <a target="_blank" href="?q=${
           encodeURIComponent(tc)
         }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
-          <a target="_blank" href=${tc} class="uri">TreatmentBank<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${safeUrl(tc) ?? nothing} class="uri">TreatmentBank<s-icon icon="link"></s-icon></a>
           <a target="_blank" href="https://rdf2h-browser.linked.solutions/#${
           tc.replace("http://", "https://")
             .replace(".plazi.", ".ld.plazi.")
@@ -114,7 +114,7 @@ export class SynoAuthName extends LitElement {
           <a target="_blank" href="?q=${
           encodeURIComponent(this.authorizedName.col.colURI)
         }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
-          <a target="_blank" href=${this.authorizedName.col.colURI} class="uri">Catalogue of Life<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${safeUrl(this.authorizedName.col.colURI) ?? nothing} class="uri">Catalogue of Life<s-icon icon="link"></s-icon></a>
         </div>
       </div>`
         : nothing
@@ -238,7 +238,7 @@ export class SynoName extends LitElement {
           <a target="_blank" href="?q=${
           encodeURIComponent(this.name.name.taxonNameURI)
         }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
-          <a target="_blank" href=${this.name.name.taxonNameURI} class="uri">TreatmentBank<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${safeUrl(this.name.name.taxonNameURI) ?? nothing} class="uri">TreatmentBank<s-icon icon="link"></s-icon></a>
           <a target="_blank" href="https://rdf2h-browser.linked.solutions/#${
           this.name.name.taxonNameURI.replace("http://", "https://").replace(
             ".plazi.",
@@ -264,7 +264,7 @@ export class SynoName extends LitElement {
           <a target="_blank" href="?q=${
           encodeURIComponent(this.name.name.col.colURI)
         }" class="taxon uri">Use as search Term<s-icon icon="link"></s-icon></a>
-          <a target="_blank" href=${this.name.name.col.colURI} class="uri">Catalogue of Life<s-icon icon="link"></s-icon></a>
+          <a target="_blank" href=${safeUrl(this.name.name.col.colURI) ?? nothing} class="uri">Catalogue of Life<s-icon icon="link"></s-icon></a>
         </div>
       </div>`
         : nothing

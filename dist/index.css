@@ -106,6 +106,12 @@ header {
     grid-template-columns: 1fr auto auto auto;
   }
 
+  & nav > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+  }
+
   & h1 {
     font-size: 1.50em;
     margin: 0;
@@ -164,6 +170,32 @@ footer {
   a {
     color: inherit;
     text-decoration: underline;
+  }
+}
+
+.endpoint-notice {
+  background: var(--highlight-background);
+  border: 1px solid var(--accent-mild);
+  border-radius: 0.6rem;
+  margin-block: 1rem;
+  padding: 0 1rem 1rem;
+
+  button {
+    background: var(--accent-mild);
+    border: 1px solid var(--accent-mild);
+    border-radius: 0.6rem;
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 2rem;
+    margin: 0.25rem 0.5rem 0 0;
+    padding: 0 1rem;
+
+    &:hover,
+    &:focus {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--body-background);
+    }
   }
 }
 
@@ -230,6 +262,28 @@ syno-form {
       border-color: var(--accent);
       color: var(--body-background);
     }
+  }
+}
+
+endpoint-select {
+  /* the labels take part in the layout of the surrounding element */
+  display: contents;
+
+  .custom-endpoint {
+    grid-column: 2 / -1;
+  }
+
+  .custom-endpoint input[type="text"] {
+    background: var(--body-background);
+    border: 1px solid var(--accent-mild);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    margin-left: 0.4rem;
+    max-width: 100%;
+    padding: 0 4px;
+    width: 24rem;
   }
 }
 

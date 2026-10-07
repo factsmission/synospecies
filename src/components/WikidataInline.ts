@@ -1,6 +1,7 @@
 import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { when } from "lit/directives/when.js";
+import { safeUrl } from "./utils.ts";
 import { SparqlEndpoint } from "@plazi/synolib";
 
 @customElement("s-wikidata")
@@ -231,7 +232,7 @@ GROUP BY ?item ?gbif
     ) return nothing;
     return html`${
       when(this.wikidataUrl, () =>
-        html` <a href=${this.wikidataUrl} class="uri" target="_blank">Wikidata<s-icon icon="link"></s-icon></a>`)
+        html` <a href=${safeUrl(this.wikidataUrl) ?? nothing} class="uri" target="_blank">Wikidata<s-icon icon="link"></s-icon></a>`)
     }${
       when(this.gbifID, () =>
         html` <a href=${
@@ -239,15 +240,15 @@ GROUP BY ?item ?gbif
         }" target="_blank" class="uri">GBIF ID ${this.gbifID}<s-icon icon="link"></s-icon></a>`)
     }${
       when(this.wikispeciesUrl, () =>
-        html` <a href=${this.wikispeciesUrl} class="uri" target="_blank">Wikispecies<s-icon icon="link"></s-icon></a>`)
+        html` <a href=${safeUrl(this.wikispeciesUrl) ?? nothing} class="uri" target="_blank">Wikispecies<s-icon icon="link"></s-icon></a>`)
     }${
       when(this.commonsUrl, () =>
-        html` <a href=${this.commonsUrl} class="uri" target="_blank">Wikimedia Commons<s-icon icon="link"></s-icon></a>`)
+        html` <a href=${safeUrl(this.commonsUrl) ?? nothing} class="uri" target="_blank">Wikimedia Commons<s-icon icon="link"></s-icon></a>`)
     }${
       when(this.wikipediaEnUrl || this.wikipediaUrls.length, () =>
         html`<div class="button_group">
       <a href=${
-          this.wikipediaEnUrl ?? nothing
+          safeUrl(this.wikipediaEnUrl) ?? nothing
         } aria-label="associated english wikipedia page" class="button" ?disabled=${!this
           .wikipediaEnUrl} target="_blank" title=${
           this.wikipediaEnUrl
@@ -272,7 +273,7 @@ GROUP BY ?item ?gbif
           <ul>${
           [this.wikipediaEnUrl, ...this.wikipediaUrls].map((link) =>
             link
-              ? html`<li><a href=${link ?? nothing}>${
+              ? html`<li><a href=${safeUrl(link) ?? nothing}>${
                 readableLink(link)
               }</a></li>`
               : nothing

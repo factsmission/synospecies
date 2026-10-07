@@ -3,7 +3,7 @@ import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import { type NameState, type NonexistentTreatment } from "../types.ts";
-import { authNameToID, nameToID } from "./utils.ts";
+import { authNameToID, nameToID, safeUrl } from "./utils.ts";
 
 type Cell = {
   missing_def: number;
@@ -124,8 +124,10 @@ export class TimelineTreatment extends LitElement {
 
     return html`${style}<a
       href=${
-      this.icons.acceptedCoL ||
-      (this.icons.treatment as Treatment | undefined)?.url || nothing
+      safeUrl(
+        this.icons.acceptedCoL ||
+          (this.icons.treatment as Treatment | undefined)?.url,
+      ) ?? nothing
     }
       target="_blank" class=${
       this.icons.acceptedCoL || this.isCoL

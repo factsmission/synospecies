@@ -1,18 +1,10 @@
-import type { SparqlEndpoint } from "@plazi/synolib";
+import Awesomplete from "awesomplete";
 import Taxomplete from "taxomplete";
 
-const endpoints = {
-  plazi: "https://treatment.ld.plazi.org/sparql",
-  lindas: "https://lindas.admin.ch/query",
-  cached: "https://cached.lindas.admin.ch/query",
-  qlever: "https://qlever.ld.plazi.org/sparql",
-};
+import { getEndpoint } from "../endpoints.ts";
+import "./EndpointSelect.ts";
 
 export class SynoForm extends HTMLElement {
-  constructor(private sparqlEndpoint: SparqlEndpoint) {
-    super();
-  }
-
   connectedCallback() {
     if (this.innerHTML) return;
 
@@ -20,8 +12,8 @@ export class SynoForm extends HTMLElement {
     const SHOW_COL = params.has("show_col");
     const START_WITH_SUBTAXA = params.has("subtaxa");
     const NOSYNONYMS = params.has("nosynonyms");
-    const ENDPOINT_URL = params.get("server");
     const NAME = params.get("q");
+    const ENDPOINT_URL = getEndpoint();
 
     const nameInput = document.createElement("input");
     nameInput.type = "text";
@@ -54,69 +46,8 @@ export class SynoForm extends HTMLElement {
       () => colCheck.disabled = nosynonymsCheck.checked,
     );
 
-    const endpointPlaziLabel = document.createElement("label");
-    const endpointPlaziLabelUrl = document.createElement("code");
-    endpointPlaziLabelUrl.className = "uri";
-    endpointPlaziLabelUrl.innerText = endpoints.plazi.replace("https://", "");
-    const endpointPlazi = document.createElement("input");
-    endpointPlazi.type = "radio";
-    endpointPlazi.name = "endpoint";
-    endpointPlazi.checked = ENDPOINT_URL === endpoints.plazi;
-    endpointPlaziLabel.append(
-      endpointPlazi,
-      "Plazi ",
-      endpointPlaziLabelUrl,
-      " (Most up-to-date)",
-    );
-
-    const endpointLindasCachedLabel = document.createElement("label");
-    const endpointLindasCachedLabelUrl = document.createElement("code");
-    endpointLindasCachedLabelUrl.className = "uri";
-    endpointLindasCachedLabelUrl.innerText = endpoints.cached.replace(
-      "https://",
-      "",
-    );
-    const endpointLindasCached = document.createElement("input");
-    endpointLindasCached.type = "radio";
-    endpointLindasCached.name = "endpoint";
-    endpointLindasCached.checked = ENDPOINT_URL
-      ? ENDPOINT_URL === endpoints.cached
-      : true;
-    endpointLindasCachedLabel.append(
-      endpointLindasCached,
-      "Lindas ",
-      endpointLindasCachedLabelUrl,
-      " (Default)",
-    );
-
-    const endpointLindasLabel = document.createElement("label");
-    const endpointLindasLabelUrl = document.createElement("code");
-    endpointLindasLabelUrl.className = "uri";
-    endpointLindasLabelUrl.innerText = endpoints.lindas.replace("https://", "");
-    const endpointLindas = document.createElement("input");
-    endpointLindas.type = "radio";
-    endpointLindas.name = "endpoint";
-    endpointLindas.checked = ENDPOINT_URL === endpoints.lindas;
-    endpointLindasLabel.append(
-      endpointLindas,
-      "Lindas uncached ",
-      endpointLindasLabelUrl,
-    );
-
-    const endpointQleverLabel = document.createElement("label");
-    const endpointQleverLabelUrl = document.createElement("code");
-    endpointQleverLabelUrl.className = "uri";
-    endpointQleverLabelUrl.innerText = endpoints.qlever.replace("https://", "");
-    const endpointQlever = document.createElement("input");
-    endpointQlever.type = "radio";
-    endpointQlever.name = "endpoint";
-    endpointQlever.checked = ENDPOINT_URL === endpoints.qlever;
-    endpointQleverLabel.append(
-      endpointQlever,
-      "Qlever ",
-      endpointQleverLabelUrl,
-      " (NEW)",
-    );
+    const endpointSelect = document.createElement("endpoint-select");
+    endpointSelect.value = ENDPOINT_URL;
 
     const button = document.createElement("button");
     button.innerText = "Go";
@@ -138,15 +69,13 @@ export class SynoForm extends HTMLElement {
       nosynonymsCheckLabel,
       label,
       "Server: ",
-      endpointQleverLabel,
-      endpointLindasCachedLabel,
-      endpointLindasLabel,
-      endpointPlaziLabel,
+      endpointSelect,
     );
 
     this.append(search, options);
 
     const go = () => {
+      if (!endpointSelect.checkValidity()) return;
       const params = new URLSearchParams({
         q: nameInput.value,
       });
@@ -156,15 +85,7 @@ export class SynoForm extends HTMLElement {
       // if (sorttreatmentsCheck.checked) {
       //   params.append("sort_treatments_by_type", "");
       // }
-      if (endpointLindasCached.checked) {
-        params.append("server", endpoints.cached);
-      } else if (endpointLindas.checked) {
-        params.append("server", endpoints.lindas);
-      } else if (endpointPlazi.checked) {
-        params.append("server", endpoints.plazi);
-      } else if (endpointQlever.checked) {
-        params.append("server", endpoints.qlever);
-      }
+      params.append("server", endpointSelect.value);
       document.location.hash = "";
       document.location.search = params.toString();
     };
@@ -175,8 +96,29 @@ export class SynoForm extends HTMLElement {
     });
 
     // we can only create the Taxomplete when nameInput has a parent
-    new Taxomplete(nameInput, this.sparqlEndpoint).action = go;
+    new Taxomplete(nameInput, ENDPOINT_URL).action = go;
+    // Taxomplete renders the suggestions, which come from the endpoint, as
+    // HTML; render them as text instead.
+    const awesomplete = Awesomplete.all.find((a: { input: HTMLElement }) =>
+      a.input === nameInput
+    );
+    if (awesomplete) awesomplete.item = suggestionItem;
   }
+}
+
+/** Like Taxomplete's suggestion item, but without parsing it as HTML. */
+function suggestionItem(suggestion: string, input: string): HTMLLIElement {
+  const text = String(suggestion);
+  const spacePos = text.slice(0, -1).indexOf(" ");
+  // the input matches either the start or the second word of the suggestion
+  const start = spacePos !== -1 && !input.includes(" ") ? spacePos + 1 : 0;
+  const end = start + input.length;
+  const mark = document.createElement("mark");
+  mark.textContent = text.slice(start, end);
+  const li = document.createElement("li");
+  li.setAttribute("aria-selected", "false");
+  li.append(text.slice(0, start), mark, text.slice(end));
+  return li;
 }
 
 customElements.define("syno-form", SynoForm);

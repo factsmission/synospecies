@@ -6,7 +6,7 @@ const SERVE = Deno.args.includes("serve");
 const BUILD = Deno.args.includes("build");
 
 const config: esbuild.BuildOptions = {
-  entryPoints: ["./src/index.ts", "./src/advanced.ts"],
+  entryPoints: ["./src/index.ts", "./src/advanced.ts", "./src/settings.ts"],
   outdir: "./dist",
   sourcemap: true,
   bundle: true,

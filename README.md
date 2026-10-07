@@ -2,19 +2,26 @@
 
 http://synospecies.factsmission.com/
 
-Build with
+SynoSpecies is built with [Deno](https://deno.com/) (v2). Build with
 
-    npm install
-    npm run build
+    deno task build
+
+The static site is written to `dist/`. For development, run
+
+    deno task serve
+
+to serve `dist/` with live reload.
 
 # About
 
 SynoSpecies is a tool developed by FactsMission AG to leverage the RDF data
-provided by Plazi. The RDF data of all treatments is stored in an
-[AllegroGraph](https://allegrograph.com/) triple store allowing
-[SPARQL](https://www.w3.org/TR/sparql11-overview/) queries over the data.
-SynoSpecies allows manually writing and submitting such queries in the advanced
-mode and send such queries in the background when using the easier interface.
+provided by Plazi. The RDF data of all treatments is available from
+[SPARQL](https://www.w3.org/TR/sparql11-overview/) endpoints such as
+[LINDAS](https://lindas.admin.ch/), Plazi's own endpoint and QLever. On the
+settings page you can choose which endpoint to use, including a custom one
+serving the same data. SynoSpecies allows manually writing and submitting such
+queries in the advanced mode and send such queries in the background when using
+the easier interface.
 
 SynoSpecies is an Open Source application running purely in the browser, the
 source code is available on

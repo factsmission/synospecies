@@ -6,11 +6,17 @@ import "yasqe/build/yasqe.min.css";
 import Yasr from "yasr";
 import "yasr/build/yasr.min.css";
 
-import { css, html, LitElement } from "lit";
+import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import "./components/EndpointSelect.ts";
 import "./components/Icons.ts";
+import {
+  getEndpoint,
+  isTrustedEndpoint,
+  isValidEndpoint,
+} from "./endpoints.ts";
 
 const queryPrefixes = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -155,7 +161,24 @@ export class QueryEditor extends LitElement {
   @property()
   accessor query: string | null = null;
 
+  private yasqe?: Yasqe;
+  private editor?: HTMLDivElement;
+
   override render() {
+    // the editor is created once, so that results and edits survive updates
+    this.editor ??= this.createEditor();
+    return html`<link href="advanced.css" rel="stylesheet">${this.editor}`;
+  }
+
+  protected override updated(changed: PropertyValues<this>) {
+    if (changed.has("endpoint") && this.yasqe) {
+      // used for the next query run
+      (this.yasqe.config.requestConfig as { endpoint: string }).endpoint =
+        this.endpoint;
+    }
+  }
+
+  private createEditor() {
     // deno-lint-ignore no-explicit-any
     const newConfig: Record<string, any> = {
       ...config,
@@ -167,6 +190,7 @@ export class QueryEditor extends LitElement {
     };
     const div = document.createElement("div");
     const yasqe = new Yasqe(div, newConfig);
+    this.yasqe = yasqe;
     yasqe.addPrefixes(queryPrefixes);
     yasqe.collapsePrefixes(true);
     const yasr = new Yasr(div, newConfig);
@@ -190,7 +214,7 @@ export class QueryEditor extends LitElement {
       yasqe.refresh();
     });
 
-    return html`<link href="advanced.css" rel="stylesheet">${div}`;
+    return div;
   }
 }
 
@@ -361,13 +385,13 @@ export class SynoAdvanced extends LitElement {
   `;
 
   @state()
-  accessor endpoint: string = "https://treatment.ld.plazi.org/sparql";
+  accessor endpoint: string = getEndpoint();
+
+  /** Whether the endpoint is an unfamiliar one, set by the link. */
+  @state()
+  accessor endpointFromLink: boolean = !isTrustedEndpoint(this.endpoint);
 
   override render() {
-    const params = new URLSearchParams(document.location.search);
-    const ENDPOINT_URL = params.get("server");
-    if (ENDPOINT_URL) this.endpoint = ENDPOINT_URL;
-
     return html`
       <link href="index.css" rel="stylesheet">
       <h2>Advanced Mode</h2>
@@ -378,27 +402,21 @@ export class SynoAdvanced extends LitElement {
       </p>
       <div class="options">
         <span>Server:</span>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://qlever.ld.plazi.org/sparql"
-    } @change=${() => {
-      this.endpoint = "https://qlever.ld.plazi.org/sparql";
-    }}>Qlever <code class="uri">qlever.ld.plazi.org/sparql</code> (NEW)</label>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://cached.lindas.admin.ch/query"
-    } @change=${() => {
-      this.endpoint = "https://cached.lindas.admin.ch/query";
-    }}>Lindas <code class="uri">lindas-cached.cluster.ldbar.ch/query</code></label>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://lindas.admin.ch/query"
-    } @change=${() => {
-      this.endpoint = "https://lindas.admin.ch/query";
-    }}>Lindas uncached <code class="uri">lindas.admin.ch/query</code></label>
-        <label><input type="radio" name="endpoint" checked=${
-      this.endpoint === "https://treatment.ld.plazi.org/sparql"
-    } @change=${() => {
-      this.endpoint = "https://treatment.ld.plazi.org/sparql";
-    }}>Plazi <code class="uri">treatment.ld.plazi.org/sparql</code> (Most up-to-date)</label>
+        <endpoint-select .value=${this.endpoint} @endpoint-change=${(
+      e: CustomEvent<string>,
+    ) => {
+      if (isValidEndpoint(e.detail)) this.endpoint = e.detail;
+      this.endpointFromLink = false;
+    }}></endpoint-select>
       </div>
+      ${
+      this.endpointFromLink
+        ? html`<p><b>Note:</b> This link set the server to
+        <code class="uri">${this.endpoint}</code>, which is not one of the
+        known endpoints nor the one chosen in the
+        <a href="settings.html">settings</a>. Queries are sent to that server.</p>`
+        : nothing
+    }
       <query-editor persistenceId="editor-1" endpoint=${this.endpoint}></query-editor>
       <query-editor persistenceId="editor-2" endpoint=${this.endpoint}></query-editor>
       <hr>
@@ -419,10 +437,3 @@ export class SynoAdvanced extends LitElement {
   //   return this;
   // }
 }
-
-const endpoints = {
-  plazi: "https://treatment.ld.plazi.org/sparql",
-  lindas: "https://lindas.admin.ch/query",
-  cached: "https://cached.lindas.admin.ch/query",
-  qlever: "https://qlever.ld.plazi.org/sparql",
-};
