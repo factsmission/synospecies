@@ -17,11 +17,11 @@ to serve `dist/` with live reload.
 SynoSpecies is a tool developed by FactsMission AG to leverage the RDF data
 provided by Plazi. The RDF data of all treatments is available from
 [SPARQL](https://www.w3.org/TR/sparql11-overview/) endpoints such as
-[LINDAS](https://lindas.admin.ch/), Plazi's own endpoint and QLever. On the
-settings page you can choose which endpoint to use, including a custom one
-serving the same data. SynoSpecies allows manually writing and submitting such
-queries in the advanced mode and send such queries in the background when using
-the easier interface.
+[LINDAS](https://lindas.admin.ch/), Plazi's own endpoint and QLever. In the
+settings (the gear icon in the header) you can choose which endpoint to use,
+including a custom one serving the same data. SynoSpecies allows manually
+writing and submitting such queries on the SPARQL page and sends such queries in
+the background when using the search.
 
 SynoSpecies is an Open Source application running purely in the browser, the
 source code is available on

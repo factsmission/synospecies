@@ -3,18 +3,17 @@ import { customElement, query, state } from "lit/decorators.js";
 
 import "./components/EndpointSelect.ts";
 import type { EndpointSelect } from "./components/EndpointSelect.ts";
+import "./components/SettingsMenu.ts";
+import { renderTestResult } from "./components/TestResult.ts";
 import {
   DEFAULT_ENDPOINT,
   getStoredEndpoint,
   isKnownEndpoint,
   isValidEndpoint,
   setStoredEndpoint,
+  testEndpoint,
+  type TestResult,
 } from "./endpoints.ts";
-
-type TestResult =
-  | { state: "running" }
-  | { state: "ok"; treatments: boolean }
-  | { state: "error"; message: string };
 
 @customElement("syno-settings")
 export class SynoSettings extends LitElement {
@@ -73,6 +72,24 @@ export class SynoSettings extends LitElement {
   /** Aborts the running endpoint test, if any. */
   private abortTest?: AbortController;
 
+  override connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener("endpoint-change", this.onEndpointChange);
+  }
+
+  override disconnectedCallback() {
+    document.removeEventListener("endpoint-change", this.onEndpointChange);
+    super.disconnectedCallback();
+  }
+
+  /** Reflects an endpoint chosen in the settings menu of the header. */
+  private readonly onEndpointChange = (e: Event) => {
+    this.clearTest();
+    this.endpoint = (e as CustomEvent<string>).detail;
+    this.select.value = this.endpoint;
+    this.saved = true;
+  };
+
   private clearTest() {
     this.abortTest?.abort();
     this.abortTest = undefined;
@@ -111,46 +128,16 @@ export class SynoSettings extends LitElement {
     const abort = new AbortController();
     this.abortTest = abort;
     this.test = { state: "running" };
-    const target = new URL(url, document.baseURI);
-    target.searchParams.set(
-      "query",
-      "ASK { ?treatment a <http://plazi.org/vocab/treatment#Treatment> }",
-    );
     try {
-      const response = await fetch(target, {
-        headers: { accept: "application/sparql-results+json" },
-        signal: abort.signal,
-      });
-      if (!response.ok) {
-        throw new Error(`${response.status} ${response.statusText}`);
-      }
-      const json = await response.json();
-      if (typeof json?.boolean !== "boolean") {
-        throw new Error("The response is not a SPARQL ASK result");
-      }
+      const treatments = await testEndpoint(url, abort.signal);
       if (abort.signal.aborted) return;
-      this.test = { state: "ok", treatments: json.boolean };
+      this.test = { state: "ok", treatments };
     } catch (error) {
       if (abort.signal.aborted) return;
       this.test = {
         state: "error",
         message: error instanceof Error ? error.message : String(error),
       };
-    }
-  }
-
-  private renderTest() {
-    if (!this.test) return null;
-    switch (this.test.state) {
-      case "running":
-        return html`<span>Testing…</span>`;
-      case "ok":
-        return this.test.treatments
-          ? html`<span>✓ The endpoint works and contains treatments.</span>`
-          : html`<span class="error">The endpoint works, but contains no Plazi treatments.</span>`;
-      case "error":
-        return html`<span class="error">Query failed: ${this.test.message.replace(/\.$/, "")}.
-          The endpoint may be unreachable or may not allow cross-origin (CORS) requests.</span>`;
     }
   }
 
@@ -167,9 +154,10 @@ export class SynoSettings extends LitElement {
         can be used, including one you host yourself.
       </p>
       <p>
-        Choose the endpoint to use by default. The choice is stored in this
-        browser only. You can still pick a different server for a single
-        search in the search options.
+        Choose the endpoint used by the search and the SPARQL page. The choice
+        is stored in this browser only; it can also be changed in the settings
+        menu (the gear icon in the header). A link may still name a different
+        server, in which case you are asked before results are loaded from it.
       </p>
       <div class="options">
         <endpoint-select .value=${this.endpoint}
@@ -186,7 +174,7 @@ export class SynoSettings extends LitElement {
         <button @click=${this.runTest}>Test endpoint</button>
         <button @click=${this.reset}>Reset to default</button>
         ${this.saved ? html`<span>Saved.</span>` : null}
-        ${this.renderTest()}
+        ${renderTestResult(this.test)}
       </div>
     `;
   }

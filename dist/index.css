@@ -103,13 +103,41 @@ header {
     align-items: center;
     display: grid;
     gap: 2rem;
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr auto auto auto auto;
   }
 
-  & nav > div {
+  /* the two applications */
+  & .pages {
     display: flex;
     flex-wrap: wrap;
     justify-content: end;
+  }
+
+  /* settings and info */
+  & .tools {
+    align-items: center;
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  & .icon-button {
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-color);
+    cursor: pointer;
+    display: inline-flex;
+    padding: 0.4rem;
+
+    & s-icon {
+      height: 1.5rem;
+    }
+
+    &:hover,
+    &:focus-visible,
+    &.active {
+      background: var(--body-background);
+    }
   }
 
   & h1 {
@@ -155,8 +183,56 @@ header {
   @media (max-width: 36rem) {
     & nav {
       gap: 1rem;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr auto;
     }
+
+    & .pages {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-content: start;
+    }
+  }
+}
+
+/* the settings menu opened from the header */
+#settings-menu {
+  background: var(--body-background);
+  border: 1px solid var(--accent-mild);
+  border-radius: 0.6rem;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 25%);
+  color: var(--text-color);
+  inset: auto;
+  margin: 0;
+  padding: 0.8rem 1rem;
+  width: 22rem;
+
+  label {
+    display: block;
+    font-weight: 600;
+  }
+
+  select,
+  input[type="text"] {
+    background: var(--body-background);
+    border: 1px solid var(--accent-mild);
+    border-radius: 4px;
+    color: var(--text-color);
+    display: block;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: normal;
+    line-height: 1.5rem;
+    margin-top: 0.4rem;
+    padding: 0.2rem 4px;
+    width: 100%;
+  }
+
+  p {
+    margin: 0.8rem 0 0;
+  }
+
+  .error {
+    color: light-dark(#c62828, #ff8a80);
   }
 }
 
@@ -213,6 +289,12 @@ syno-form {
     grid-template-columns: auto repeat(4, 1fr);
     gap: 0.4rem;
     margin-top: 0.6rem;
+
+    /* too narrow for the grid */
+    @media (max-width: 36rem) {
+      display: flex;
+      flex-wrap: wrap;
+    }
   }
 
   .awesomplete {

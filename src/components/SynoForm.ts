@@ -2,7 +2,6 @@ import Awesomplete from "awesomplete";
 import Taxomplete from "taxomplete";
 
 import { getEndpoint } from "../endpoints.ts";
-import "./EndpointSelect.ts";
 
 export class SynoForm extends HTMLElement {
   connectedCallback() {
@@ -46,9 +45,6 @@ export class SynoForm extends HTMLElement {
       () => colCheck.disabled = nosynonymsCheck.checked,
     );
 
-    const endpointSelect = document.createElement("endpoint-select");
-    endpointSelect.value = ENDPOINT_URL;
-
     const button = document.createElement("button");
     button.innerText = "Go";
 
@@ -68,14 +64,11 @@ export class SynoForm extends HTMLElement {
       subtaxaCheckLabel,
       nosynonymsCheckLabel,
       label,
-      "Server: ",
-      endpointSelect,
     );
 
     this.append(search, options);
 
     const go = () => {
-      if (!endpointSelect.checkValidity()) return;
       const params = new URLSearchParams({
         q: nameInput.value,
       });
@@ -85,7 +78,11 @@ export class SynoForm extends HTMLElement {
       // if (sorttreatmentsCheck.checked) {
       //   params.append("sort_treatments_by_type", "");
       // }
-      params.append("server", endpointSelect.value);
+      // a server named in the link stays in effect
+      const server = new URLSearchParams(document.location.search).get(
+        "server",
+      );
+      if (server) params.append("server", server);
       document.location.hash = "";
       document.location.search = params.toString();
     };

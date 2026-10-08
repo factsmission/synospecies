@@ -10,13 +10,9 @@ import { css, html, LitElement, nothing, type PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-import "./components/EndpointSelect.ts";
 import "./components/Icons.ts";
-import {
-  getEndpoint,
-  isTrustedEndpoint,
-  isValidEndpoint,
-} from "./endpoints.ts";
+import "./components/SettingsMenu.ts";
+import { getEndpoint, isTrustedEndpoint } from "./endpoints.ts";
 
 const queryPrefixes = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -373,15 +369,6 @@ export class SynoAdvanced extends LitElement {
   h4 + p {
     margin-top: 0;
   }
-
-  .options {
-    border: 1px solid var(--nav-background);
-    display: grid;
-    gap: 0.5rem;
-    grid-template-columns: auto repeat(4, auto);
-    margin: 1rem 0;
-    padding: 0.5rem;
-  }
   `;
 
   @state()
@@ -391,30 +378,44 @@ export class SynoAdvanced extends LitElement {
   @state()
   accessor endpointFromLink: boolean = !isTrustedEndpoint(this.endpoint);
 
+  override connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener("endpoint-change", this.onEndpointChange);
+  }
+
+  override disconnectedCallback() {
+    document.removeEventListener("endpoint-change", this.onEndpointChange);
+    super.disconnectedCallback();
+  }
+
+  /** An endpoint chosen in the settings menu applies to all editors. */
+  private readonly onEndpointChange = (e: Event) => {
+    this.endpoint = (e as CustomEvent<string>).detail;
+    this.endpointFromLink = false;
+    // the server named in the link no longer applies
+    const url = new URL(document.location.href);
+    if (url.searchParams.has("server")) {
+      url.searchParams.delete("server");
+      history.replaceState(null, "", url);
+    }
+  };
+
   override render() {
     return html`
       <link href="index.css" rel="stylesheet">
-      <h2>Advanced Mode</h2>
+      <h2>SPARQL Queries</h2>
       <p>
         Here, you can run arbitrary
         <a target="_blank" href="https://www.w3.org/TR/sparql11-query/" class="uri">SPARQL<s-icon icon="link"></s-icon></a>
-        queries against our data.
+        queries against our data. The queries are sent to the endpoint chosen
+        in the settings (the gear icon above).
       </p>
-      <div class="options">
-        <span>Server:</span>
-        <endpoint-select .value=${this.endpoint} @endpoint-change=${(
-      e: CustomEvent<string>,
-    ) => {
-      if (isValidEndpoint(e.detail)) this.endpoint = e.detail;
-      this.endpointFromLink = false;
-    }}></endpoint-select>
-      </div>
       ${
       this.endpointFromLink
         ? html`<p><b>Note:</b> This link set the server to
         <code class="uri">${this.endpoint}</code>, which is not one of the
-        known endpoints nor the one chosen in the
-        <a href="settings.html">settings</a>. Queries are sent to that server.</p>`
+        known endpoints nor the one chosen in the settings. Queries are sent
+        to that server; choose an endpoint in the settings menu to switch.</p>`
         : nothing
     }
       <query-editor persistenceId="editor-1" endpoint=${this.endpoint}></query-editor>
