@@ -8,6 +8,7 @@ import {
   isTrustedEndpoint,
   isValidEndpoint,
 } from "./endpoints.ts";
+import "./components/SettingsMenu.ts";
 import "./components/SynoForm.ts";
 import { SynoMain } from "./components/SynoMain.ts";
 
@@ -26,6 +27,27 @@ document.addEventListener("DOMContentLoaded", () => {
   else confirmEndpoint(NAME);
 });
 
+// an endpoint chosen in the settings menu applies right away
+document.addEventListener("endpoint-change", useStoredEndpoint);
+
+/**
+ * Drops the `server` parameter from the address, so that the stored endpoint
+ * is used, and loads the page again if a name is searched.
+ */
+function useStoredEndpoint() {
+  const target = new URL(document.location.href);
+  target.searchParams.delete("server");
+  if (!NAME) {
+    history.replaceState(null, "", target);
+    return;
+  }
+  target.hash = "";
+  const current = new URL(document.location.href);
+  current.hash = "";
+  if (target.href === current.href) document.location.reload();
+  else document.location.href = target.href;
+}
+
 /**
  * A link may name any endpoint in its `server` parameter. Before showing
  * results from an endpoint that is neither a known one nor the one chosen in
@@ -41,31 +63,28 @@ function confirmEndpoint(name: string) {
     notice.remove();
     main(name);
   };
-  const useOwn = () => {
-    const params = new URLSearchParams(document.location.search);
-    params.delete("server");
-    document.location.search = params.toString();
-  };
 
   render(
-    html`${
-      isValidEndpoint(ENDPOINT_URL)
-        ? html`<p>
-          This link searches the SPARQL endpoint
-          <code class="uri">${ENDPOINT_URL}</code>, which is not one of the
-          known endpoints nor the one chosen in the
-          <a href="settings.html">settings</a>. The results would come from
-          that server.
-        </p>
-        <button @click=${searchAnyway}>Search with this endpoint</button>`
+    html`
+      ${isValidEndpoint(ENDPOINT_URL)
+        ? html`
+          <p>
+                    This link searches the SPARQL endpoint
+                    <code class="uri">${ENDPOINT_URL}</code>, which is not one of the
+                    known endpoints nor the one chosen in the
+                    <a href="settings.html">settings</a>. The results would come from
+                    that server.
+                  </p>
+          <button @click=${searchAnyway}>Search with this endpoint</button>
+        `
         : html`<p>
           This link names <code class="uri">${ENDPOINT_URL}</code> as SPARQL
           endpoint, which is not a valid endpoint URL.
-        </p>`
-    }
-      <button @click=${useOwn}>Use <code class="uri">${
-      getStoredEndpoint().replace("https://", "")
-    }</code> instead</button>`,
+        </p>`}
+            <button
+        @click=${useStoredEndpoint}>Use <code class="uri">${getStoredEndpoint()
+          .replace("https://", "")}</code> instead</button>
+    `,
     notice,
   );
 }

@@ -83,3 +83,36 @@ export function getEndpoint(): string {
 export function isTrustedEndpoint(url: string): boolean {
   return isKnownEndpoint(url) || url === getStoredEndpoint();
 }
+
+export type TestResult =
+  | { state: "running" }
+  | { state: "ok"; treatments: boolean }
+  | { state: "error"; message: string };
+
+/**
+ * Checks that `url` answers SPARQL queries. Resolves to whether the endpoint
+ * contains Plazi treatments; rejects if it does not answer with a SPARQL ASK
+ * result.
+ */
+export async function testEndpoint(
+  url: string,
+  signal?: AbortSignal,
+): Promise<boolean> {
+  const target = new URL(url, document.baseURI);
+  target.searchParams.set(
+    "query",
+    "ASK { ?treatment a <http://plazi.org/vocab/treatment#Treatment> }",
+  );
+  const response = await fetch(target, {
+    headers: { accept: "application/sparql-results+json" },
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
+  const json = await response.json();
+  if (typeof json?.boolean !== "boolean") {
+    throw new Error("The response is not a SPARQL ASK result");
+  }
+  return json.boolean;
+}

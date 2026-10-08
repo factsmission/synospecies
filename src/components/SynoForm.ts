@@ -1,8 +1,8 @@
+import { SparqlEndpoint } from "@plazi/synolib";
 import Awesomplete from "awesomplete";
 import Taxomplete from "taxomplete";
 
 import { getEndpoint } from "../endpoints.ts";
-import "./EndpointSelect.ts";
 
 export class SynoForm extends HTMLElement {
   connectedCallback() {
@@ -46,9 +46,6 @@ export class SynoForm extends HTMLElement {
       () => colCheck.disabled = nosynonymsCheck.checked,
     );
 
-    const endpointSelect = document.createElement("endpoint-select");
-    endpointSelect.value = ENDPOINT_URL;
-
     const button = document.createElement("button");
     button.innerText = "Go";
 
@@ -68,14 +65,11 @@ export class SynoForm extends HTMLElement {
       subtaxaCheckLabel,
       nosynonymsCheckLabel,
       label,
-      "Server: ",
-      endpointSelect,
     );
 
     this.append(search, options);
 
     const go = () => {
-      if (!endpointSelect.checkValidity()) return;
       const params = new URLSearchParams({
         q: nameInput.value,
       });
@@ -85,7 +79,11 @@ export class SynoForm extends HTMLElement {
       // if (sorttreatmentsCheck.checked) {
       //   params.append("sort_treatments_by_type", "");
       // }
-      params.append("server", endpointSelect.value);
+      // a server named in the link stays in effect
+      const server = new URLSearchParams(document.location.search).get(
+        "server",
+      );
+      if (server) params.append("server", server);
       document.location.hash = "";
       document.location.search = params.toString();
     };
@@ -96,7 +94,15 @@ export class SynoForm extends HTMLElement {
     });
 
     // we can only create the Taxomplete when nameInput has a parent
-    new Taxomplete(nameInput, ENDPOINT_URL).action = go;
+    const taxomplete = new Taxomplete(nameInput, ENDPOINT_URL);
+    taxomplete.action = go;
+    // an endpoint chosen in the settings menu applies to the suggestions too;
+    // Taxomplete keeps its endpoint in this field and reads it for each query
+    document.addEventListener("endpoint-change", (e) => {
+      taxomplete._sparqlEndpoint = new SparqlEndpoint(
+        (e as CustomEvent<string>).detail,
+      );
+    });
     // Taxomplete renders the suggestions, which come from the endpoint, as
     // HTML; render them as text instead.
     const awesomplete = Awesomplete.all.find((a: { input: HTMLElement }) =>

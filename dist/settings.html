@@ -8,17 +8,22 @@
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     <link rel="stylesheet" href="index.css" />
     <script src="./settings.js" type="module"></script>
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="favicon.ico" />
   </head>
 
   <body>
     <header>
       <nav class="center">
-        <h1><a href="/">SynoSpecies</a></h1>
-        <div>
-          <a class="inactive" href="info.html">Info</a>
-          <a class="inactive" href="advanced.html">Advanced</a>
-          <a class="active" href="settings.html">Settings</a>
+        <h1><a href="index.html">SynoSpecies</a></h1>
+        <div class="pages">
+          <a class="inactive" href="index.html">Search</a>
+          <a class="inactive" href="advanced.html">SPARQL</a>
+        </div>
+        <div class="tools">
+          <syno-settings-menu></syno-settings-menu>
+          <a class="icon-button" href="info.html"
+            aria-label="About SynoSpecies" title="About SynoSpecies"
+          ><s-icon icon="info"></s-icon></a>
         </div>
         <a href="http://plazi.org/">
           <img
