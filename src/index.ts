@@ -37,11 +37,11 @@ document.addEventListener("endpoint-change", useStoredEndpoint);
 function useStoredEndpoint() {
   const target = new URL(document.location.href);
   target.searchParams.delete("server");
-  target.hash = "";
   if (!NAME) {
     history.replaceState(null, "", target);
     return;
   }
+  target.hash = "";
   const current = new URL(document.location.href);
   current.hash = "";
   if (target.href === current.href) document.location.reload();
@@ -65,24 +65,26 @@ function confirmEndpoint(name: string) {
   };
 
   render(
-    html`${
-      isValidEndpoint(ENDPOINT_URL)
-        ? html`<p>
-          This link searches the SPARQL endpoint
-          <code class="uri">${ENDPOINT_URL}</code>, which is not one of the
-          known endpoints nor the one chosen in the
-          <a href="settings.html">settings</a>. The results would come from
-          that server.
-        </p>
-        <button @click=${searchAnyway}>Search with this endpoint</button>`
+    html`
+      ${isValidEndpoint(ENDPOINT_URL)
+        ? html`
+          <p>
+                    This link searches the SPARQL endpoint
+                    <code class="uri">${ENDPOINT_URL}</code>, which is not one of the
+                    known endpoints nor the one chosen in the
+                    <a href="settings.html">settings</a>. The results would come from
+                    that server.
+                  </p>
+          <button @click=${searchAnyway}>Search with this endpoint</button>
+        `
         : html`<p>
           This link names <code class="uri">${ENDPOINT_URL}</code> as SPARQL
           endpoint, which is not a valid endpoint URL.
-        </p>`
-    }
-      <button @click=${useStoredEndpoint}>Use <code class="uri">${
-      getStoredEndpoint().replace("https://", "")
-    }</code> instead</button>`,
+        </p>`}
+            <button
+        @click=${useStoredEndpoint}>Use <code class="uri">${getStoredEndpoint()
+          .replace("https://", "")}</code> instead</button>
+    `,
     notice,
   );
 }

@@ -1,3 +1,4 @@
+import { SparqlEndpoint } from "@plazi/synolib";
 import Awesomplete from "awesomplete";
 import Taxomplete from "taxomplete";
 
@@ -93,7 +94,15 @@ export class SynoForm extends HTMLElement {
     });
 
     // we can only create the Taxomplete when nameInput has a parent
-    new Taxomplete(nameInput, ENDPOINT_URL).action = go;
+    const taxomplete = new Taxomplete(nameInput, ENDPOINT_URL);
+    taxomplete.action = go;
+    // an endpoint chosen in the settings menu applies to the suggestions too;
+    // Taxomplete keeps its endpoint in this field and reads it for each query
+    document.addEventListener("endpoint-change", (e) => {
+      taxomplete._sparqlEndpoint = new SparqlEndpoint(
+        (e as CustomEvent<string>).detail,
+      );
+    });
     // Taxomplete renders the suggestions, which come from the endpoint, as
     // HTML; render them as text instead.
     const awesomplete = Awesomplete.all.find((a: { input: HTMLElement }) =>

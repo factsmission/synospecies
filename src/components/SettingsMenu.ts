@@ -18,6 +18,9 @@ import {
 /** Value of the select's option for a custom endpoint URL. */
 const CUSTOM = "custom";
 
+/** Value of the select's placeholder while the page uses a link's server. */
+const LINK = "link";
+
 /**
  * The settings menu in the page header: a gear button opening a popover in
  * which the SPARQL endpoint can be chosen. A choice is stored right away and
@@ -32,7 +35,7 @@ export class SettingsMenu extends LitElement {
   @state()
   accessor endpoint: string = getStoredEndpoint();
 
-  /** The select's value: a known endpoint URL or `CUSTOM`. */
+  /** The select's value: a known endpoint URL, `CUSTOM` or `LINK`. */
   @state()
   accessor choice: string = CUSTOM;
 
@@ -74,7 +77,13 @@ export class SettingsMenu extends LitElement {
 
   private reflectStored() {
     this.endpoint = getStoredEndpoint();
-    this.choice = isKnownEndpoint(this.endpoint) ? this.endpoint : CUSTOM;
+    // while the page uses a server named in its link, nothing is selected, so
+    // that choosing any endpoint (also the stored one) counts as a change
+    this.choice = getEndpoint() !== this.endpoint
+      ? LINK
+      : isKnownEndpoint(this.endpoint)
+      ? this.endpoint
+      : CUSTOM;
     this.custom = this.choice === CUSTOM ? this.endpoint : "";
   }
 
@@ -115,6 +124,8 @@ export class SettingsMenu extends LitElement {
     const input = e.target as HTMLInputElement;
     const url = input.value.trim();
     this.custom = url;
+    // the result shown belongs to the URL before the edit
+    this.clearTest();
     const valid = isValidEndpoint(url);
     input.setCustomValidity(
       valid
@@ -166,8 +177,7 @@ export class SettingsMenu extends LitElement {
   }
 
   override render() {
-    // the page may use a server named in its link instead of the setting
-    const fromLink = getEndpoint() !== getStoredEndpoint();
+    const fromLink = this.choice === LINK;
     return html`
       <button class="icon-button" type="button"
         aria-label="Settings" title="Settings"
@@ -175,6 +185,13 @@ export class SettingsMenu extends LitElement {
       <div id="settings-menu" popover @beforetoggle=${this.onBeforeToggle}>
               <label>SPARQL endpoint
                 <select @change=${this.onSelect}>
+                  ${fromLink
+                    ? html`
+                      <option value=${LINK} disabled
+                        .selected=${true}>Server from link: ${getEndpoint()
+                          .replace(/^https?:\/\//, "")}</option>
+                    `
+                    : nothing}
                   ${ENDPOINTS.map((e) =>
                     html`
                       <option value=${e.url}
@@ -201,7 +218,7 @@ export class SettingsMenu extends LitElement {
                 : nothing}
               ${fromLink
                 ? html`<p><small>This page uses the server named in its link.
-          Choosing an endpoint here switches to that one.</small></p>`
+          Choose an endpoint to switch to it.</small></p>`
                 : nothing}
               <p><a href="settings.html">All settings…</a></p>
             </div>
