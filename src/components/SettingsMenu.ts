@@ -65,18 +65,23 @@ export class SettingsMenu extends LitElement {
     super.connectedCallback();
     this.reflectStored();
     addEventListener("resize", this.close);
+    addEventListener("scroll", this.close, { passive: true });
   }
 
   override disconnectedCallback() {
     removeEventListener("resize", this.close);
+    removeEventListener("scroll", this.close);
     super.disconnectedCallback();
   }
 
-  /** The popover is positioned for the current layout, so it closes on resize. */
+  /** The popover is placed next to the gear, so it closes when that moves. */
   private readonly close = () => this.menu?.hidePopover();
 
   private reflectStored() {
-    this.endpoint = getStoredEndpoint();
+    const stored = getStoredEndpoint();
+    // a test result belongs to the endpoint it was run for
+    if (stored !== this.endpoint) this.clearTest();
+    this.endpoint = stored;
     // while the page uses a server named in its link, nothing is selected, so
     // that choosing any endpoint (also the stored one) counts as a change
     this.choice = getEndpoint() !== this.endpoint
@@ -87,12 +92,9 @@ export class SettingsMenu extends LitElement {
     this.custom = this.choice === CUSTOM ? this.endpoint : "";
   }
 
-  /** Prepares the menu before it is shown (or forgets the test on close). */
+  /** Prepares the menu before it is shown. */
   private onBeforeToggle(e: ToggleEvent) {
-    if (e.newState !== "open") {
-      this.clearTest();
-      return;
-    }
+    if (e.newState !== "open") return;
     // the setting may have been changed elsewhere, e.g. on the settings page
     this.reflectStored();
     this.position();
@@ -142,8 +144,15 @@ export class SettingsMenu extends LitElement {
     this.clearTest();
     this.endpoint = url;
     setStoredEndpoint(url);
-    // check a custom endpoint right away; a failure only warns
-    if (!isKnownEndpoint(url)) this.runTest(url);
+    // a custom endpoint is checked first: the page switches once the test has
+    // passed (or on request), so that a failure is seen before e.g. the
+    // search reloads with it
+    if (isKnownEndpoint(url)) this.announce(url);
+    else this.runTest(url);
+  }
+
+  /** Tells the page to use the endpoint. */
+  private announce(url: string) {
     this.dispatchEvent(
       new CustomEvent("endpoint-change", {
         detail: url,
@@ -167,6 +176,7 @@ export class SettingsMenu extends LitElement {
       const treatments = await testEndpoint(url, abort.signal);
       if (abort.signal.aborted) return;
       this.test = { state: "ok", treatments };
+      if (treatments) this.announce(url);
     } catch (error) {
       if (abort.signal.aborted) return;
       this.test = {
@@ -214,7 +224,15 @@ export class SettingsMenu extends LitElement {
                 `
                 : nothing}
               ${this.test
-                ? html`<p>${renderTestResult(this.test)}</p>`
+                ? html`<p>${renderTestResult(this.test)}${
+                  this.test.state === "error" ||
+                    (this.test.state === "ok" && !this.test.treatments)
+                    ? html`
+                      <button type="button" @click=${() =>
+                        this.announce(this.endpoint)}>Use anyway</button>
+                    `
+                    : nothing
+                }</p>`
                 : nothing}
               ${fromLink
                 ? html`<p><small>This page uses the server named in its link.

@@ -234,6 +234,23 @@ header {
   .error {
     color: light-dark(#c62828, #ff8a80);
   }
+
+  button {
+    background: var(--accent-mild);
+    border: 1px solid var(--accent-mild);
+    border-radius: 0.6rem;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    line-height: 1.6rem;
+    padding: 0 0.6rem;
+
+    &:hover,
+    &:focus {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--body-background);
+    }
+  }
 }
 
 footer {
