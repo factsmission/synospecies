@@ -23,9 +23,11 @@ const LINK = "link";
 
 /**
  * The settings menu in the page header: a gear button opening a popover in
- * which the SPARQL endpoint can be chosen. A choice is stored right away and
- * announced with an `endpoint-change` event (bubbling and composed, with the
- * URL as `detail`), so that the page can switch to the new endpoint.
+ * which the SPARQL endpoint can be chosen. A known endpoint is stored right
+ * away and announced with an `endpoint-change` event (bubbling and composed,
+ * with the URL as `detail`), so that the page can switch to it. A custom URL
+ * is tested first and only stored and announced once the test has passed, or
+ * when the user decides to use it anyway.
  *
  * Renders into the light DOM, so the page's stylesheet applies.
  */
@@ -42,6 +44,10 @@ export class SettingsMenu extends LitElement {
   /** The text in the custom URL field. */
   @state()
   accessor custom: string = "";
+
+  /** A custom URL being tested, or one that failed; not stored yet. */
+  @state()
+  accessor pending: string | null = null;
 
   @state()
   accessor test: TestResult | null = null;
@@ -64,24 +70,41 @@ export class SettingsMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
     this.reflectStored();
-    addEventListener("resize", this.close);
-    addEventListener("scroll", this.close, { passive: true });
+    addEventListener("resize", this.onLayoutChange);
+    addEventListener("scroll", this.onLayoutChange, { passive: true });
   }
 
   override disconnectedCallback() {
-    removeEventListener("resize", this.close);
-    removeEventListener("scroll", this.close);
+    removeEventListener("resize", this.onLayoutChange);
+    removeEventListener("scroll", this.onLayoutChange);
     super.disconnectedCallback();
   }
 
-  /** The popover is placed next to the gear, so it closes when that moves. */
-  private readonly close = () => this.menu?.hidePopover();
+  /**
+   * The popover is placed next to the gear, so it closes when that moves. While
+   * a field in it has focus it follows the gear instead: on phones, the
+   * on-screen keyboard opening for the field resizes or scrolls the page.
+   */
+  private readonly onLayoutChange = () => {
+    if (!this.menu?.matches(":popover-open")) return;
+    if (this.menu.matches(":focus-within")) this.position();
+    else this.menu.hidePopover();
+  };
 
   private reflectStored() {
     const stored = getStoredEndpoint();
-    // a test result belongs to the endpoint it was run for
-    if (stored !== this.endpoint) this.clearTest();
+    // a test result and a draft belong to the setting they were made for
+    if (stored !== this.endpoint) {
+      this.clearTest();
+      this.pending = null;
+    }
     this.endpoint = stored;
+    // a custom URL not used yet stays in the menu with its test result
+    if (this.pending !== null) {
+      this.choice = CUSTOM;
+      this.custom = this.pending;
+      return;
+    }
     // while the page uses a server named in its link, nothing is selected, so
     // that choosing any endpoint (also the stored one) counts as a change
     this.choice = getEndpoint() !== this.endpoint
@@ -112,12 +135,21 @@ export class SettingsMenu extends LitElement {
 
   private onSelect(e: Event) {
     const value = (e.target as HTMLSelectElement).value;
+    const previous = this.choice;
     this.choice = value;
     if (value !== CUSTOM) {
       this.save(value);
       return;
     }
     this.clearTest();
+    this.pending = null;
+    if (previous === LINK && !isKnownEndpoint(this.endpoint)) {
+      // back from the link's server to the stored custom endpoint, which the
+      // field shows already, so that it would not fire a change
+      this.custom = this.endpoint;
+      this.save(this.endpoint);
+      return;
+    }
     this.custom = isKnownEndpoint(this.endpoint) ? "" : this.endpoint;
     this.updateComplete.then(() => this.customInput?.focus());
   }
@@ -142,17 +174,22 @@ export class SettingsMenu extends LitElement {
 
   private save(url: string) {
     this.clearTest();
-    this.endpoint = url;
-    setStoredEndpoint(url);
-    // a custom endpoint is checked first: the page switches once the test has
-    // passed (or on request), so that a failure is seen before e.g. the
-    // search reloads with it
-    if (isKnownEndpoint(url)) this.announce(url);
-    else this.runTest(url);
+    if (isKnownEndpoint(url)) {
+      this.apply(url);
+      return;
+    }
+    // a custom endpoint is checked first and applied once the test has passed
+    // (or on request), so that a failure is seen before e.g. the search
+    // reloads with it, and a failing URL is neither stored nor used
+    this.pending = url;
+    this.runTest(url);
   }
 
-  /** Tells the page to use the endpoint. */
-  private announce(url: string) {
+  /** Stores the endpoint and tells the page to use it. */
+  private apply(url: string) {
+    this.pending = null;
+    this.endpoint = url;
+    setStoredEndpoint(url);
     this.dispatchEvent(
       new CustomEvent("endpoint-change", {
         detail: url,
@@ -176,7 +213,7 @@ export class SettingsMenu extends LitElement {
       const treatments = await testEndpoint(url, abort.signal);
       if (abort.signal.aborted) return;
       this.test = { state: "ok", treatments };
-      if (treatments) this.announce(url);
+      if (treatments) this.apply(url);
     } catch (error) {
       if (abort.signal.aborted) return;
       this.test = {
@@ -187,7 +224,9 @@ export class SettingsMenu extends LitElement {
   }
 
   override render() {
-    const fromLink = this.choice === LINK;
+    // the page may use a server named in its link instead of the setting
+    const fromLink = getEndpoint() !== this.endpoint;
+    const pending = this.pending;
     return html`
       <button class="icon-button" type="button"
         aria-label="Settings" title="Settings"
@@ -195,7 +234,7 @@ export class SettingsMenu extends LitElement {
       <div id="settings-menu" popover @beforetoggle=${this.onBeforeToggle}>
               <label>SPARQL endpoint
                 <select @change=${this.onSelect}>
-                  ${fromLink
+                  ${this.choice === LINK
                     ? html`
                       <option value=${LINK} disabled
                         .selected=${true}>Server from link: ${getEndpoint()
@@ -225,11 +264,12 @@ export class SettingsMenu extends LitElement {
                 : nothing}
               ${this.test
                 ? html`<p>${renderTestResult(this.test)}${
-                  this.test.state === "error" ||
-                    (this.test.state === "ok" && !this.test.treatments)
+                  pending !== null &&
+                    (this.test.state === "error" ||
+                      (this.test.state === "ok" && !this.test.treatments))
                     ? html`
                       <button type="button" @click=${() =>
-                        this.announce(this.endpoint)}>Use anyway</button>
+                        this.apply(pending)}>Use anyway</button>
                     `
                     : nothing
                 }</p>`
