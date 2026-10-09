@@ -63,6 +63,9 @@ export class SettingsMenu extends LitElement {
 
   private abortTest?: AbortController;
 
+  /** The animation frame in which the popover is placed again, if any. */
+  private layoutFrame = 0;
+
   protected override createRenderRoot() {
     return this;
   }
@@ -77,22 +80,31 @@ export class SettingsMenu extends LitElement {
   override disconnectedCallback() {
     removeEventListener("resize", this.onLayoutChange);
     removeEventListener("scroll", this.onLayoutChange);
+    cancelAnimationFrame(this.layoutFrame);
+    this.layoutFrame = 0;
     super.disconnectedCallback();
   }
 
   /**
-   * The popover is placed next to the gear, so it closes when that moves. While
-   * a field in it has focus it follows the gear instead, as long as the gear is
-   * in view: on phones, the on-screen keyboard opening for the field resizes or
-   * scrolls the page.
+   * The popover is placed next to the gear: it follows the gear when the page
+   * is resized or scrolled (as on phones when the on-screen keyboard opens or
+   * closes), once per frame, and closes when the gear leaves the view.
    */
   private readonly onLayoutChange = () => {
-    if (!this.menu?.matches(":popover-open")) return;
-    const { top, bottom } = this.button.getBoundingClientRect();
-    const gearVisible = bottom > 0 && top < innerHeight;
-    if (gearVisible && this.menu.matches(":focus-within")) this.position();
-    else this.menu.hidePopover();
+    if (this.layoutFrame) return;
+    this.layoutFrame = requestAnimationFrame(() => {
+      this.layoutFrame = 0;
+      if (!this.menu?.matches(":popover-open")) return;
+      const { top, bottom } = this.button.getBoundingClientRect();
+      if (bottom > 0 && top < innerHeight) this.position();
+      else this.menu.hidePopover();
+    });
   };
+
+  /** Whether the page uses a server named in its link instead of the setting. */
+  private get fromLink() {
+    return getEndpoint() !== this.endpoint;
+  }
 
   private reflectStored() {
     const stored = getStoredEndpoint();
@@ -110,7 +122,7 @@ export class SettingsMenu extends LitElement {
     }
     // while the page uses a server named in its link, nothing is selected, so
     // that choosing any endpoint (also the stored one) counts as a change
-    this.choice = getEndpoint() !== this.endpoint
+    this.choice = this.fromLink
       ? LINK
       : isKnownEndpoint(this.endpoint)
       ? this.endpoint
@@ -138,7 +150,6 @@ export class SettingsMenu extends LitElement {
 
   private onSelect(e: Event) {
     const value = (e.target as HTMLSelectElement).value;
-    const previous = this.choice;
     this.choice = value;
     if (value !== CUSTOM) {
       this.save(value);
@@ -146,19 +157,29 @@ export class SettingsMenu extends LitElement {
     }
     this.clearTest();
     this.pending = null;
-    if (previous === LINK && !isKnownEndpoint(this.endpoint)) {
-      // back from the link's server to the stored custom endpoint, which the
-      // field shows already, so that it would not fire a change
-      this.custom = this.endpoint;
-      this.save(this.endpoint);
-      return;
-    }
+    // a stored custom endpoint is offered for editing; it is used again with
+    // the field's "Use" button, e.g. to leave a server named in the link
     this.custom = isKnownEndpoint(this.endpoint) ? "" : this.endpoint;
     this.updateComplete.then(() => this.customInput?.focus());
   }
 
+  /** Uses the URL in the field, also when it was not edited. */
+  private onCustomSubmit(e: SubmitEvent) {
+    e.preventDefault();
+    const input = this.customInput;
+    if (!input) return;
+    // Enter in the field fires `change` first, which already started a test
+    if (
+      this.pending === input.value.trim() && this.test?.state === "running"
+    ) return;
+    this.useCustom(input);
+  }
+
   private onCustomChange(e: Event) {
-    const input = e.target as HTMLInputElement;
+    this.useCustom(e.target as HTMLInputElement);
+  }
+
+  private useCustom(input: HTMLInputElement) {
     const url = input.value.trim();
     this.custom = url;
     // the draft and its result belong to the URL before the edit
@@ -192,8 +213,9 @@ export class SettingsMenu extends LitElement {
   /** Stores the endpoint and tells the page to use it. */
   private apply(url: string) {
     this.pending = null;
-    this.endpoint = url;
     setStoredEndpoint(url);
+    // read back, as storing fails silently when site data is blocked
+    this.endpoint = getStoredEndpoint();
     this.dispatchEvent(
       new CustomEvent("endpoint-change", {
         detail: url,
@@ -228,8 +250,6 @@ export class SettingsMenu extends LitElement {
   }
 
   override render() {
-    // the page may use a server named in its link instead of the setting
-    const fromLink = getEndpoint() !== this.endpoint;
     const pending = this.pending;
     return html`
       <button class="icon-button" type="button"
@@ -260,10 +280,13 @@ export class SettingsMenu extends LitElement {
               </label>
               ${this.choice === CUSTOM
                 ? html`
-                  <input type="text" inputmode="url"
-                    placeholder="https://example.org/sparql"
-                    aria-label="Custom endpoint URL"
-                    .value=${this.custom} @change=${this.onCustomChange}>
+                  <form class="custom-endpoint" @submit=${this.onCustomSubmit}>
+                    <input type="text" inputmode="url" enterkeyhint="go"
+                      placeholder="https://example.org/sparql"
+                      aria-label="Custom endpoint URL"
+                      .value=${this.custom} @change=${this.onCustomChange}>
+                    <button type="submit">Use</button>
+                  </form>
                 `
                 : nothing}
               ${this.test
@@ -278,7 +301,7 @@ export class SettingsMenu extends LitElement {
                     : nothing
                 }</p>`
                 : nothing}
-              ${fromLink
+              ${this.fromLink
                 ? html`<p><small>This page uses the server named in its link.
           Choose an endpoint to switch to it.</small></p>`
                 : nothing}

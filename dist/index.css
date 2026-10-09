@@ -231,6 +231,18 @@ header {
     margin: 0.8rem 0 0;
   }
 
+  /* the custom URL and its "Use" button */
+  .custom-endpoint {
+    align-items: end;
+    display: flex;
+    gap: 0.4rem;
+
+    input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
   .error {
     color: light-dark(#c62828, #ff8a80);
   }
