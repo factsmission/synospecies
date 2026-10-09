@@ -20,10 +20,10 @@ const queryPrefixes = {
   dwc: "http://rs.tdwg.org/dwc/terms/",
   dc: "http://purl.org/dc/elements/1.1/",
   trt: "http://plazi.org/vocab/treatment#",
-  treatment: "http://treatment.plazi.org/id/",
-  // taxonConcept: "http://taxon-concept.plazi.org/id/",
-  // taxonName: "http://taxon-name.plazi.org/id/",
-  publication: "http://publication.plazi.org/id/",
+  treatment: "https://treatment.plazi.org/id/",
+  // taxonConcept: "https://taxon-concept.plazi.org/id/",
+  // taxonName: "https://taxon-name.plazi.org/id/",
+  publication: "https://publication.plazi.org/id/",
 };
 
 const resultsPrefixes = {
@@ -226,20 +226,20 @@ const exampleQueries: exampleQuery[] = [
     A good way to get get a first impression as to how the data is structured is using <code class="uri">DESCRIBE</code>-queries.
     Try also to describe the objects that this first query returns.
     `,
-    query: `DESCRIBE <http://treatment.plazi.org/id/962587B2FFF8FF9EFF2A38EEF59DB87E>`,
+    query: `DESCRIBE <https://treatment.plazi.org/id/962587B2FFF8FF9EFF2A38EEF59DB87E>`,
   },
   {
     title: "All synonyms",
     description: `
     This query returns all synonyms of 
-    <code class="uri taxon">http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905</code>.
+    <code class="uri taxon">https://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905</code>.
     It uses a transitive property path to get the taxa (Taxon-Concepts) 
     augmented or defined by a treatmented that deprecates this taxon or that are
     deprecated by a treatement that defines or deprecates this taxon.
     `,
     query: `SELECT DISTINCT *
 WHERE {
-  <http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^trt:deprecates/(trt:augmentsTaxonConcept|trt:definesTaxonConcept))|((^trt:augmentsTaxonConcept|^trt:definesTaxonConcept)/trt:deprecates))* ?tc .
+  <https://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^trt:deprecates/(trt:augmentsTaxonConcept|trt:definesTaxonConcept))|((^trt:augmentsTaxonConcept|^trt:definesTaxonConcept)/trt:deprecates))* ?tc .
 }`,
   },
   {
@@ -348,7 +348,7 @@ WHERE {
       `This query returns all material citations for all synonyms of Tyrannosaurus rex that are in the New Mexico Museum of Natural History & Science (NMMNH).`,
     query: `SELECT DISTINCT ?syn ?catalogNumber # ?collectionCode
 WHERE {
-  <http://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^trt:deprecates/(trt:augmentsTaxonConcept|trt:definesTaxonConcept))|((^trt:augmentsTaxonConcept|^trt:definesTaxonConcept)/trt:deprecates))* ?syn .
+  <https://taxon-concept.plazi.org/id/Animalia/Tyrannosaurus_rex_Osborn_1905> ((^trt:deprecates/(trt:augmentsTaxonConcept|trt:definesTaxonConcept))|((^trt:augmentsTaxonConcept|^trt:definesTaxonConcept)/trt:deprecates))* ?syn .
   ?treat (trt:definesTaxonConcept|trt:augmentsTaxonConcept|trt:deprecates) ?syn ;
          dwc:basisOfRecord ?mc .
   # This might miss some specimens where the ‘dwc:collectionCode’ was entered in a non-standard way.
