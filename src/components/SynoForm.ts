@@ -4,6 +4,9 @@ import Taxomplete from "taxomplete";
 
 import { getEndpoint } from "../endpoints.ts";
 
+/** Shown in the empty search field, and searched for when it stays empty. */
+const EXAMPLE_NAME = "Sadayoshia acamar";
+
 export class SynoForm extends HTMLElement {
   connectedCallback() {
     if (this.innerHTML) return;
@@ -17,6 +20,7 @@ export class SynoForm extends HTMLElement {
 
     const nameInput = document.createElement("input");
     nameInput.type = "text";
+    nameInput.placeholder = EXAMPLE_NAME;
     if (NAME) nameInput.value = NAME;
 
     const colCheckLabel = document.createElement("label");
@@ -71,7 +75,7 @@ export class SynoForm extends HTMLElement {
 
     const go = () => {
       const params = new URLSearchParams({
-        q: nameInput.value,
+        q: nameInput.value.trim() || EXAMPLE_NAME,
       });
       if (colCheck.checked) params.append("show_col", "");
       if (subtaxaCheck.checked) params.append("subtaxa", "");
