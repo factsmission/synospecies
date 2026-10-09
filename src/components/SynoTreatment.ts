@@ -10,7 +10,7 @@ import { css, html, LitElement, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
 import "./Icons.ts";
-import { authNameToID, nameToID, safeUrl } from "./utils.ts";
+import { authNameToID, nameToID, safeUrl, shortPlaziId } from "./utils.ts";
 
 export type SynoStatus = "def" | "aug" | "dpr" | "cite";
 
@@ -281,7 +281,7 @@ export class SynoTreatment extends LitElement {
   override render() {
     this.classList.toggle("open", this.open);
     const treatmentID =
-      this.trt?.url.replace("http://treatment.plazi.org/id/", "") || "";
+      shortPlaziId(this.trt?.url ?? "");
     return html`
       <div class="head ${this.open ? "open" : ""}" @click=${(e: Event) => {
       e.stopPropagation();
@@ -353,10 +353,7 @@ export class SynoTreatment extends LitElement {
                 this.status === "def" || this.status === "cite" ? "hidden" : ""
               }"><s-icon icon="def"></s-icon><div><b class="green"><abbr title="This treatment defines (e.g. as ‘sp. nov.’) a new Taxon.">Defines:</abbr></b>${
                 details.treats.def.values().map((n) => {
-                  const short = n.replace(
-                    "http://taxon-concept.plazi.org/id/",
-                    "",
-                  );
+                  const short = shortPlaziId(n);
                   return until(
                     this.synoGroup?.findName(n).then(nameLink, () =>
                       html` <a class="taxon uri">${short}</a>`),
@@ -372,13 +369,7 @@ export class SynoTreatment extends LitElement {
               }"><s-icon icon="aug"></s-icon><div><b class="blue"><abbr title="The taxon the treatment is about. SynoSpecies interprets this as an assertion that this name is valid.">Treats:</abbr></b>${
                 details.treats.aug.union(details.treats.treattn).values().map(
                   (n) => {
-                    const short = n.replace(
-                      "http://taxon-concept.plazi.org/id/",
-                      "",
-                    ).replace(
-                      "http://taxon-name.plazi.org/id/",
-                      "",
-                    );
+                    const short = shortPlaziId(n);
 
                     return until(
                       this.synoGroup?.findName(n).then(nameLink, () => html` <a class="taxon uri">${short}</a>`),
@@ -394,10 +385,7 @@ export class SynoTreatment extends LitElement {
                 this.status === "dpr" || this.status === "cite" ? "hidden" : ""
               }"><s-icon icon="dpr"></s-icon><div><b class="red"><abbr title="Synonym(s) cited in the treatment.">Deprecates:</abbr></b>${
                 details.treats.dpr.values().map((n) => {
-                  const short = n.replace(
-                    "http://taxon-concept.plazi.org/id/",
-                    "",
-                  );
+                  const short = shortPlaziId(n);
 
                   return until(
                     this.synoGroup?.findName(n).then(nameLink, () => html` <a class="taxon uri">${short}</a>`),
@@ -411,13 +399,7 @@ export class SynoTreatment extends LitElement {
               ? html`<div class="row hidden"><s-icon icon="cite"></s-icon><div><b class="gray"><abbr title="Other taxa cited in the treatment. These citations are not considered synonyms by SynoSpecies.">Cites:</abbr></b>${
                 details.treats.citetc.union(details.treats.citetn).values().map(
                   (n) => {
-                    const short = n.replace(
-                      "http://taxon-concept.plazi.org/id/",
-                      "",
-                    ).replace(
-                      "http://taxon-name.plazi.org/id/",
-                      "",
-                    );
+                    const short = shortPlaziId(n);
 
                     return until(
                       this.synoGroup?.findName(n).then(nameLink, () => html` <a class="taxon uri">${short}</a>`),

@@ -23,3 +23,15 @@ export function safeUrl(url: string | null | undefined): string | undefined {
   }
   return undefined;
 }
+
+/**
+ * The part of a Plazi treatment, taxon-concept or taxon-name IRI after `/id/`.
+ * Plazi mints these with https since plazi/gg2rdf#34; endpoints not yet
+ * migrated still serve the http form.
+ */
+export function shortPlaziId(iri: string): string {
+  return iri.replace(
+    /^https?:\/\/(?:treatment|taxon-concept|taxon-name)\.plazi\.org\/id\//,
+    "",
+  );
+}
