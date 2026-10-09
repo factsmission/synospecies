@@ -158,8 +158,9 @@ export class SettingsMenu extends LitElement {
     const input = e.target as HTMLInputElement;
     const url = input.value.trim();
     this.custom = url;
-    // the result shown belongs to the URL before the edit
+    // the draft and its result belong to the URL before the edit
     this.clearTest();
+    this.pending = null;
     const valid = isValidEndpoint(url);
     input.setCustomValidity(
       valid
