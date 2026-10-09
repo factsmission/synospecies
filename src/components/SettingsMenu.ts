@@ -82,12 +82,15 @@ export class SettingsMenu extends LitElement {
 
   /**
    * The popover is placed next to the gear, so it closes when that moves. While
-   * a field in it has focus it follows the gear instead: on phones, the
-   * on-screen keyboard opening for the field resizes or scrolls the page.
+   * a field in it has focus it follows the gear instead, as long as the gear is
+   * in view: on phones, the on-screen keyboard opening for the field resizes or
+   * scrolls the page.
    */
   private readonly onLayoutChange = () => {
     if (!this.menu?.matches(":popover-open")) return;
-    if (this.menu.matches(":focus-within")) this.position();
+    const { top, bottom } = this.button.getBoundingClientRect();
+    const gearVisible = bottom > 0 && top < innerHeight;
+    if (gearVisible && this.menu.matches(":focus-within")) this.position();
     else this.menu.hidePopover();
   };
 
