@@ -287,7 +287,7 @@ LIMIT 10`,
     title: "Single graph",
     description: `
     This query returns the triples of a single graph.
-    Note that this works only on the plazi endpoint, as this is the only endpoint where each treatment receives its own graph.`,
+    Note that this works only on endpoints where each treatment receives its own graph, such as the Plazi and QLever endpoints, but not LINDAS.`,
     query: `CONSTRUCT { ?s ?p ?o . }
 WHERE {
   GRAPH <https://treatment.plazi.org/id/8E33E30FFFD9FFCC4AD302B2FFB04209> {
