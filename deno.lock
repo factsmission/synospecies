@@ -2,7 +2,7 @@
   "version": "4",
   "specifiers": {
     "jsr:@luca/esbuild-deno-loader@0.11": "0.11.1",
-    "jsr:@plazi/synolib@^3.4.8": "3.4.8",
+    "jsr:@plazi/synolib@^3.4.9": "3.4.9",
     "jsr:@std/bytes@^1.0.2": "1.0.4",
     "jsr:@std/collections@^1.0.9": "1.0.9",
     "jsr:@std/encoding@^1.0.5": "1.0.6",
@@ -24,8 +24,8 @@
         "jsr:@std/path"
       ]
     },
-    "@plazi/synolib@3.4.8": {
-      "integrity": "c2527746a049dfb49603b851f31c5849de37d832ccc2b90555029d57a4572182"
+    "@plazi/synolib@3.4.9": {
+      "integrity": "5aa99e4fc936bc1c8a1374fd9f1aabac71027db68235409345ea754e16086556"
     },
     "@std/bytes@1.0.4": {
       "integrity": "11a0debe522707c95c7b7ef89b478c13fb1583a7cfb9a85674cd2cc2e3a28abc"
@@ -961,7 +961,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@luca/esbuild-deno-loader@0.11",
-      "jsr:@plazi/synolib@^3.4.8",
+      "jsr:@plazi/synolib@^3.4.9",
       "jsr:@std/collections@^1.0.9",
       "npm:@triply/yasqe@^4.2.28",
       "npm:@triply/yasr@^4.2.28",
