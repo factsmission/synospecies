@@ -14,7 +14,12 @@ const config: esbuild.BuildOptions = {
   format: "esm",
   plugins: [
     // sassPlugin({ quietDeps: true, silenceDeprecations: ["color-functions", "global-builtin", "import"] }),
-    ...denoPlugins(),
+    // with the config, the loader resolves imports through deno.lock, so the
+    // build uses the locked versions, including ones newer than Deno's
+    // minimum dependency age
+    ...denoPlugins({
+      configPath: new URL("./deno.jsonc", import.meta.url).pathname,
+    }),
   ],
   lineLimit: 120,
   minify: BUILD ? true : false,
