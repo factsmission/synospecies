@@ -13,6 +13,20 @@
       integrity="sha256-WucYll9Mn2FE68lRHrTpBwzWC+Ra3IeEok0re4TBmgc="
       crossorigin="anonymous"
     />
+    <script>
+      // links to the old version name the taxon in the fragment
+      // (/#Sadayoshia+acamar); turn them into a search
+      if (
+        location.hash.length > 1 &&
+        !new URLSearchParams(location.search).has("q")
+      ) {
+        let name = location.hash.slice(1).replaceAll("+", " ");
+        try {
+          name = decodeURIComponent(name);
+        } catch {}
+        location.replace("?q=" + encodeURIComponent(name));
+      }
+    </script>
     <script src="./index.js"></script>
     <link rel="icon" href="favicon.ico" />
   </head>
