@@ -33,6 +33,7 @@ function pretty(mc: MaterialCitation): string {
       !([
         // "collectionCode",
         // "catalogNumber",
+        "uri",
         "typeStatus",
         "recordedBy",
         "httpUri",
@@ -427,10 +428,11 @@ export class SynoTreatment extends LitElement {
             details.materialCitations.length > 0
               ? html`<div class="row hidden"><s-icon icon="material"></s-icon><div class="materials"><b class="gray">Cited Materials:</b><ul>${
                 details.materialCitations.sort((a, b) =>
-                  ((a.typeStatus || "zz") + a.collectionCode + a.catalogNumber)
+                  ((a.typeStatus || "zz") + a.collectionCode +
+                    (a.catalogNumber ?? a.locality))
                     .localeCompare(
                       (b.typeStatus || "zz") +
-                        b.collectionCode + b.catalogNumber,
+                        b.collectionCode + (b.catalogNumber ?? b.locality),
                     )
                 ).map((material) =>
                   html`
@@ -452,8 +454,14 @@ export class SynoTreatment extends LitElement {
                       : nothing
                   }
                   ${
-                    material.collectionCode &&
-                      material.catalogNumber.startsWith(material.collectionCode)
+                    !material.catalogNumber
+                      // without a catalog number, the locality identifies the material best
+                      ? material.locality ?? material.verbatimLocality ??
+                        material.countryCode ?? nothing
+                      : material.collectionCode &&
+                          material.catalogNumber.startsWith(
+                            material.collectionCode,
+                          )
                       ? material.catalogNumber.slice(
                         material.collectionCode.length,
                       ).replace(/^\s*[-:]\s*/i, "")
