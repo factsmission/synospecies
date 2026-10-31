@@ -31,7 +31,7 @@ export class SynoForm extends HTMLElement {
     colCheckLabel.prepend(colCheck);
 
     const subtaxaCheckLabel = document.createElement("label");
-    subtaxaCheckLabel.innerText = "Include subatxa of search term.";
+    subtaxaCheckLabel.innerText = "Include subtaxa of search term.";
     const subtaxaCheck = document.createElement("input");
     subtaxaCheck.type = "checkbox";
     subtaxaCheck.checked = NAME ? START_WITH_SUBTAXA : false;
