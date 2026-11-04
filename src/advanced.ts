@@ -18,6 +18,7 @@ const queryPrefixes = {
   rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
   dwcFP: "http://filteredpush.org/ontologies/oa/dwcFP#",
   dwc: "http://rs.tdwg.org/dwc/terms/",
+  dwciri: "http://rs.tdwg.org/dwc/iri/",
   dc: "http://purl.org/dc/elements/1.1/",
   trt: "http://plazi.org/vocab/treatment#",
   treatment: "https://treatment.plazi.org/id/",
@@ -357,6 +358,49 @@ WHERE {
   ?mc dwc:collectionCode "NMMNH" ;
       dwc:catalogNumber ?catalogNumber .
 }`,
+  },
+  {
+    title: "Holotypes",
+    description:
+      `This query returns all material citations whose type status is holotype, with or without a catalog number.`,
+    query: `SELECT ?materialCitation ?typeStatus ?treatment ?title ?catalogNumber ?collectionCode ?locality ?country ?eventDate
+WHERE {
+  ?materialCitation a dwc:MaterialCitation ;
+                    dwc:typeStatus ?typeStatus .
+  FILTER regex(str(?typeStatus), "^\\\\s*holo(type?s?|tipos?|typus|-)?\\\\s*$", "i")
+  ?treatment dwc:basisOfRecord ?materialCitation .
+  OPTIONAL { ?treatment dc:title ?title }
+  OPTIONAL { ?materialCitation dwc:catalogNumber ?catalogNumber }
+  OPTIONAL { ?materialCitation dwc:collectionCode ?collectionCode }
+  OPTIONAL { ?materialCitation dwc:locality ?locality }
+  OPTIONAL { ?materialCitation dwc:country ?country }
+  OPTIONAL { ?materialCitation dwc:eventDate ?eventDate }
+}`,
+  },
+  {
+    title: "Sequences",
+    description:
+      `This query returns the sequence accession numbers of material citations, with the taxon the treatment defines or augments.
+    Each accession number is paired only with its own sequence IRI, so there is one row per accession number.`,
+    query: `SELECT DISTINCT ?treatment ?taxonName ?taxon ?typeStatus ?catalogNumber ?accession ?sequence
+WHERE {
+  ?treatment dwc:basisOfRecord ?citation .
+  ?citation dwc:associatedSequences ?accession .
+  OPTIONAL {
+    ?citation dwciri:associatedSequences ?sequence .
+    FILTER(STRAFTER(STR(?sequence), "insdc:") = ?accession)
+  }
+  OPTIONAL { ?citation dwc:typeStatus ?typeStatus }
+  OPTIONAL { ?citation dwc:catalogNumber ?catalogNumber }
+  OPTIONAL {
+    ?treatment trt:definesTaxonConcept|trt:augmentsTaxonConcept ?taxon .
+    OPTIONAL { ?taxon dwc:genus ?genus }
+    OPTIONAL { ?taxon dwc:species ?species }
+    OPTIONAL { ?taxon dwc:authority ?authority }
+  }
+  BIND(CONCAT(COALESCE(?genus, ""), COALESCE(CONCAT(" ", ?species), ""), COALESCE(CONCAT(" ", ?authority), "")) AS ?taxonName)
+}
+ORDER BY ?treatment`,
   },
 ];
 
